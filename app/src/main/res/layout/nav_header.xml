@@ -16,19 +16,21 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:paddingTop="@dimen/nav_header_vertical_spacing"
-        android:src="@android:drawable/sym_def_app_icon" />
+        android:src="@android:drawable/sym_def_app_icon"
+        android:contentDescription="" />
 
     <TextView
+        android:id="@+id/courier_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingTop="@dimen/nav_header_vertical_spacing"
-        android:text="Кур'єр"
+        android:text="@string/courier_name"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 
     <TextView
-        android:id="@+id/textView"
+        android:id="@+id/courier_status"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Завдань" />
+        android:text="@string/today_tasks" />
 
 </LinearLayout>

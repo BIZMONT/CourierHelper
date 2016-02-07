@@ -1,105 +1,97 @@
 package com.bizmont.courierhelper;
 
-import android.Manifest;
-import android.app.Dialog;
-import android.content.DialogInterface;
+import android.content.BroadcastReceiver;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.Point;
+import android.content.IntentFilter;
+import android.content.ServiceConnection;
+import android.graphics.Color;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.support.design.widget.NavigationView;
-import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.MotionEvent;
+import android.widget.TextView;
 import android.widget.Toast;
 
-import org.osmdroid.DefaultResourceProxyImpl;
-import org.osmdroid.ResourceProxy;
-import org.osmdroid.api.IGeoPoint;
 import org.osmdroid.api.IMapController;
+import org.osmdroid.bonuspack.overlays.Marker;
+import org.osmdroid.bonuspack.overlays.Polygon;
+import org.osmdroid.bonuspack.overlays.Polyline;
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
-import org.osmdroid.views.overlay.ItemizedIconOverlay;
-import org.osmdroid.views.overlay.OverlayItem;
-import org.osmdroid.views.overlay.ScaleBarOverlay;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
+import java.util.Locale;
 
-public class MapActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener
-{
-    final int DIALOG_SETTING = 1;
-    private LocationManager locationManager;
+
+public class MapActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+    private long backPressedTime = 0;
+
+    TextView locationInfo;
     private MapView map;
     private IMapController mapController;
-    ArrayList<OverlayItem> overlayItemArray;
 
+    Marker userLocationMarker;
+    Polygon accuracyRadius;
+
+    Polyline route;
+    ArrayList<GeoPoint> points;
+    GeoPoint userLocationGeoPoint;
+
+    int satellitesInUse;
+    private String nmeaString;
+
+    BroadcastReceiver broadcastReceiver;
+    ServiceConnection serviceConnection;
+    Intent serviceIntent;
+
+    //Overrated methods
     @Override
-    protected void onCreate(Bundle savedInstanceState)
-    {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_map);
+        setContentView(R.layout.map_activity);
+        setTitle(R.string.title_activity_map);
 
-        InitMap();
+        //receiving location from service
+        broadcastReceiver = new BroadcastReceiver() {
+            public void onReceive(Context context, Intent intent) {
+                Location location = intent.getParcelableExtra("location");
+                nmeaString = intent.getStringExtra("nmea");
+                satellitesInUse = intent.getIntExtra("satellitesInUse", 0);
+                showMarkerOnMap(location);
+            }
+        };
+        IntentFilter intentFilter = new IntentFilter(GPSTrackerService.BROADCAST_ACTION);
+        registerReceiver(broadcastReceiver, intentFilter);
+        serviceConnection = new ServiceConnection() {
+            @Override
+            public void onServiceConnected(ComponentName name, IBinder service) {
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+            }
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.setDrawerListener(toggle);
-        toggle.syncState();
+            @Override
+            public void onServiceDisconnected(ComponentName name) {
 
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);
+            }
+        };
+        serviceIntent = new Intent(this,GPSTrackerService.class);
 
-        locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        if(!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) && !locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER))
-        {
-            showDialog(DIALOG_SETTING);
-        }
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
-                ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)
-        {
-            return;
-        }
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
-        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
-                ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)
-        {
-            return;
-        }
-        locationManager.removeUpdates(locationListener);
-    }
-
-    private void InitMap()
-    {
+        //map
         map = (MapView) findViewById(R.id.map);
         map.setTileSource(TileSourceFactory.MAPNIK);
         map.setBuiltInZoomControls(true);
@@ -109,97 +101,107 @@ public class MapActivity extends AppCompatActivity implements NavigationView.OnN
         mapController = map.getController();
         mapController.setZoom(3);
 
-        overlayItemArray = new ArrayList<OverlayItem>();
 
-        DefaultResourceProxyImpl defaultResourceProxyImpl = new DefaultResourceProxyImpl(this);
-        UserPositionItemizedIconOverlay myItemizedIconOverlay = new UserPositionItemizedIconOverlay(overlayItemArray, null, defaultResourceProxyImpl);
-        map.getOverlays().add(myItemizedIconOverlay);
+        //location elements
+        userLocationMarker = new Marker(map);
+        userLocationMarker.setIcon(ContextCompat.getDrawable(this, R.drawable.user_position_marker));
+        userLocationMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER);
+        map.getOverlays().add(userLocationMarker);
 
-        ScaleBarOverlay myScaleBarOverlay = new ScaleBarOverlay(this);
-        map.getOverlays().add(myScaleBarOverlay);
+        route = new Polyline(this);
+        points = new ArrayList<>();
+        map.getOverlays().add(route);
+
+        accuracyRadius = new Polygon(this);
+        accuracyRadius.setStrokeWidth(1);
+        accuracyRadius.setStrokeColor(Color.BLUE);
+        map.getOverlays().add(accuracyRadius);
+
+
+        //Interface items
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawer.setDrawerListener(toggle);
+        toggle.syncState();
+
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(this);
+        navigationView.getMenu().findItem(R.id.nav_map).setChecked(true);
+
+        //Info Overlay
+        nmeaString = "";
+        locationInfo = (TextView) findViewById(R.id.map_info);
     }
-
-
-    private void showLocation(Location location)
+    @Override
+    protected void onResume() {
+        startService(serviceIntent);
+        bindService(serviceIntent, serviceConnection, BIND_AUTO_CREATE);
+        super.onResume();
+    }
+    @Override
+    protected void onPause() {
+        super.onPause();
+    }
+    @Override
+    protected void onDestroy()
     {
-        GeoPoint userPosition = new GeoPoint(location);
-        Toast.makeText(getBaseContext(),
-                "Latitude: " + location.getLatitude() +
-                        " Longitude: " + location.getLongitude(),
-                Toast.LENGTH_SHORT).show();
-
-        overlayItemArray.clear();
-
-        OverlayItem newMyLocationItem = new OverlayItem("My Location", "My Location", userPosition);
-        overlayItemArray.add(newMyLocationItem);
-
-        //mapController.animateTo(locGeoPoint);
-        //mapController.setZoom(16);
-
-        map.invalidate();
+        super.onDestroy();
+        unbindService(serviceConnection);
+        //stopService(new Intent(this,GPSTrackerService.class));
     }
-
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        //TODO: Save points from the map when changing screen orientation
+        super.onSaveInstanceState(outState);
+    }
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        //TODO: Restore points on the map when changing screen orientation
+        super.onRestoreInstanceState(savedInstanceState);
+    }
 
     @Override
     public void onBackPressed()
     {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-
-        if (drawer.isDrawerOpen(GravityCompat.START))
+        long t = System.currentTimeMillis();
+        if (t - backPressedTime > 2000)
         {
-            drawer.closeDrawer(GravityCompat.START);
-        }
-        else
-        {
+            backPressedTime = t;
+            Toast.makeText(this, R.string.toast_exit_message, Toast.LENGTH_SHORT).show();
+        } else {
             super.onBackPressed();
         }
     }
-
     @Override
-    public boolean onCreateOptionsMenu(Menu menu)
-    {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main, menu);
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.map, menu);
         return true;
     }
-
     @Override
-    public boolean onOptionsItemSelected(MenuItem item)
-    {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
+    public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings)
-        {
+        if (id == R.id.action_settings) {
             startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
         }
 
         return super.onOptionsItemSelected(item);
     }
-
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
-        // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_job)
-        {
-
-        }
-        else if (id == R.id.nav_map)
-        {
-
-        }
-        else if (id == R.id.nav_slideshow)
-        {
-
-        }
-        else if (id == R.id.nav_manage)
-        {
+        if (id == R.id.nav_tasks) {
+            Intent intent = new Intent(this, GetTasksActivity.class);
+            startActivity(intent);
+        } else if (id == R.id.nav_reports) {
+            Intent intent = new Intent(this, ReportsActivity.class);
+            startActivity(intent);
+        } else if (id == R.id.nav_delivery) {
 
         }
 
@@ -208,84 +210,51 @@ public class MapActivity extends AppCompatActivity implements NavigationView.OnN
         return true;
     }
 
-    private LocationListener locationListener = new LocationListener()
+    //Own methods
+    private void showMarkerOnMap(Location location)
     {
-        @Override
-        public void onLocationChanged(Location location)
+        if(userLocationGeoPoint == null)
         {
-            showLocation(location);
+            mapController.setZoom(17);
+            mapController.animateTo(new GeoPoint(location));
         }
-        @Override
-        public void onProviderDisabled(String provider) {}
-        @Override
-        public void onProviderEnabled(String provider)
-        {
-            showLocation(locationManager.getLastKnownLocation(provider));
-        }
-        @Override
-        public void onStatusChanged(String provider, int status, Bundle extras)
-        {
-        }
-    };
-    private class UserPositionItemizedIconOverlay extends ItemizedIconOverlay<OverlayItem>
-    {
-        public UserPositionItemizedIconOverlay(List<OverlayItem> pList, OnItemGestureListener<OverlayItem> pOnItemGestureListener, ResourceProxy pResourceProxy)
-        {
-            super(pList, pOnItemGestureListener, pResourceProxy);
-        }
+        showPositionInfo(location);
 
-        @Override
-        public void draw(Canvas canvas, MapView mapview, boolean arg2)
-        {
-            super.draw(canvas, mapview, arg2);
+        userLocationGeoPoint = new GeoPoint(location);
+        userLocationMarker.setPosition(userLocationGeoPoint);
+        userLocationMarker.setTitle(convertPointToAddress(userLocationGeoPoint));
+        accuracyRadius.setPoints(Polygon.pointsAsCircle(userLocationGeoPoint, location.getAccuracy()));
 
-            if(!overlayItemArray.isEmpty())
-            {
-                IGeoPoint in = overlayItemArray.get(0).getPoint();
+        points.add(userLocationGeoPoint);
+        route.setPoints(points);
 
-                Point out = new Point();
-                mapview.getProjection().toPixels(in, out);
-
-                Bitmap bm = BitmapFactory.decodeResource(getResources(), R.drawable.ic_menu_current);
-                canvas.drawBitmap(bm, out.x - bm.getWidth()/2, out.y - bm.getHeight()/2, null);
-            }
-        }
-        @Override
-        public boolean onSingleTapUp(MotionEvent event, MapView mapView)
-        {
-            return true;
-        }
+        map.invalidate();
     }
-
-    protected Dialog onCreateDialog(int id)
+    public void showPositionInfo(Location location)
     {
-        if (id == DIALOG_SETTING)
-        {
-            AlertDialog.Builder adb = new AlertDialog.Builder(this);
-
-            adb.setTitle(R.string.dialog_setting_title);
-            adb.setMessage(R.string.dialog_setting_message);
-            adb.setIcon(android.R.drawable.ic_dialog_info);
-            adb.setPositiveButton(R.string.dialog_setting_yes, myClickListener);
-            adb.setNeutralButton(R.string.dialog_setting_cancel, myClickListener);
-            return adb.create();
-        }
-        return super.onCreateDialog(id);
+        locationInfo.setText("Coordinates:\n  lat: " + location.getLatitude() +
+                "\n  lon: " + location.getLongitude() +
+                "\nAccuracy: " + location.getAccuracy() +
+                "\nSpeed: " + location.getSpeed() +
+                "\nTime: " + Calendar.getInstance().getTime() +
+                "\nNMEA: " + nmeaString +
+                "\nSatellites in use: " + satellitesInUse);
     }
+    public String convertPointToAddress(GeoPoint point) {
+        String address = "";
+        Geocoder geoCoder = new Geocoder(getBaseContext(), Locale.getDefault());
+        try {
+            List<Address> addresses = geoCoder.getFromLocation(point.getLatitudeE6() / 1E6, point.getLongitudeE6() / 1E6, 1);
 
-    DialogInterface.OnClickListener myClickListener = new DialogInterface.OnClickListener()
-    {
-        public void onClick(DialogInterface dialog, int which)
-        {
-            switch (which)
-            {
-
-                case Dialog.BUTTON_POSITIVE:
-                    startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
-                    break;
-                case Dialog.BUTTON_NEUTRAL:
-                    break;
+            if (addresses.size() > 0) {
+                for (int index = 0; index < addresses.get(0).getMaxAddressLineIndex(); index++) {
+                    address += addresses.get(0).getAddressLine(index) + " ";
+                }
             }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-    };
+
+        return address;
+    }
 }

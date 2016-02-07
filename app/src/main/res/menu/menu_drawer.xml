@@ -3,20 +3,20 @@
 
     <group android:checkableBehavior="single">
         <item
-            android:id="@+id/nav_job"
-            android:icon="@drawable/ic_menu_camera"
-            android:title="Отримати завдання" />
-        <item
             android:id="@+id/nav_map"
             android:icon="@drawable/ic_menu_gallery"
-            android:title="Карта" />
+            android:title="@string/menu_map" />
         <item
-            android:id="@+id/nav_slideshow"
+            android:id="@+id/nav_tasks"
+            android:icon="@drawable/ic_menu_camera"
+            android:title="@string/menu_tasks" />
+        <item
+            android:id="@+id/nav_reports"
             android:icon="@drawable/ic_menu_slideshow"
-            android:title="Звіти" />
+            android:title="@string/menu_reports" />
         <item
-            android:id="@+id/nav_manage"
+            android:id="@+id/nav_delivery"
             android:icon="@drawable/ic_menu_manage"
-            android:title="Доставки" />
+            android:title="@string/menu_delivery" />
     </group>
 </menu>
