@@ -20,7 +20,7 @@ public enum CourierState
             case IN_WAREHOUSE:
                 return "In warehouse";
             default:
-                return "Not Active";
+                return "Not active";
         }
     }
 }

@@ -26,9 +26,9 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.bizmont.courierhelper.Courier.Courier;
+import com.bizmont.courierhelper.OtherStuff.Courier;
+import com.bizmont.courierhelper.DataBase.DataBase;
 import com.bizmont.courierhelper.R;
-import com.bizmont.courierhelper.ReportActivity.ReportsActivity;
 import com.bizmont.courierhelper.Services.GPSTrackerService;
 
 import org.osmdroid.api.IMapController;
@@ -77,6 +77,8 @@ public class MapActivity extends AppCompatActivity implements NavigationView.OnN
         setContentView(R.layout.map_activity);
         setTitle(R.string.title_activity_map);
 
+        DataBase.initializeDatabase(getApplicationContext());
+
         //receiving location from service
         broadcastReceiver = new BroadcastReceiver() {
             public void onReceive(Context context, Intent intent) {
@@ -99,7 +101,6 @@ public class MapActivity extends AppCompatActivity implements NavigationView.OnN
             }
         };
         serviceIntent = new Intent(this,GPSTrackerService.class);
-
         startService(serviceIntent);
 
         //map
@@ -171,16 +172,6 @@ public class MapActivity extends AppCompatActivity implements NavigationView.OnN
     protected void onDestroy() {
         Log.d(LOG_TAG, "onDestroy");
         super.onDestroy();
-    }
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        //TODO: Save points from the map when changing screen orientation
-        super.onSaveInstanceState(outState);
-    }
-    @Override
-    protected void onRestoreInstanceState(Bundle savedInstanceState) {
-        //TODO: Restore points on the map when changing screen orientation
-        super.onRestoreInstanceState(savedInstanceState);
     }
 
     @Override

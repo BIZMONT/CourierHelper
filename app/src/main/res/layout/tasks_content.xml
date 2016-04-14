@@ -11,5 +11,9 @@
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context="com.bizmont.courierhelper.Activities.TasksActivity"
     tools:showIn="@layout/tasks_app_bar">
+    <ListView
+        android:id="@+id/tasks_listview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
 
 </RelativeLayout>

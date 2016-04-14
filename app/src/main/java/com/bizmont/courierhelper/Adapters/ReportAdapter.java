@@ -9,9 +9,9 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
-import com.bizmont.courierhelper.OrdersActivity.OrderState;
+import com.bizmont.courierhelper.OtherStuff.TaskState;
 import com.bizmont.courierhelper.R;
-import com.bizmont.courierhelper.ReportActivity.Report;
+import com.bizmont.courierhelper.OtherStuff.Report;
 
 public class ReportAdapter extends ArrayAdapter {
     private Context context;
@@ -51,7 +51,7 @@ public class ReportAdapter extends ArrayAdapter {
         Report report = reports[position];
         holder.orderID.setText(String.valueOf(report.getId()));
         holder.orderState.setText(report.getState().toString());
-        if(report.getState() == OrderState.DELIVERED)
+        if(report.getState() == TaskState.DELIVERED)
         {
             holder.orderState.setTextColor(Color.GREEN);
         }
@@ -59,7 +59,7 @@ public class ReportAdapter extends ArrayAdapter {
         {
             holder.orderState.setTextColor(Color.RED);
         }
-        holder.orderName.setText(report.getName());
+        holder.orderName.setText(report.getDeliveryName());
 
         return row;
     }

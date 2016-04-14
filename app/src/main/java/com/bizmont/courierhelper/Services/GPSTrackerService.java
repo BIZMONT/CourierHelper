@@ -17,13 +17,15 @@ import android.os.IBinder;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 
+import com.bizmont.courierhelper.DataBase.DataBase;
+
 import java.util.ArrayList;
 
 public class GPSTrackerService extends Service implements LocationListener {
     //constants
     public static final String BROADCAST_ACTION = "com.bizmont.courierhelper"; //filter
-    public static final int LOCATION_REFRESH_RATE = 5; //seconds
-    public static final float LOCATION_REFRESH_DISTANCE = 7; //meters
+    public static final int LOCATION_REFRESH_RATE = 0; //seconds
+    public static final float LOCATION_REFRESH_DISTANCE = 0; //meters
     public static final float LOCATION_MIN_ACCURACY = 50;
     public static final int LOCATION_MIN_SATELLITES = 4;
 
@@ -103,7 +105,7 @@ public class GPSTrackerService extends Service implements LocationListener {
         Log.d(LOG_TAG,"onLocationChanged");
         if(!isTracked && !isBound)
         {
-            stopSelf();
+            //stopSelf();
         }
         checkLocation(location);
     }
@@ -153,6 +155,7 @@ public class GPSTrackerService extends Service implements LocationListener {
         if(location == null) {
             return;
         }
+        Log.d(LOG_TAG,"Location received: " + location.getLatitude() + " " + location.getLongitude());
         if(location.getProvider().equals("gps"))
         {
             Log.d(LOG_TAG, "Getting location from GPS (" + location.getLatitude() + " " +

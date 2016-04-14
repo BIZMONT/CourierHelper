@@ -21,6 +21,6 @@
 
     </android.support.design.widget.AppBarLayout>
 
-    <include layout="@layout/task_content" />
+    <include layout="@layout/get_task_content" />
 
 </android.support.design.widget.CoordinatorLayout>

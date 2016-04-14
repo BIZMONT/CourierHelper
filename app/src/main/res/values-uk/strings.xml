@@ -18,4 +18,5 @@
     <string name="toast_exit_message">Натисніть "Назад" знову для виходу</string>
     <string name="navigation_drawer_close">Закрити навігаційне меню</string>
     <string name="navigation_drawer_open">Відкрити навігаційне меню</string>
+    <string name="order_number">Замовлення №</string>
 </resources>

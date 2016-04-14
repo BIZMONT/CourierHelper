@@ -16,9 +16,9 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".MapActivity"
+            android:name=".Activities.MapActivity"
+            android:configChanges="orientation|screenSize"
             android:label="@string/app_name"
-            android:launchMode="singleInstance"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -27,18 +27,32 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".ReportsActivity"
+            android:name=".Activities.ReportsActivity"
             android:label="@string/title_activity_reports"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".GetTasksActivity"
+            android:name=".Activities.GetTasksActivity"
             android:label="@string/title_activity_task"
             android:theme="@style/AppTheme.NoActionBar" />
 
         <service
-            android:name=".GPSTrackerService"
+            android:name=".Services.GPSTrackerService"
             android:process=":GPSTrackerService" />
 
+        <activity
+            android:name=".FullscreenActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:label="@string/title_activity_fullscreen"
+            android:theme="@style/FullscreenTheme" />
+        <activity
+            android:name=".Activities.TasksActivity"
+            android:label="@string/title_activity_tasks"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".Activities.TaskInfoActivity"
+            android:label="@string/title_activity_task_info"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity android:name=".Activities.ReportDetailsActivity"></activity>
     </application>
 
 </manifest>

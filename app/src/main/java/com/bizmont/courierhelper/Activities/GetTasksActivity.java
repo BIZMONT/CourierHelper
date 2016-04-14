@@ -13,10 +13,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
-import com.bizmont.courierhelper.Courier.Courier;
+import com.bizmont.courierhelper.OtherStuff.Courier;
+import com.bizmont.courierhelper.DataBase.DataBase;
 import com.bizmont.courierhelper.FileChooser;
 import com.bizmont.courierhelper.R;
-import com.bizmont.courierhelper.ReportActivity.ReportsActivity;
 
 import java.io.File;
 
@@ -28,13 +28,13 @@ public class GetTasksActivity extends AppCompatActivity implements NavigationVie
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.task_activity);
+        setContentView(R.layout.get_task_activity);
 
         fileChooser = new FileChooser(this);
         fileChooser.setFileListener(new FileChooser.FileSelectedListener() {
             @Override
             public void fileSelected(File file) {
-                //TODO: Read file to DB
+                DataBase.WriteData(file);
             }
         });
         fileChooser.setExtension("cht");
@@ -73,19 +73,14 @@ public class GetTasksActivity extends AppCompatActivity implements NavigationVie
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.task, menu);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             return true;
         }

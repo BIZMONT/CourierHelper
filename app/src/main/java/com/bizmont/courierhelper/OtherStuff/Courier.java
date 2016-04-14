@@ -1,7 +1,5 @@
 package com.bizmont.courierhelper.OtherStuff;
 
-import com.bizmont.courierhelper.Courier.CourierState;
-
 public class Courier {
     private static Courier ourInstance = new Courier();
 

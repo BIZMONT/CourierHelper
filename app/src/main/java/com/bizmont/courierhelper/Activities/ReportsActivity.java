@@ -13,16 +13,18 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
-import com.bizmont.courierhelper.Courier.Courier;
-import com.bizmont.courierhelper.OrdersActivity.OrderState;
+import com.bizmont.courierhelper.Adapters.ReportAdapter;
+import com.bizmont.courierhelper.OtherStuff.Courier;
+import com.bizmont.courierhelper.OtherStuff.TaskState;
+import com.bizmont.courierhelper.OtherStuff.Report;
 import com.bizmont.courierhelper.R;
-import com.bizmont.courierhelper.ReportActivity.Report;
-import com.bizmont.courierhelper.ReportActivity.ReportAdapter;
 
 import java.util.Calendar;
 
@@ -38,6 +40,14 @@ public class ReportsActivity extends AppCompatActivity implements NavigationView
     int day;
 
     NavigationView navigationView;
+    ReportAdapter reportAdapter;
+
+    Report[] reports = new Report[]
+            {
+                    new Report(123,"Навушники", TaskState.DELIVERED),
+                    new Report(456,"Телефон", TaskState.DELIVERED),
+                    new Report(789,"Гомно", TaskState.NOT_DELIVERED)
+            };
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -75,15 +85,16 @@ public class ReportsActivity extends AppCompatActivity implements NavigationView
             }
         });
 
-        Report[] reports = new Report[]
-                {
-                        new Report(123,"test1", OrderState.DELIVERED),
-                        new Report(456,"test2",OrderState.DELIVERED),
-                        new Report(789,"test3",OrderState.NOT_DELIVERED)
-                };
-        ReportAdapter adapter = new ReportAdapter(this, R.layout.reports_listview_row, reports);
         reportsList = (ListView) findViewById(R.id.reports_listview);
-        reportsList.setAdapter(adapter);
+        reportAdapter = new ReportAdapter(ReportsActivity.this, R.layout.reports_listview_row, reports);
+        reportsList.setAdapter(reportAdapter);
+
+        reportsList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Toast.makeText(ReportsActivity.this,"Hello",Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     @Override
@@ -104,7 +115,6 @@ public class ReportsActivity extends AppCompatActivity implements NavigationView
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.reports, menu);
         return true;
     }
@@ -112,12 +122,8 @@ public class ReportsActivity extends AppCompatActivity implements NavigationView
     @Override
     public boolean onOptionsItemSelected(MenuItem item)
     {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             return true;
         }
@@ -128,7 +134,6 @@ public class ReportsActivity extends AppCompatActivity implements NavigationView
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
-        // Handle navigation view item clicks here.
         int id = item.getItemId();
 
         if (id == R.id.nav_tasks)
@@ -169,6 +174,12 @@ public class ReportsActivity extends AppCompatActivity implements NavigationView
             ReportsActivity.this.month = monthOfYear + 1;
             ReportsActivity.this.day = dayOfMonth;
             datePickerButton.setText(dayOfMonth + "/" + (monthOfYear + 1) + "/" + year);
+
+            reports = new Report[]{
+                    new Report(987,"Курваааа", TaskState.DELIVERED)
+            };
+            reportAdapter = new ReportAdapter(ReportsActivity.this, R.layout.reports_listview_row, reports);
+            reportsList.setAdapter(reportAdapter);
         }
     };
 }
