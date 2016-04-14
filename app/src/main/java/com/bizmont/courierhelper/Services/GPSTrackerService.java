@@ -1,4 +1,4 @@
-package com.bizmont.courierhelper;
+package com.bizmont.courierhelper.Services;
 
 
 import android.Manifest;
@@ -17,25 +17,31 @@ import android.os.IBinder;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 
+import java.util.ArrayList;
+
 public class GPSTrackerService extends Service implements LocationListener {
     //constants
     public static final String BROADCAST_ACTION = "com.bizmont.courierhelper"; //filter
-    private static final int LOCATION_REFRESH_RATE = 0; //seconds
-    private static final float LOCATION_REFRESH_DISTANCE = 0; //meters
+    public static final int LOCATION_REFRESH_RATE = 5; //seconds
+    public static final float LOCATION_REFRESH_DISTANCE = 7; //meters
+    public static final float LOCATION_MIN_ACCURACY = 50;
+    public static final int LOCATION_MIN_SATELLITES = 4;
+
     private static final String LOG_TAG = "GPSTracker";
 
     //location fields
     private LocationManager locationManager;
     private GpsStatus gpsStatus;
-    private String nmeaString;
+    private Location lastFix;
+    private String nmea;
     private int satellitesInUse;
+    private ArrayList<Location> track;
 
     private boolean isTracked;
     private boolean isBound;
 
     @Override
     public void onCreate() {
-        Log.d(LOG_TAG, "onCreate");
         super.onCreate();
 
         isTracked = false;
@@ -46,7 +52,7 @@ public class GPSTrackerService extends Service implements LocationListener {
             locationManager.addNmeaListener(new GpsStatus.NmeaListener() {
                 @Override
                 public void onNmeaReceived(long timestamp, String nmea) {
-                    GPSTrackerService.this.nmeaString = nmea;
+                    GPSTrackerService.this.nmea = nmea;
                 }
             });
             locationManager.addGpsStatusListener(new GpsStatus.Listener() {
@@ -61,6 +67,11 @@ public class GPSTrackerService extends Service implements LocationListener {
             locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000 * LOCATION_REFRESH_RATE, LOCATION_REFRESH_DISTANCE, this);
             locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000 * LOCATION_REFRESH_RATE, LOCATION_REFRESH_DISTANCE, this);
         }
+
+        lastFix = new Location(LocationManager.GPS_PROVIDER);
+        lastFix.setLatitude(0);
+        lastFix.setLongitude(0);
+        Log.d(LOG_TAG, "onCreate");
     }
     @Override
     public void onDestroy() {
@@ -89,6 +100,7 @@ public class GPSTrackerService extends Service implements LocationListener {
     //LocationListener overridden methods
     @Override
     public void onLocationChanged(Location location) {
+        Log.d(LOG_TAG,"onLocationChanged");
         if(!isTracked && !isBound)
         {
             stopSelf();
@@ -101,7 +113,6 @@ public class GPSTrackerService extends Service implements LocationListener {
     }
     @Override
     public void onProviderEnabled(String provider) {
-        checkEnabled();
         if (ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED &&
                 ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             checkLocation(locationManager.getLastKnownLocation(provider));
@@ -138,21 +149,30 @@ public class GPSTrackerService extends Service implements LocationListener {
     }
     private void checkLocation(Location location)
     {
-        if(location == null)
-        {
+        //TODO: Make better checkLocation
+        if(location == null) {
             return;
         }
         if(location.getProvider().equals("gps"))
         {
-            Log.d(LOG_TAG, "Getting location from GPS (" + location.getLatitude() + " " + location.getLongitude() + ")");
+            Log.d(LOG_TAG, "Getting location from GPS (" + location.getLatitude() + " " +
+                    location.getLongitude() + ")");
+
             satellitesInUse = getSatellitesInUse();
-            if (location.getAccuracy() < 50 && satellitesInUse > 4) {
+            if (location.getAccuracy() < LOCATION_MIN_ACCURACY &&
+                    satellitesInUse > LOCATION_MIN_SATELLITES &&
+                    lastFix.distanceTo(location) > 7) {
+                lastFix = location;
                 sendLocation(location);
             }
         }
         else {
-            Log.d(LOG_TAG, "Getting location from Network (" + location.getLatitude() + " " + location.getLongitude() + ")");
-            if (location.getAccuracy() < 50) {
+            Log.d(LOG_TAG, "Getting location from Network (" + location.getLatitude() + " " +
+                    location.getLongitude() + ")");
+
+            if (location.getAccuracy() < LOCATION_MIN_ACCURACY &&
+                    lastFix.distanceTo(location) > 7 ) {
+                lastFix = location;
                 sendLocation(location);
             }
         }
@@ -160,9 +180,11 @@ public class GPSTrackerService extends Service implements LocationListener {
     private void sendLocation(Location location)
     {
         Intent locationIntent = new Intent(BROADCAST_ACTION);
+
         locationIntent.putExtra("location", location);
-        locationIntent.putExtra("nmea", nmeaString);
+        locationIntent.putExtra("nmea", nmea);
         locationIntent.putExtra("satellitesInUse", satellitesInUse);
+
         sendBroadcast(locationIntent);
         Log.d(LOG_TAG, "Location sent (" + location.getLatitude() + " " + location.getLongitude() + ")");
     }

@@ -1,7 +1,5 @@
-package com.bizmont.courierhelper;
+package com.bizmont.courierhelper.Activities;
 
-import android.app.DatePickerDialog;
-import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
@@ -13,31 +11,35 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
-import android.widget.DatePicker;
-import android.widget.ListView;
+import android.widget.TextView;
 
-import java.util.Calendar;
+import com.bizmont.courierhelper.Courier.Courier;
+import com.bizmont.courierhelper.FileChooser;
+import com.bizmont.courierhelper.R;
+import com.bizmont.courierhelper.ReportActivity.ReportsActivity;
 
-public class ReportsActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener
+import java.io.File;
+
+public class GetTasksActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener
 {
-    static final int DATE_DIALOG_ID = 0;
-
-    Button datePickerButton;
-    ListView reportsList;
-
-    int year;
-    int month;
-    int day;
+    FileChooser fileChooser;
 
     NavigationView navigationView;
-
     @Override
-    protected void onCreate(Bundle savedInstanceState)
-    {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.reports_activity);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setContentView(R.layout.task_activity);
+
+        fileChooser = new FileChooser(this);
+        fileChooser.setFileListener(new FileChooser.FileSelectedListener() {
+            @Override
+            public void fileSelected(File file) {
+                //TODO: Read file to DB
+            }
+        });
+        fileChooser.setExtension("cht");
+
+        Toolbar toolbar = (Toolbar) findViewById(R.id.map_toolbar);
         setSupportActionBar(toolbar);
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -48,37 +50,22 @@ public class ReportsActivity extends AppCompatActivity implements NavigationView
 
         navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
-        navigationView.getMenu().findItem(R.id.nav_reports).setChecked(true);
-
-
-        Calendar cal = Calendar.getInstance();
-        year = cal.get(Calendar.YEAR);
-        month = cal.get(Calendar.MONTH) + 1;
-        day = cal.get(Calendar.DAY_OF_MONTH);
-
-        datePickerButton = (Button)findViewById(R.id.date_picker_button);
-        datePickerButton.setText(day + "/" + (month) + "/" + year);
-        datePickerButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showDialog(DATE_DIALOG_ID);
-            }
-        });
-
-        reportsList = (ListView) findViewById(R.id.reports_listview);
+        navigationView.getMenu().findItem(R.id.nav_tasks).setChecked(true);
+        View headerView = navigationView.getHeaderView(0);
+        ((TextView)headerView.findViewById(R.id.courier_name)).setText(Courier.getInstance().getName());
+        ((TextView)headerView.findViewById(R.id.courier_status)).setText(Courier.getInstance().getState().toString());
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        if (!navigationView.getMenu().findItem(R.id.nav_reports).isChecked()) {
-            navigationView.getMenu().findItem(R.id.nav_reports).setChecked(true);
+        if (!navigationView.getMenu().findItem(R.id.nav_tasks).isChecked()) {
+            navigationView.getMenu().findItem(R.id.nav_tasks).setChecked(true);
         }
     }
 
     @Override
-    public void onBackPressed()
-    {
+    public void onBackPressed() {
         Intent intent = new Intent(this, MapActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(intent);
@@ -87,13 +74,12 @@ public class ReportsActivity extends AppCompatActivity implements NavigationView
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.reports, menu);
+        getMenuInflater().inflate(R.menu.task, menu);
         return true;
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item)
-    {
+    public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
@@ -115,13 +101,17 @@ public class ReportsActivity extends AppCompatActivity implements NavigationView
 
         if (id == R.id.nav_tasks)
         {
-            Intent intent = new Intent(this, GetTasksActivity.class);
-            startActivity(intent);
+
         }
         else if (id == R.id.nav_map)
         {
             Intent intent = new Intent(this, MapActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(intent);
+        }
+        else if (id == R.id.nav_reports)
+        {
+            Intent intent = new Intent(this, ReportsActivity.class);
             startActivity(intent);
         }
         else if (id == R.id.nav_delivery)
@@ -134,23 +124,7 @@ public class ReportsActivity extends AppCompatActivity implements NavigationView
         return true;
     }
 
-    @Override
-    protected Dialog onCreateDialog(int id)
-    {
-        if(id == DATE_DIALOG_ID)
-        {
-            return new DatePickerDialog(this, dPickListener, this.year, this.month, this.day);
-        }
-        return null;
+    public void onChoseFileButtonClick(View view) {
+        fileChooser.showDialog();
     }
-
-    private DatePickerDialog.OnDateSetListener dPickListener = new DatePickerDialog.OnDateSetListener() {
-        @Override
-        public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
-            ReportsActivity.this.year = year;
-            ReportsActivity.this.month = monthOfYear + 1;
-            ReportsActivity.this.day = dayOfMonth;
-            datePickerButton.setText(dayOfMonth + "/" + (monthOfYear + 1) + "/" + year);
-        }
-    };
 }
