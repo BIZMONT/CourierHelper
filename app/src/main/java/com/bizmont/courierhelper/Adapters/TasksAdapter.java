@@ -37,9 +37,9 @@ public class TasksAdapter extends ArrayAdapter {
             row = inflater.inflate(layoutResourceId, parent, false);
 
             holder = new TaskHolder();
-            holder.orderID = (TextView)row.findViewById(R.id.order_id);
-            holder.orderState = (TextView)row.findViewById(R.id.order_state);
-            holder.orderName = (TextView)row.findViewById(R.id.order_name);
+            holder.taskID = (TextView)row.findViewById(R.id.task_id);
+            holder.taskState = (TextView)row.findViewById(R.id.task_state);
+            holder.taskName = (TextView)row.findViewById(R.id.task_name);
 
             row.setTag(holder);
         }
@@ -49,26 +49,26 @@ public class TasksAdapter extends ArrayAdapter {
         }
 
         Task task = tasks[position];
-        /*holder.orderID.setText(String.valueOf(report.getId()));
-        holder.orderState.setText(report.getState().toString());
-        if(report.getState() == TaskState.DELIVERED)
+        holder.taskID.setText(String.valueOf(task.getId()));
+        holder.taskState.setText(task.getState().toString());
+        if(task.getState() == TaskState.DELIVERED)
         {
-            holder.orderState.setTextColor(Color.GREEN);
+            holder.taskState.setTextColor(Color.GREEN);
         }
         else
         {
-            holder.orderState.setTextColor(Color.RED);
+            holder.taskState.setTextColor(Color.RED);
         }
-        holder.orderName.setText(report.getDeliveryName());
-*/
+        holder.taskName.setText(task.getAddress());
+
         return row;
     }
 
     static class TaskHolder
     {
-        TextView orderID;
-        TextView orderName;
-        TextView orderState;
+        TextView taskID;
+        TextView taskName;
+        TextView taskState;
     }
 }
 

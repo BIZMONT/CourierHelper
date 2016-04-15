@@ -59,7 +59,7 @@ public class ReportAdapter extends ArrayAdapter {
         {
             holder.orderState.setTextColor(Color.RED);
         }
-        holder.orderName.setText(report.getDeliveryName());
+        holder.orderName.setText(report.getAddress());
 
         return row;
     }

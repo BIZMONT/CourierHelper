@@ -2,10 +2,13 @@ package com.bizmont.courierhelper.DataBase;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
+import com.bizmont.courierhelper.OtherStuff.Task;
+import com.bizmont.courierhelper.OtherStuff.TaskDetails;
 import com.bizmont.courierhelper.OtherStuff.TaskState;
 
 import org.w3c.dom.Document;
@@ -39,16 +42,24 @@ public final class DataBase
 
             NodeList table = document.getElementsByTagName("Task");
 
-            PutTasksToDB(table);
+            SQLiteDatabase database = DatabaseManager.getInstance().openDatabase();
+
+            PutTasksToDB(table, database);
             Log.d(LOG_TAG,"Tasks added!");
 
             table = document.getElementsByTagName("Warehouse");
-            PutWarehousesToDB(table);
+            PutWarehousesToDB(table, database);
             Log.d(LOG_TAG,"Warehouses added!");
 
-            table = document.getElementsByTagName("Recipient");
-            PutRecipientsToDB(table);
-            Log.d(LOG_TAG,"Recipients added!");
+            table = document.getElementsByTagName("Receiver");
+            PutReceiversToDB(table, database);
+            Log.d(LOG_TAG,"Receivers added!");
+
+            table = document.getElementsByTagName("Sender");
+            PutSendersToDB(table, database);
+            Log.d(LOG_TAG,"Senders added!");
+
+            DatabaseManager.getInstance().closeDatabase();
         }
         catch (Exception e)
         {
@@ -61,41 +72,120 @@ public final class DataBase
         contentValues.put("State",state.toString());
 
         SQLiteDatabase dataBase = DatabaseManager.getInstance().openDatabase();
-        dataBase.update("Tasks",contentValues,"id=?",new String[]{Integer.toString(DeliveryId)});
+        dataBase.update(Tables.TASKS, contentValues, "id=?", new String[]{Integer.toString(DeliveryId)});
         DatabaseManager.getInstance().closeDatabase();
     }
-    public static void GetActiveTasks()
+    public static Task[] getActiveTasks()
     {
+        Task[] tasks;
+        Cursor cursor;
         SQLiteDatabase database = DatabaseManager.getInstance().openDatabase();
 
+        cursor = database.query(Tables.TASKS, null, "State != ? OR State != ?",
+                new String[]{TaskState.DELIVERED.toString(),TaskState.NOT_DELIVERED.toString()},
+                null, null, null);
+        tasks = new Task[cursor.getCount()];
 
+        if (cursor.moveToFirst())
+        {
+            int idColIndex = cursor.getColumnIndex("ID");
+            int addressColIndex = cursor.getColumnIndex("Address");
+            int stateColIndex = cursor.getColumnIndex("State");
 
+            int i = 0;
+            do
+            {
+                tasks[i] = new Task(cursor.getInt(idColIndex),
+                        TaskState.Parse(cursor.getString(stateColIndex)),
+                        cursor.getString(addressColIndex));
+                i++;
+            } while (cursor.moveToNext());
+        }
+
+        cursor.close();
         DatabaseManager.getInstance().closeDatabase();
+        return tasks;
+    }
+    public static TaskDetails getTaskDetails(int id)
+    {
+        TaskDetails taskDetails = null;
+
+        String sqlCommand = "SELECT " +
+                Tables.TASKS + ".State, " +
+                Tables.TASKS + ".Address AS ReceiverAddress, " +
+                Tables.TASKS + ".Content, " +
+                Tables.TASKS + ".Date, " +
+                Tables.TASKS + ".Comment, " +
+                Tables.RECEIVERS + ".Name, " +
+                Tables.RECEIVERS + ".Phone, " +
+                Tables.SENDERS + ".Address AS SenderAddress, " +
+                Tables.SENDERS + ".Name AS SenderName, " +
+                Tables.SENDERS + ".Phone AS SenderPhone, " +
+                Tables.WAREHOUSES + ".Address AS WarehouseAddress " +
+                "FROM " + Tables.TASKS +
+                " LEFT OUTER JOIN " + Tables.RECEIVERS + " ON " + Tables.TASKS + ".ReceiverID = " + Tables.RECEIVERS + ".ID " +
+                "LEFT OUTER JOIN " + Tables.WAREHOUSES + " ON " + Tables.TASKS + ".WarehouseID = " + Tables.WAREHOUSES + ".ID " +
+                "LEFT OUTER JOIN " + Tables.SENDERS + " ON " + Tables.TASKS + ".SenderID = " + Tables.SENDERS + ".ID " +
+                "WHERE " + Tables.TASKS + ".ID = ?;";
+
+        Cursor cursor;
+        SQLiteDatabase database = DatabaseManager.getInstance().openDatabase();
+
+        cursor = database.rawQuery(sqlCommand,new String[]{Integer.toString(id)});
+
+        if (cursor.moveToFirst())
+        {
+            do
+            {
+                taskDetails = new TaskDetails(
+                        id,
+                        TaskState.Parse(cursor.getString(cursor.getColumnIndex("State"))),
+                        cursor.getString(cursor.getColumnIndex("ReceiverAddress")),
+                        cursor.getString(cursor.getColumnIndex("Content")),
+                        cursor.getString(cursor.getColumnIndex("Name")),
+                        cursor.getString(cursor.getColumnIndex("Phone")),
+                        cursor.getString(cursor.getColumnIndex("WarehouseAddress")),
+                        cursor.getString(cursor.getColumnIndex("Date")),
+                        cursor.getString(cursor.getColumnIndex("Comment")),
+                        cursor.getString(cursor.getColumnIndex("SenderName")),
+                        cursor.getString(cursor.getColumnIndex("SenderAddress")),
+                        cursor.getString(cursor.getColumnIndex("SenderPhone"))
+                        );
+            } while (cursor.moveToNext());
+        }
+
+        cursor.close();
+        DatabaseManager.getInstance().closeDatabase();
+
+        return taskDetails;
     }
 
-    //TODO:Check if row is already existing
-    private static void PutRecipientsToDB(NodeList recipients)
+    private static void PutReceiversToDB(NodeList receivers, SQLiteDatabase database)
     {
         ContentValues contentValues = new ContentValues();
 
-        for (int i = 0; i < recipients.getLength(); i++)
+        for (int i = 0; i < receivers.getLength(); i++)
         {
-            Node recipient = recipients.item(i);
-            if (recipient.getNodeType() == Node.ELEMENT_NODE)
+            Node receiver = receivers.item(i);
+            if (receiver.getNodeType() == Node.ELEMENT_NODE)
             {
-                Element element = (Element) recipient;
+                Element element = (Element) receiver;
 
-                contentValues.put("ID", Integer.parseInt(element.getAttribute("ID")));
-                contentValues.put("Name", element.getAttribute("Name"));
-                contentValues.put("Phone", element.getAttribute("Phone"));
+                Cursor cursor = database.query(Tables.RECEIVERS, new String[]{"ID"}, "ID=?",
+                        new String[]{element.getAttribute("ID")}, null, null, null);
+                if(cursor.getCount() == 0) {
 
-                SQLiteDatabase database = DatabaseManager.getInstance().openDatabase();
-                database.insert("Recipients", null, contentValues);
-                DatabaseManager.getInstance().closeDatabase();
+                    contentValues.put("ID", Integer.parseInt(element.getAttribute("ID")));
+                    contentValues.put("Name", element.getAttribute("Name"));
+                    contentValues.put("Phone", element.getAttribute("Phone"));
+
+                    database.insert(Tables.RECEIVERS, null, contentValues);
+                }
+                cursor.close();
             }
         }
     }
-    private static void PutWarehousesToDB(NodeList warehouses)
+    private static void PutWarehousesToDB(NodeList warehouses, SQLiteDatabase database)
     {
         ContentValues contentValues = new ContentValues();
 
@@ -106,46 +196,78 @@ public final class DataBase
             {
                 Element element = (Element) warehouse;
 
-                contentValues.put("ID", Integer.parseInt(element.getAttribute("ID")));
-                contentValues.put("Address", element.getAttribute("Address"));
-                contentValues.put("Latitude", Float.parseFloat(element.getAttribute("Latitude")));
-                contentValues.put("Longitude", Float.parseFloat(element.getAttribute("Longitude")));
-                contentValues.put("Radius", Float.parseFloat(element.getAttribute("Radius")));
+                Cursor cursor = database.query(Tables.WAREHOUSES, new String[]{"ID"}, "ID=?",
+                        new String[]{element.getAttribute("ID")}, null, null, null);
+                if(cursor.getCount() == 0) {
+                    contentValues.put("ID", Integer.parseInt(element.getAttribute("ID")));
+                    contentValues.put("Address", element.getAttribute("Address"));
+                    contentValues.put("Latitude", Float.parseFloat(element.getAttribute("Latitude")));
+                    contentValues.put("Longitude", Float.parseFloat(element.getAttribute("Longitude")));
+                    contentValues.put("Radius", Float.parseFloat(element.getAttribute("Radius")));
 
-                SQLiteDatabase database = DatabaseManager.getInstance().openDatabase();
-                database.insert("Warehouses", null, contentValues);
-                DatabaseManager.getInstance().closeDatabase();
+                    database.insert(Tables.WAREHOUSES, null, contentValues);
+                }
+                cursor.close();
             }
         }
     }
-    private static void PutTasksToDB(NodeList table)
+    private static void PutTasksToDB(NodeList tasks, SQLiteDatabase database)
     {
         ContentValues contentValues = new ContentValues();
 
-        for (int i = 0; i < table.getLength(); i++)
+        for (int i = 0; i < tasks.getLength(); i++)
         {
-            Node task = table.item(i);
+            Node task = tasks.item(i);
 
             if (task.getNodeType() == Node.ELEMENT_NODE)
             {
                 Element element = (Element) task;
 
-                Log.d(LOG_TAG,element.getAttribute("ID"));
+                Cursor cursor = database.query(Tables.TASKS, new String[]{"ID"}, "ID=?",
+                        new String[]{element.getAttribute("ID")}, null, null, null);
+                if(cursor.getCount() == 0)
+                {
+                    contentValues.put("ID", Integer.parseInt(element.getAttribute("ID")));
+                    contentValues.put("State", TaskState.IN_WAREHOUSE.toString());
+                    contentValues.put("Content", element.getAttribute("Content"));
+                    contentValues.put("ReceiverID", Integer.parseInt(element.getAttribute("ReceiverID")));
+                    contentValues.put("SenderID", Integer.parseInt(element.getAttribute("SenderID")));
+                    contentValues.put("Address", element.getAttribute("Address"));
+                    contentValues.put("Latitude", Float.parseFloat(element.getAttribute("Latitude")));
+                    contentValues.put("Longitude", Float.parseFloat(element.getAttribute("Longitude")));
+                    contentValues.put("WarehouseID", Integer.parseInt(element.getAttribute("WarehouseID")));
+                    contentValues.put("Date", element.getAttribute("Date"));
+                    contentValues.put("Comment", element.getAttribute("Comment"));
 
-                contentValues.put("ID", Integer.parseInt(element.getAttribute("ID")));
-                contentValues.put("Content", element.getAttribute("Content"));
-                contentValues.put("RecipientID", Integer.parseInt(element.getAttribute("RecipientID")));
-                contentValues.put("Address", element.getAttribute("Address"));
-                contentValues.put("Latitude", Float.parseFloat(element.getAttribute("Latitude")));
-                contentValues.put("Longitude", Float.parseFloat(element.getAttribute("Longitude")));
-                contentValues.put("State", TaskState.IN_WAREHOUSE.toString());
-                contentValues.put("WarehouseID", Integer.parseInt(element.getAttribute("WarehouseID")));
-                contentValues.put("Date", element.getAttribute("Date"));
-                contentValues.put("Comment", element.getAttribute("Comment"));
+                    database.insert(Tables.TASKS, null, contentValues);
+                }
+                cursor.close();
+            }
+        }
+    }
+    private static void PutSendersToDB(NodeList senders, SQLiteDatabase database)
+    {
+        ContentValues contentValues = new ContentValues();
 
-                SQLiteDatabase database = DatabaseManager.getInstance().openDatabase();
-                database.insert("Tasks", null, contentValues);
-                DatabaseManager.getInstance().closeDatabase();
+        for (int i = 0; i < senders.getLength(); i++)
+        {
+            Node sender = senders.item(i);
+            if (sender.getNodeType() == Node.ELEMENT_NODE)
+            {
+                Element element = (Element) sender;
+
+                Cursor cursor = database.query(Tables.SENDERS, new String[]{"ID"}, "ID=?",
+                        new String[]{element.getAttribute("ID")}, null, null, null);
+                if(cursor.getCount() == 0) {
+
+                    contentValues.put("ID", Integer.parseInt(element.getAttribute("ID")));
+                    contentValues.put("Name", element.getAttribute("Name"));
+                    contentValues.put("Phone", element.getAttribute("Phone"));
+                    contentValues.put("Address", element.getAttribute("Address"));
+
+                    database.insert(Tables.SENDERS, null, contentValues);
+                }
+                cursor.close();
             }
         }
     }
@@ -176,7 +298,6 @@ class DatabaseManager
 
     public synchronized SQLiteDatabase openDatabase() {
         if(mOpenCounter.incrementAndGet() == 1) {
-            // Opening new database
             mDatabase = mDatabaseHelper.getWritableDatabase();
         }
         return mDatabase;
@@ -185,6 +306,10 @@ class DatabaseManager
         if(mOpenCounter.decrementAndGet() == 0) {
             mDatabase.close();
         }
+    }
+    public static synchronized void releaseDatabase()
+    {
+        mDatabaseHelper.close();
     }
 }
 
@@ -200,41 +325,53 @@ class DataBaseHelper extends SQLiteOpenHelper
     @Override
     public void onCreate(SQLiteDatabase db)
     {
-            db.execSQL("CREATE TABLE Tasks" +
-                    "(" +
-                    "ID integer PRIMARY KEY, " +
-                    "Content text, " +
-                    "RecipientID integer, " +
-                    "Address text, " +
-                    "Latitude real, " +
-                    "Longitude real, " +
-                    "State text, " +
-                    "WarehouseID integer, " +
-                    "Date text, " +
-                    "Comment text, " +
-                    "FOREIGN KEY (RecipientID) REFERENCES Recipients(ID), " +
-                    "FOREIGN KEY (WarehouseID) REFERENCES Warehouse(ID)" +
-                    ");");
-            db.execSQL("CREATE TABLE Warehouses(" +
-                    "ID integer PRIMARY KEY, " +
-                    "Address text, " +
-                    "Latitude real, " +
-                    "Longitude real, " +
-                    "Radius real DEFAULT 5" +
-                    ");");
-            db.execSQL("CREATE TABLE Recipients(" +
-                    "ID integer PRIMARY KEY, " +
-                    "Name text, " +
-                    "Phone text" +
-                    ");");
-            db.execSQL("CREATE TABLE Reports(" +
-                    "ID integer PRIMARY KEY AUTOINCREMENT, " +
-                    "TaskID integer, " +
-                    "Track text DEFAULT 'No track'," +
-                    "BeginTime text," +
-                    "EndTime text," +
-                    "FOREIGN KEY (TaskID) REFERENCES Tasks(ID)" +
-                    ");");
+        db.execSQL("CREATE TABLE " + Tables.TASKS +
+                "(" +
+                "ID integer PRIMARY KEY, " +
+                "State text, " +
+                "Content text, " +
+                "ReceiverID integer, " +
+                "SenderID integer, " +
+                "Address text, " +
+                "Latitude real, " +
+                "Longitude real, " +
+                "WarehouseID integer, " +
+                "Date text, " +
+                "Comment text, " +
+                "FOREIGN KEY (ReceiverID) REFERENCES " + Tables.RECEIVERS + "(ID), " +
+                "FOREIGN KEY (WarehouseID) REFERENCES " + Tables.WAREHOUSES + "(ID)," +
+                "FOREIGN KEY (SenderID) REFERENCES " + Tables.SENDERS + "(ID)" +
+                ");");
+        db.execSQL("CREATE TABLE " + Tables.WAREHOUSES +
+                "(" +
+                "ID integer PRIMARY KEY, " +
+                "Address text, " +
+                "Latitude real, " +
+                "Longitude real, " +
+                "Radius real DEFAULT 10" +
+                ");");
+        db.execSQL("CREATE TABLE " + Tables.RECEIVERS +
+                "(" +
+                "ID integer PRIMARY KEY, " +
+                "Name text, " +
+                "Phone text" +
+                ");");
+        db.execSQL("CREATE TABLE " + Tables.REPORTS +
+                "(" +
+                "ID integer PRIMARY KEY AUTOINCREMENT, " +
+                "TaskID integer, " +
+                "Track text DEFAULT 'No track'," +
+                "BeginTime text," +
+                "EndTime text," +
+                "FOREIGN KEY (TaskID) REFERENCES " + Tables.TASKS + "(ID)" +
+                ");");
+        db.execSQL("CREATE TABLE " + Tables.SENDERS +
+                "(" +
+                "ID integer PRIMARY KEY," +
+                "Name text, " +
+                "Phone text, " +
+                "Address text" +
+                ");");
     }
 
     @Override
@@ -242,4 +379,13 @@ class DataBaseHelper extends SQLiteOpenHelper
     {
 
     }
+}
+
+final class Tables
+{
+    public static final String RECEIVERS = "Receivers";
+    public static final String TASKS = "Tasks";
+    public static final String WAREHOUSES = "Warehouses";
+    public static final String REPORTS = "Reports";
+    public static final String SENDERS = "Senders";
 }

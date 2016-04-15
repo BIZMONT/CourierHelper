@@ -17,8 +17,6 @@ import android.os.IBinder;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 
-import com.bizmont.courierhelper.DataBase.DataBase;
-
 import java.util.ArrayList;
 
 public class GPSTrackerService extends Service implements LocationListener {
@@ -166,7 +164,7 @@ public class GPSTrackerService extends Service implements LocationListener {
                     satellitesInUse > LOCATION_MIN_SATELLITES &&
                     lastFix.distanceTo(location) > 7) {
                 lastFix = location;
-                sendLocation(location);
+                sendLocationInfo(location);
             }
         }
         else {
@@ -176,17 +174,18 @@ public class GPSTrackerService extends Service implements LocationListener {
             if (location.getAccuracy() < LOCATION_MIN_ACCURACY &&
                     lastFix.distanceTo(location) > 7 ) {
                 lastFix = location;
-                sendLocation(location);
+                sendLocationInfo(location);
             }
         }
     }
-    private void sendLocation(Location location)
+    private void sendLocationInfo(Location location)
     {
         Intent locationIntent = new Intent(BROADCAST_ACTION);
 
         locationIntent.putExtra("location", location);
         locationIntent.putExtra("nmea", nmea);
         locationIntent.putExtra("satellitesInUse", satellitesInUse);
+        locationIntent.putExtra("isTracked",isTracked);
 
         sendBroadcast(locationIntent);
         Log.d(LOG_TAG, "Location sent (" + location.getLatitude() + " " + location.getLongitude() + ")");

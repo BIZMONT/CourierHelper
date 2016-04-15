@@ -136,7 +136,7 @@ public class ReportsActivity extends AppCompatActivity implements NavigationView
     public boolean onNavigationItemSelected(MenuItem item) {
         int id = item.getItemId();
 
-        if (id == R.id.nav_tasks)
+        if (id == R.id.nav_get_tasks)
         {
             Intent intent = new Intent(this, GetTasksActivity.class);
             startActivity(intent);
@@ -147,9 +147,10 @@ public class ReportsActivity extends AppCompatActivity implements NavigationView
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             startActivity(intent);
         }
-        else if (id == R.id.nav_delivery)
+        else if (id == R.id.nav_tasks)
         {
-
+            Intent intent = new Intent(this, TasksActivity.class);
+            startActivity(intent);
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);

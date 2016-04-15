@@ -24,7 +24,7 @@ public enum TaskState
         }
     }
 
-    public TaskState Parse(String state)
+    public static TaskState Parse(String state)
     {
         switch (state)
         {

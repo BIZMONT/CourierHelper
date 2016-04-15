@@ -8,9 +8,9 @@
     <string name="dialog_setting_yes">Так</string>
     <string name="menu_map">Карта</string>
     <string name="menu_reports">Звіти</string>
-    <string name="menu_tasks">Отримати завдання</string>
+    <string name="menu_get_tasks">Отримати завдання</string>
     <string name="courier_name">Ім\'я кур\'єра</string>
-    <string name="menu_delivery">Доставки</string>
+    <string name="menu_tasks">Доставки</string>
     <string name="title_activity_map">Карта</string>
     <string name="title_activity_reports">Звіти</string>
     <string name="title_activity_task">Отримати завдання</string>
@@ -18,5 +18,10 @@
     <string name="toast_exit_message">Натисніть "Назад" знову для виходу</string>
     <string name="navigation_drawer_close">Закрити навігаційне меню</string>
     <string name="navigation_drawer_open">Відкрити навігаційне меню</string>
-    <string name="order_number">Замовлення №</string>
+    <string name="task_number">Замовлення №</string>
+    <string name="title_activity_tasks">Активні завдання</string>
+    <string name="title_activity_task_info">Деталі завдання</string>
+    <string name="complete_button">Завершити</string>
+    <string name="set_active">Встановити активним</string>
+    <string name="show_on_map">Показати на карті</string>
 </resources>

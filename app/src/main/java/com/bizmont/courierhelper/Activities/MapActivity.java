@@ -1,17 +1,14 @@
 package com.bizmont.courierhelper.Activities;
 
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.ServiceConnection;
 import android.graphics.Color;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.support.design.widget.NavigationView;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
@@ -27,7 +24,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bizmont.courierhelper.OtherStuff.Courier;
-import com.bizmont.courierhelper.DataBase.DataBase;
 import com.bizmont.courierhelper.R;
 import com.bizmont.courierhelper.Services.GPSTrackerService;
 
@@ -50,25 +46,24 @@ public class MapActivity extends AppCompatActivity implements NavigationView.OnN
     private static final String LOG_TAG = "CourierHelperLog";
 
     private long backPressedTime = 0;
+    private boolean isTracked = false;
 
-    TextView locationInfo;
+    private TextView locationInfo;
     private MapView map;
     private IMapController mapController;
 
-    NavigationView navigationView;
-    Marker userLocationMarker;
-    Polygon accuracyRadius;
+    private NavigationView navigationView;
+    private Marker userLocationMarker;
+    private Polygon accuracyRadius;
 
-    Polyline route;
-    ArrayList<GeoPoint> points;
-    GeoPoint userLocationGeoPoint;
+    private Polyline route;
+    private ArrayList<GeoPoint> points;
+    private GeoPoint userLocationGeoPoint;
 
-    int satellitesInUse;
+    private int satellitesInUse;
     private String nmeaString;
 
-    BroadcastReceiver broadcastReceiver;
-    ServiceConnection serviceConnection;
-    Intent serviceIntent;
+    private BroadcastReceiver broadcastReceiver;
 
     //Overrated methods
     @Override
@@ -77,31 +72,19 @@ public class MapActivity extends AppCompatActivity implements NavigationView.OnN
         setContentView(R.layout.map_activity);
         setTitle(R.string.title_activity_map);
 
-        DataBase.initializeDatabase(getApplicationContext());
-
         //receiving location from service
         broadcastReceiver = new BroadcastReceiver() {
             public void onReceive(Context context, Intent intent) {
                 Location location = intent.getParcelableExtra("location");
+
                 nmeaString = intent.getStringExtra("nmea");
                 satellitesInUse = intent.getIntExtra("satellitesInUse", 0);
+                isTracked = intent.getBooleanExtra("isTracked", false);
+
                 Log.d(LOG_TAG, "locationReceived");
                 showMarkerOnMap(location);
             }
         };
-        serviceConnection = new ServiceConnection() {
-            @Override
-            public void onServiceConnected(ComponentName name, IBinder service) {
-
-            }
-
-            @Override
-            public void onServiceDisconnected(ComponentName name) {
-
-            }
-        };
-        serviceIntent = new Intent(this,GPSTrackerService.class);
-        startService(serviceIntent);
 
         //map
         map = (MapView) findViewById(R.id.map);
@@ -109,6 +92,7 @@ public class MapActivity extends AppCompatActivity implements NavigationView.OnN
         map.setBuiltInZoomControls(true);
         map.setMultiTouchControls(true);
         map.setMinZoomLevel(2);
+        map.setBuiltInZoomControls(false);
 
         mapController = map.getController();
         mapController.setZoom(3);
@@ -144,8 +128,8 @@ public class MapActivity extends AppCompatActivity implements NavigationView.OnN
         navigationView.getMenu().findItem(R.id.nav_map).setChecked(true);
 
         View headerView = navigationView.getHeaderView(0);
-        ((TextView)headerView.findViewById(R.id.courier_name)).setText(Courier.getInstance().getName());
-        ((TextView)headerView.findViewById(R.id.courier_status)).setText(Courier.getInstance().getState().toString());
+            ((TextView) headerView.findViewById(R.id.courier_name)).setText(Courier.getInstance().getName());
+            ((TextView) headerView.findViewById(R.id.courier_status)).setText(Courier.getInstance().getState().toString());
 
         //Info Overlay
         nmeaString = "";
@@ -159,14 +143,12 @@ public class MapActivity extends AppCompatActivity implements NavigationView.OnN
         }
         IntentFilter intentFilter = new IntentFilter(GPSTrackerService.BROADCAST_ACTION);
         registerReceiver(broadcastReceiver, intentFilter);
-        bindService(serviceIntent, serviceConnection, BIND_AUTO_CREATE);
     }
     @Override
     protected void onPause() {
         Log.d(LOG_TAG, "onPause");
         super.onPause();
         unregisterReceiver(broadcastReceiver);
-        unbindService(serviceConnection);
     }
     @Override
     protected void onDestroy() {
@@ -206,14 +188,15 @@ public class MapActivity extends AppCompatActivity implements NavigationView.OnN
     public boolean onNavigationItemSelected(MenuItem item) {
         int id = item.getItemId();
 
-        if (id == R.id.nav_tasks) {
+        if (id == R.id.nav_get_tasks) {
             Intent intent = new Intent(this, GetTasksActivity.class);
             startActivity(intent);
         } else if (id == R.id.nav_reports) {
             Intent intent = new Intent(this, ReportsActivity.class);
             startActivity(intent);
-        } else if (id == R.id.nav_delivery) {
-
+        } else if (id == R.id.nav_tasks) {
+            Intent intent = new Intent(this, TasksActivity.class);
+            startActivity(intent);
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -237,8 +220,10 @@ public class MapActivity extends AppCompatActivity implements NavigationView.OnN
         userLocationMarker.setSubDescription(convertPointToAddress(userLocationGeoPoint));
         accuracyRadius.setPoints(Polygon.pointsAsCircle(userLocationGeoPoint, location.getAccuracy()));
 
-        points.add(userLocationGeoPoint);
-        route.setPoints(points);
+        if(isTracked) {
+            points.add(userLocationGeoPoint);
+            route.setPoints(points);
+        }
 
         map.invalidate();
     }

@@ -12,13 +12,19 @@
     <string name="dialog_setting_message">Do you want to open the location settings?</string>
     <string name="title_activity_reports">Reports</string>
     <string name="menu_map">Map</string>
-    <string name="menu_tasks">Get tasks</string>
+    <string name="menu_get_tasks">Get tasks</string>
     <string name="menu_reports">Reports</string>
     <string name="title_activity_task">Get tasks</string>
     <string name="today_tasks">Tasks</string>
     <string name="courier_name">Courier name</string>
     <string name="title_activity_map">Map</string>
-    <string name="menu_delivery">Delivery</string>
+    <string name="menu_tasks">Tasks</string>
     <string name="toast_exit_message">Press back again to exit</string>
-    <string name="order_number">Order #</string>
+    <string name="task_number">Task #</string>
+    <string name="title_activity_tasks">Active Tasks</string>
+    <string name="title_activity_task_info">Task Info</string>
+    <string name="complete_button">Complete</string>
+    <string name="show_on_map">Show on map</string>
+    <string name="set_active">Set Active</string>
+    <string name="action_settings"></string>
 </resources>

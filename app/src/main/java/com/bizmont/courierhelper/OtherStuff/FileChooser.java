@@ -1,4 +1,4 @@
-package com.bizmont.courierhelper;
+package com.bizmont.courierhelper.OtherStuff;
 
 import android.app.Activity;
 import android.app.Dialog;

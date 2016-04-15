@@ -15,7 +15,7 @@ import android.widget.TextView;
 
 import com.bizmont.courierhelper.OtherStuff.Courier;
 import com.bizmont.courierhelper.DataBase.DataBase;
-import com.bizmont.courierhelper.FileChooser;
+import com.bizmont.courierhelper.OtherStuff.FileChooser;
 import com.bizmont.courierhelper.R;
 
 import java.io.File;
@@ -50,7 +50,7 @@ public class GetTasksActivity extends AppCompatActivity implements NavigationVie
 
         navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
-        navigationView.getMenu().findItem(R.id.nav_tasks).setChecked(true);
+        navigationView.getMenu().findItem(R.id.nav_get_tasks).setChecked(true);
         View headerView = navigationView.getHeaderView(0);
         ((TextView)headerView.findViewById(R.id.courier_name)).setText(Courier.getInstance().getName());
         ((TextView)headerView.findViewById(R.id.courier_status)).setText(Courier.getInstance().getState().toString());
@@ -59,8 +59,8 @@ public class GetTasksActivity extends AppCompatActivity implements NavigationVie
     @Override
     protected void onResume() {
         super.onResume();
-        if (!navigationView.getMenu().findItem(R.id.nav_tasks).isChecked()) {
-            navigationView.getMenu().findItem(R.id.nav_tasks).setChecked(true);
+        if (!navigationView.getMenu().findItem(R.id.nav_get_tasks).isChecked()) {
+            navigationView.getMenu().findItem(R.id.nav_get_tasks).setChecked(true);
         }
     }
 
@@ -94,9 +94,10 @@ public class GetTasksActivity extends AppCompatActivity implements NavigationVie
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_tasks)
+        if (id == R.id.nav_get_tasks)
         {
-
+            Intent intent = new Intent(this, GetTasksActivity.class);
+            startActivity(intent);
         }
         else if (id == R.id.nav_map)
         {
@@ -109,9 +110,10 @@ public class GetTasksActivity extends AppCompatActivity implements NavigationVie
             Intent intent = new Intent(this, ReportsActivity.class);
             startActivity(intent);
         }
-        else if (id == R.id.nav_delivery)
+        else if (id == R.id.nav_tasks)
         {
-
+            Intent intent = new Intent(this, TasksActivity.class);
+            startActivity(intent);
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
