@@ -27,4 +27,12 @@
     <string name="show_on_map">Show on map</string>
     <string name="set_active">Set Active</string>
     <string name="action_settings"></string>
+    <string name="address">Address</string>
+    <string name="comments">Comments</string>
+    <string name="content">Content</string>
+    <string name="name">Name</string>
+    <string name="phone">Phone</string>
+    <string name="receiver">Receiver</string>
+    <string name="sender">Sender</string>
+    <string name="unknown">Unknown</string>
 </resources>
