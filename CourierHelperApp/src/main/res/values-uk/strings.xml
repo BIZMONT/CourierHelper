@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Courier Helper</string>
+    <string name="action_settings_location">Налаштування розташування</string>
+    <string name="menu_map">Карта</string>
+    <string name="menu_reports">Звіти</string>
+    <string name="menu_tasks">Список активних завдань</string>
+    <string name="title_activity_map">Карта</string>
+    <string name="title_activity_reports">Звіти</string>
+    <string name="toast_exit_message">Натисніть "Назад" знову для виходу</string>
+    <string name="navigation_drawer_close">Закрити навігаційне меню</string>
+    <string name="navigation_drawer_open">Відкрити навігаційне меню</string>
+    <string name="task_number">Замовлення №</string>
+    <string name="title_activity_tasks">Активні завдання</string>
+    <string name="title_activity_task_info">Деталі завдання</string>
+    <string name="complete_button">Завершити</string>
+    <string name="show_on_map">Показати на карті</string>
+    <string name="address">Адреса</string>
+    <string name="comments">Коментар</string>
+    <string name="content">Вміст</string>
+    <string name="name">Ім\'я</string>
+    <string name="phone">Телефон</string>
+    <string name="receiver">Отримувач</string>
+    <string name="sender">Відправник</string>
+    <string name="unknown">Невідомо</string>
+    <string name="location_disabled_message">Будь ласка увімкніть геолокацію для правильної роботи програми!</string>
+    <string name="location_disabled">Геолокація недоступна!</string>
+    <string name="settings">Налаштування</string>
+    <string name="title_activity_settings">Налаштування</string>
+</resources>

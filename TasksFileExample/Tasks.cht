@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<Job>
+    <Tasks>
+	    <Task ID="123" 
+		    Content="FlashDrive" 
+		    ReceiverID="1" 
+			SenderID="1"
+		    Address="Budivelnukiv 4/4, room 25"
+		    Latitude="51.3439127"
+            Longitude="25.8500169"
+			State=""
+            WarehouseID="1"
+			Date="14.04.2016"
+            Comment="Test Comment"/>
+	    <Task ID="124" 
+		    Content="FlashDrive" 
+		    ReceiverID="1" 
+			SenderID="1"
+		    Address="Budivelnukiv 4/4, room 25"
+		    Latitude="51.3439127"
+            Longitude="25.8500169"
+			State=""
+            WarehouseID="1"
+			Date="14.04.2016"
+            Comment="Test Comment"/>
+	</Tasks>
+	<Warehouses>
+	    <Warehouse ID="1" 
+		    Address="Budivelnukiv 71B"
+		    Latitude="51.3435532"
+            Longitude="25.8520821"
+            Radius="5"/>
+	</Warehouses>
+	<Receivers>
+	    <Receiver ID="1"
+		    Name="Yerzhykevych Pavlo"
+		    Phone="+380984436465"/>
+	</Receivers>
+	<Senders>
+	    <Sender ID="1"
+		    Name="Test Sender"
+			Phone="+380984436465"
+			Address="Test Address"/>
+	</Senders>
+</Job>

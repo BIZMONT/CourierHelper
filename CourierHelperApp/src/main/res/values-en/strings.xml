@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Courier Helper</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <string name="action_settings_location">Location settings</string>
+
+    <string name="title_activity_reports">Reports</string>
+    <string name="menu_map">Map</string>
+    <string name="menu_reports">Reports</string>
+    <string name="title_activity_map">Map</string>
+    <string name="menu_tasks">List of active tasks</string>
+    <string name="toast_exit_message">Press back again to exit</string>
+    <string name="task_number">Task #</string>
+    <string name="title_activity_tasks">Active Tasks</string>
+    <string name="title_activity_task_info">Task Info</string>
+    <string name="complete_button">Complete</string>
+    <string name="show_on_map">Show on map</string>
+    <string name="address">Address</string>
+    <string name="comments">Comments</string>
+    <string name="content">Content</string>
+    <string name="name">Name</string>
+    <string name="phone">Phone</string>
+    <string name="receiver">Receiver</string>
+    <string name="sender">Sender</string>
+    <string name="unknown">Unknown</string>
+    <string name="location_disabled_message">Please turn on location, for the correct work of the program!</string>
+    <string name="location_disabled">Location disabled!</string>
+    <string name="settings">Settings</string>
+    <string name="title_activity_settings">Settings</string>
+</resources>
