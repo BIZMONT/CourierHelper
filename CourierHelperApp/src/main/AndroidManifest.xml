@@ -6,11 +6,12 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <application
-        android:name=".CourierHelper"
+        android:name=".CourierHelperApp"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -31,11 +32,9 @@
             android:name=".Activities.ReportsActivity"
             android:label="@string/title_activity_reports"
             android:theme="@style/AppTheme.NoActionBar" />
-
         <service
             android:name=".Services.GPSTrackerService"
             android:process=":GPSTrackerService" />
-
         <activity
             android:name=".Activities.TasksActivity"
             android:label="@string/title_activity_tasks"
@@ -48,7 +47,9 @@
         <activity
             android:name=".Activities.SettingsActivity"
             android:label="@string/title_activity_settings" />
-        <activity android:name=".Activities.AboutActivity"></activity>
+        <activity android:name=".Activities.AboutActivity" />
+        <activity android:name=".Activities.WarehouseActivity"
+            android:label="Warehouse #"/>
     </application>
 
 </manifest>

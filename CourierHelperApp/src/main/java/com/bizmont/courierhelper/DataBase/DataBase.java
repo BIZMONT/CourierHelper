@@ -123,6 +123,7 @@ public final class DataBase
 
             do
             {
+                Log.d(LOG_TAG, cursor.getString(stateColIndex));
                 points.add(new TargetPoint(
                         cursor.getString(taskAddressColIndex),
                         cursor.getDouble(taskLatColIndex),
@@ -155,16 +156,26 @@ public final class DataBase
         Log.d(LOG_TAG, "Points: " + points.size());
         return points;
     }
-    public static Task[] getActiveTasks()
+    public static Task[] getActiveTasks(int warehouseId)
     {
         Task[] tasks;
         Cursor cursor;
 
         SQLiteDatabase database = DatabaseManager.getInstance().openDatabase();
 
-        cursor = database.query(Tables.TASKS, null, "State != ? OR State != ?",
-                new String[]{TaskState.DELIVERED.toString(),TaskState.NOT_DELIVERED.toString()},
-                null, null, null);
+        if(warehouseId == 0)
+        {
+            cursor = database.query(Tables.TASKS, null, "State != ? OR State != ?",
+                    new String[]{TaskState.DELIVERED.toString(),TaskState.NOT_DELIVERED.toString()},
+                    null, null, null);
+        }
+        else
+        {
+            cursor = database.query(Tables.TASKS, null, "(State = ? OR State = ?) AND WarehouseID = ?",
+                    new String[]{TaskState.IN_WAREHOUSE.toString(), TaskState.ON_THE_WAY.toString(), Integer.toString(warehouseId)},
+                    null, null, null);
+        }
+
         tasks = new Task[cursor.getCount()];
 
         if (cursor.moveToFirst())
@@ -240,6 +251,7 @@ public final class DataBase
 
         return taskDetails;
     }
+
     private static void PutReceiversToDB(NodeList receivers, SQLiteDatabase database)
     {
         ContentValues contentValues = new ContentValues();

@@ -61,19 +61,20 @@ public class MapActivity extends AppCompatActivity implements NavigationView.OnN
     private long backPressedTime = 0;
     private boolean isTracked = false;
 
-    private TextView locationInfoOverlay;
     private MapView map;
     private IMapController mapController;
 
+    //Overlays
     private NavigationView navigationView;
     private Marker userLocationMarker;
     private Polygon accuracyRadius;
     private ArrayList<Overlay> markersOverlays;
-
     private Polyline route;
     private ArrayList<GeoPoint> routePoints;
     private GeoPoint userLocationGeoPoint;
+    private TextView locationInfoOverlay;
 
+    //location info
     private int satellitesInUse;
     private String nmeaString;
 
@@ -81,13 +82,12 @@ public class MapActivity extends AppCompatActivity implements NavigationView.OnN
 
     SensorManager mSensorManager;
     private Intent serviceIntent;
+
     private ServiceConnection serviceConnection;
 
     //Overrated methods
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        Log.d(LOG_TAG, "MapActivity onCreate");
-
         super.onCreate(savedInstanceState);
         setContentView(R.layout.map_activity);
         setTitle(R.string.title_activity_map);
@@ -116,9 +116,14 @@ public class MapActivity extends AppCompatActivity implements NavigationView.OnN
         userMarkerOverlayInit();
         routeOverlayInit();
         locationInfoOverlay = (TextView) findViewById(R.id.map_info);
-        ArrayList<Point> places = DataBase.getPoints();
-        refreshMapPoints(places);
 
+        Courier.addOnStatusChangedListener(new Courier.CourierListener() {
+            @Override
+            public void onStatusChanged()
+            {
+                refreshCourierInfo();
+            }
+        });
 
         //Interface items
         Toolbar toolbar = (Toolbar) findViewById(R.id.map_toolbar);
@@ -135,9 +140,7 @@ public class MapActivity extends AppCompatActivity implements NavigationView.OnN
         navigationView.setNavigationItemSelectedListener(this);
         navigationView.getMenu().findItem(R.id.nav_map).setChecked(true);
 
-        View headerView = navigationView.getHeaderView(0);
-            ((TextView) headerView.findViewById(R.id.courier_name)).setText(Courier.getInstance().getName());
-            ((TextView) headerView.findViewById(R.id.courier_status)).setText(Courier.getInstance().getState().toString());
+        //
     }
 
     private void mapInit()
@@ -177,7 +180,9 @@ public class MapActivity extends AppCompatActivity implements NavigationView.OnN
                 }
 
                 Log.d(LOG_TAG, "locationReceived");
-                showMarkerOnMap(location);
+                if(location.getLatitude() != 0 && location.getLongitude() !=0) {
+                    showMarkerOnMap(location);
+                }
             }
         };
     }
@@ -216,7 +221,8 @@ public class MapActivity extends AppCompatActivity implements NavigationView.OnN
     }
 
     @Override
-    protected void onResume() {
+    protected void onResume()
+    {
         super.onResume();
 
         bindService(serviceIntent, serviceConnection, BIND_AUTO_CREATE);
@@ -224,8 +230,15 @@ public class MapActivity extends AppCompatActivity implements NavigationView.OnN
         if (!navigationView.getMenu().findItem(R.id.nav_map).isChecked()) {
             navigationView.getMenu().findItem(R.id.nav_map).setChecked(true);
         }
-        IntentFilter intentFilter = new IntentFilter(GPSTrackerService.BROADCAST_ACTION);
+        IntentFilter intentFilter = new IntentFilter(GPSTrackerService.BROADCAST_SEND_ACTION);
         registerReceiver(broadcastReceiver, intentFilter);
+
+        //Points refresh
+        ArrayList<Point> places = DataBase.getPoints();
+        refreshMapPoints(places);
+
+        //Courier status refresh
+        refreshCourierInfo();
 
         Intent intent = getIntent();
         int taskID = intent.getIntExtra("taskID", 0);
@@ -381,5 +394,11 @@ public class MapActivity extends AppCompatActivity implements NavigationView.OnN
             markersOverlays.add(point.InitializeMarker(this,map));
         }
         map.getOverlays().addAll(markersOverlays);
+    }
+    private void refreshCourierInfo()
+    {
+        View headerView = navigationView.getHeaderView(0);
+        ((TextView) headerView.findViewById(R.id.courier_name)).setText(Courier.getInstance().getName());
+        ((TextView) headerView.findViewById(R.id.courier_status)).setText(Courier.getInstance().getState().toString());
     }
 }

@@ -86,4 +86,5 @@
     <string name="location_disabled">Location disabled!</string>
     <string name="location_disabled_message">Please turn on location, for the correct work of the program!</string>
     <string name="service_work">Service is working</string>
+    <string name="unknown_user">Unknown user</string>
 </resources>

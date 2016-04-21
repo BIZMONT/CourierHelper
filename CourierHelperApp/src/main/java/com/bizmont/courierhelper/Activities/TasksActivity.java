@@ -20,6 +20,7 @@ import com.bizmont.courierhelper.Adapters.TasksAdapter;
 import com.bizmont.courierhelper.DataBase.DataBase;
 import com.bizmont.courierhelper.OtherStuff.Courier;
 import com.bizmont.courierhelper.OtherStuff.FileChooser;
+import com.bizmont.courierhelper.Services.GPSTrackerService;
 import com.bizmont.courierhelper.Task.Task;
 import com.bizmont.courierhelper.R;
 
@@ -53,9 +54,13 @@ public class TasksActivity extends AppCompatActivity
             public void fileSelected(File file) {
                 DataBase.addData(file);
 
-                tasks = DataBase.getActiveTasks();
+                tasks = DataBase.getActiveTasks(0);
                 tasksAdapter = new TasksAdapter(TasksActivity.this, R.layout.tasks_listview_row, tasks);
                 tasksList.setAdapter(tasksAdapter);
+
+                Intent locationIntent = new Intent(GPSTrackerService.BROADCAST_SEND_ACTION);
+                locationIntent.putExtra("Update points", true);
+                sendBroadcast(locationIntent);
             }
         });
         fileChooser.setExtension("cht");
@@ -75,7 +80,7 @@ public class TasksActivity extends AppCompatActivity
         ((TextView)headerView.findViewById(R.id.courier_name)).setText(Courier.getInstance().getName());
         ((TextView)headerView.findViewById(R.id.courier_status)).setText(Courier.getInstance().getState().toString());
 
-        tasks = DataBase.getActiveTasks();
+        tasks = DataBase.getActiveTasks(0);
 
         tasksList = (ListView) findViewById(R.id.tasks_listview);
         tasksAdapter = new TasksAdapter(TasksActivity.this, R.layout.tasks_listview_row, tasks);

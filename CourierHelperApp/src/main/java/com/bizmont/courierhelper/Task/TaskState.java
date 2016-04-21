@@ -14,7 +14,7 @@ public enum TaskState
             case DELIVERED:
                 return "Delivered";
             case ON_THE_WAY:
-                return "On te way";
+                return "On the way";
             case IN_WAREHOUSE:
                 return "In warehouse";
             case NOT_DELIVERED:

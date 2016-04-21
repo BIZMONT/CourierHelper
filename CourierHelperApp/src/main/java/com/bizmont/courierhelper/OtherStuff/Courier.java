@@ -2,7 +2,18 @@ package com.bizmont.courierhelper.OtherStuff;
 
 import android.content.SharedPreferences;
 
-public class Courier {
+import java.util.ArrayList;
+import java.util.List;
+
+public class Courier
+{
+    public interface CourierListener
+    {
+        void onStatusChanged();
+    }
+
+    private static List<CourierListener> listeners = new ArrayList<>();
+
     private static Courier ourInstance = new Courier();
 
     private String name;
@@ -10,7 +21,7 @@ public class Courier {
 
     private Courier()
     {
-        name = "Unknown";
+        name = "Unknown user";
         state = CourierState.NOT_ACTIVE;
     }
 
@@ -40,6 +51,15 @@ public class Courier {
     public void setState(CourierState state)
     {
         this.state = state;
+        for(CourierListener cl: listeners)
+        {
+            cl.onStatusChanged();
+        }
+    }
+
+    public static void addOnStatusChangedListener(CourierListener listener)
+    {
+        listeners.add(listener);
     }
 }
 

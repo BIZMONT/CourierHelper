@@ -4,7 +4,6 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/CourierHelper.iml" filepath="$PROJECT_DIR$/CourierHelper.iml" />
       <module fileurl="file://$PROJECT_DIR$/CourierHelperApp/CourierHelperApp.iml" filepath="$PROJECT_DIR$/CourierHelperApp/CourierHelperApp.iml" />
-      <module fileurl="file://$PROJECT_DIR$/CourierHelperApp/app.iml" filepath="$PROJECT_DIR$/CourierHelperApp/app.iml" />
     </modules>
   </component>
 </project>
