@@ -30,6 +30,7 @@ public class TaskDetails extends Task
 
         this.content = content;
         this.receiverName = receiverName;
+        this.receiverPhone = receiverPhone;
         this.warehouseAddress = warehouseAddress;
         this.date = date;
         this.comment = comment;

@@ -20,10 +20,9 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.bizmont.courierhelper.Adapters.ReportAdapter;
+import com.bizmont.courierhelper.Adapters.ReportsListViewAdapter;
 import com.bizmont.courierhelper.OtherStuff.Courier;
-import com.bizmont.courierhelper.Task.TaskState;
-import com.bizmont.courierhelper.OtherStuff.Report;
+import com.bizmont.courierhelper.Task.TaskReport;
 import com.bizmont.courierhelper.R;
 
 import java.util.Calendar;
@@ -40,14 +39,9 @@ public class ReportsActivity extends AppCompatActivity implements NavigationView
     int day;
 
     NavigationView navigationView;
-    ReportAdapter reportAdapter;
+    ReportsListViewAdapter reportsListViewAdapter;
 
-    Report[] reports = new Report[]
-            {
-                    new Report(123,"Навушники", TaskState.DELIVERED),
-                    new Report(456,"Телефон", TaskState.DELIVERED),
-                    new Report(789,"Гомно", TaskState.NOT_DELIVERED)
-            };
+    TaskReport[] reports;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -89,8 +83,8 @@ public class ReportsActivity extends AppCompatActivity implements NavigationView
         });
 
         reportsList = (ListView) findViewById(R.id.reports_listview);
-        reportAdapter = new ReportAdapter(ReportsActivity.this, R.layout.reports_listview_row, reports);
-        reportsList.setAdapter(reportAdapter);
+        reportsListViewAdapter = new ReportsListViewAdapter(ReportsActivity.this, R.layout.reports_listview_row, reports);
+        reportsList.setAdapter(reportsListViewAdapter);
 
         reportsList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -114,12 +108,6 @@ public class ReportsActivity extends AppCompatActivity implements NavigationView
         Intent intent = new Intent(this, MapActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(intent);
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.reports, menu);
-        return true;
     }
 
     @Override
@@ -175,11 +163,8 @@ public class ReportsActivity extends AppCompatActivity implements NavigationView
             ReportsActivity.this.day = dayOfMonth;
             datePickerButton.setText(dayOfMonth + "/" + (monthOfYear + 1) + "/" + year);
 
-            reports = new Report[]{
-                    new Report(987,"Курваааа", TaskState.DELIVERED)
-            };
-            reportAdapter = new ReportAdapter(ReportsActivity.this, R.layout.reports_listview_row, reports);
-            reportsList.setAdapter(reportAdapter);
+            reportsListViewAdapter = new ReportsListViewAdapter(ReportsActivity.this, R.layout.reports_listview_row, reports);
+            reportsList.setAdapter(reportsListViewAdapter);
         }
     };
 }

@@ -32,9 +32,11 @@
             android:name=".Activities.ReportsActivity"
             android:label="@string/title_activity_reports"
             android:theme="@style/AppTheme.NoActionBar" />
+
         <service
             android:name=".Services.GPSTrackerService"
             android:process=":GPSTrackerService" />
+
         <activity
             android:name=".Activities.TasksActivity"
             android:label="@string/title_activity_tasks"
@@ -48,8 +50,10 @@
             android:name=".Activities.SettingsActivity"
             android:label="@string/title_activity_settings" />
         <activity android:name=".Activities.AboutActivity" />
-        <activity android:name=".Activities.WarehouseActivity"
-            android:label="Warehouse #"/>
+        <activity
+            android:name=".Activities.WarehouseActivity"
+            android:label="Warehouse #" />
+        <activity android:name=".Activities.CompleteTaskActivity"></activity>
     </application>
 
 </manifest>

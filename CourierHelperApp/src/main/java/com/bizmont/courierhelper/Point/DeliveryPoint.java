@@ -10,14 +10,14 @@ import org.osmdroid.bonuspack.overlays.Marker;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
 
-public class TargetPoint extends Point
+public class DeliveryPoint extends Point
 {
     private TaskState state;
     private double warehouseLatitude;
     private double warehouseLongitude;
 
-    public TargetPoint(String address, double latitude, double longitude, TaskState state, int ID,
-                       double warehouseLatitude, double warehouseLongitude)
+    public DeliveryPoint(String address, double latitude, double longitude, TaskState state, int ID,
+                         double warehouseLatitude, double warehouseLongitude)
     {
         this.address = address;
         this.latitude = latitude;
@@ -67,8 +67,8 @@ public class TargetPoint extends Point
 
         marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
         marker.setPosition(new GeoPoint(latitude,longitude));
-        marker.setTitle(R.string.task_number + Integer.toString(ID));
-        marker.setSubDescription(R.string.address + ": " + address);
+        marker.setTitle(context.getString(R.string.task_number) + Integer.toString(ID) + "State " + state);
+        marker.setSubDescription(context.getString(R.string.address) + ": " + address);
         return marker;
     }
 }

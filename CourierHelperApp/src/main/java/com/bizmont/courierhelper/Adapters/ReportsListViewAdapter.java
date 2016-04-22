@@ -9,16 +9,16 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
+import com.bizmont.courierhelper.Task.TaskReport;
 import com.bizmont.courierhelper.Task.TaskState;
 import com.bizmont.courierhelper.R;
-import com.bizmont.courierhelper.OtherStuff.Report;
 
-public class ReportAdapter extends ArrayAdapter {
+public class ReportsListViewAdapter extends ArrayAdapter {
     private Context context;
     private int layoutResourceId;
-    private Report[] reports = null;
+    private TaskReport[] reports = null;
 
-    public ReportAdapter(Context context, int layoutResourceId, Report[] reports)
+    public ReportsListViewAdapter(Context context, int layoutResourceId, TaskReport[] reports)
     {
         super(context,layoutResourceId,reports);
         this.layoutResourceId = layoutResourceId;
@@ -48,7 +48,7 @@ public class ReportAdapter extends ArrayAdapter {
             holder = (ReportHolder)row.getTag();
         }
 
-        Report report = reports[position];
+        TaskReport report = reports[position];
         holder.orderID.setText(String.valueOf(report.getId()));
         holder.orderState.setText(report.getState().toString());
         if(report.getState() == TaskState.DELIVERED)

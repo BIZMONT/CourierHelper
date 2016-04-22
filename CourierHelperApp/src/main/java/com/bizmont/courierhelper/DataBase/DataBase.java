@@ -8,7 +8,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
 import com.bizmont.courierhelper.Point.Point;
-import com.bizmont.courierhelper.Point.TargetPoint;
+import com.bizmont.courierhelper.Point.DeliveryPoint;
 import com.bizmont.courierhelper.Point.WarehousePoint;
 import com.bizmont.courierhelper.Task.Task;
 import com.bizmont.courierhelper.Task.TaskDetails;
@@ -22,8 +22,6 @@ import org.w3c.dom.NodeList;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -31,15 +29,20 @@ import javax.xml.parsers.DocumentBuilderFactory;
 
 public final class DataBase
 {
-    static final String LOG_TAG = "DBLog";
+    static final String LOG_TAG = "Data Base";
 
-    public static void initializeDatabase(Context context)
+    public static void initialize(Context context)
     {
         DatabaseManager.initializeDatabase(new DataBaseHelper(context));
+        Log.d(LOG_TAG, "Initialized");
     }
-
+    public static void close()
+    {
+        DatabaseManager.releaseDatabase();
+    }
     public static void addData(File file)
     {
+        //TODO: catch parsing exceptions
         try
         {
             DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
@@ -73,16 +76,16 @@ public final class DataBase
             Log.d(LOG_TAG,"Error in parsing file: " + e.getMessage());
         }
     }
-    public static void setTaskStatus(TaskState state, int TaskId)
+    public static void setTaskStatus(TaskState state, int taskId)
     {
         ContentValues contentValues = new ContentValues();
         contentValues.put("State",state.toString());
 
         SQLiteDatabase dataBase = DatabaseManager.getInstance().openDatabase();
-        dataBase.update(Tables.TASKS, contentValues, "id=?", new String[]{Integer.toString(TaskId)});
+        dataBase.update(Tables.TASKS, contentValues, "id=?", new String[]{Integer.toString(taskId)});
         DatabaseManager.getInstance().closeDatabase();
     }
-    public static ArrayList<Point> getPoints()
+    public static ArrayList<Point> getTargetPoints()
     {
         ArrayList<Point> points = new ArrayList<>();
         HashSet<Integer> warehouses = new HashSet<>();
@@ -103,7 +106,8 @@ public final class DataBase
                 Tables.WAREHOUSES + ".Longitude AS WarehouseLong, " +
                 Tables.WAREHOUSES + ".Radius " +
                 "FROM " + Tables.TASKS +
-                " LEFT OUTER JOIN " + Tables.WAREHOUSES + " ON " + Tables.TASKS + ".WarehouseID = " + Tables.WAREHOUSES + ".ID;";
+                " LEFT OUTER JOIN " + Tables.WAREHOUSES + " ON " + Tables.TASKS + ".WarehouseID = " + Tables.WAREHOUSES + ".ID" +
+                " WHERE " + Tables.TASKS + ".State = \"" + TaskState.ON_THE_WAY + "\" OR " + Tables.TASKS + ".State = \"" + TaskState.IN_WAREHOUSE +"\";";
 
         cursor = database.rawQuery(sqlCommand,null);
 
@@ -124,7 +128,7 @@ public final class DataBase
             do
             {
                 Log.d(LOG_TAG, cursor.getString(stateColIndex));
-                points.add(new TargetPoint(
+                points.add(new DeliveryPoint(
                         cursor.getString(taskAddressColIndex),
                         cursor.getDouble(taskLatColIndex),
                         cursor.getDouble(taskLongColIndex),
@@ -198,7 +202,7 @@ public final class DataBase
         DatabaseManager.getInstance().closeDatabase();
         return tasks;
     }
-    public static TaskDetails getTaskDetails(int id)
+    public static TaskDetails getTaskDetails(int taskId)
     {
         TaskDetails taskDetails = null;
 
@@ -223,14 +227,14 @@ public final class DataBase
         Cursor cursor;
         SQLiteDatabase database = DatabaseManager.getInstance().openDatabase();
 
-        cursor = database.rawQuery(sqlCommand,new String[]{Integer.toString(id)});
+        cursor = database.rawQuery(sqlCommand,new String[]{Integer.toString(taskId)});
 
         if (cursor.moveToFirst())
         {
             do
             {
                 taskDetails = new TaskDetails(
-                        id,
+                        taskId,
                         TaskState.Parse(cursor.getString(cursor.getColumnIndex("State"))),
                         cursor.getString(cursor.getColumnIndex("ReceiverAddress")),
                         cursor.getString(cursor.getColumnIndex("Content")),
@@ -250,6 +254,28 @@ public final class DataBase
         DatabaseManager.getInstance().closeDatabase();
 
         return taskDetails;
+    }
+    public static String getTaskCode(int taskId)
+    {
+        Cursor cursor;
+        String result;
+
+        SQLiteDatabase database = DatabaseManager.getInstance().openDatabase();
+
+        cursor = database.query(Tables.TASKS, null, "ID = ?",
+                new String[]{String.valueOf(taskId)}, null, null, null);
+
+        if(cursor.moveToFirst())
+        {
+            result = cursor.getString(cursor.getColumnIndex("Code"));
+        }
+        else
+        {
+            throw new RuntimeException();
+        }
+        DatabaseManager.getInstance().closeDatabase();
+
+        return result;
     }
 
     private static void PutReceiversToDB(NodeList receivers, SQLiteDatabase database)
@@ -330,6 +356,7 @@ public final class DataBase
                     contentValues.put("WarehouseID", Integer.parseInt(element.getAttribute("WarehouseID")));
                     contentValues.put("Date", element.getAttribute("Date"));
                     contentValues.put("Comment", element.getAttribute("Comment"));
+                    contentValues.put("Code", element.getAttribute("Code"));
 
                     database.insert(Tables.TASKS, null, contentValues);
                 }
@@ -383,7 +410,7 @@ class DatabaseManager
     public static synchronized DatabaseManager getInstance() {
         if (instance == null) {
             throw new IllegalStateException(DatabaseManager.class.getSimpleName() +
-                    " is not initialized, call initializeDatabase(..) method first.");
+                    " is not initialized, call initialize(..) method first.");
         }
         return instance;
     }
@@ -430,6 +457,7 @@ class DataBaseHelper extends SQLiteOpenHelper
                 "WarehouseID integer, " +
                 "Date text, " +
                 "Comment text, " +
+                "Code text, " +
                 "FOREIGN KEY (ReceiverID) REFERENCES " + Tables.RECEIVERS + "(ID), " +
                 "FOREIGN KEY (WarehouseID) REFERENCES " + Tables.WAREHOUSES + "(ID)," +
                 "FOREIGN KEY (SenderID) REFERENCES " + Tables.SENDERS + "(ID)" +

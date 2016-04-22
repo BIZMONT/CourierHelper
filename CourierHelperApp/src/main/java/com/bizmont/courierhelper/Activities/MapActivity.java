@@ -1,5 +1,4 @@
 package com.bizmont.courierhelper.Activities;
-
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -27,6 +26,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -51,12 +51,12 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
 
-
 public class MapActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener
 {
     private static final String LOG_TAG = "CourierHelperLog";
-    private static final int MAP_MIN_ZOM_LEVEL = 2;
+    private static final int MAP_MIN_ZOOM_LEVEL = 2;
     private static final int DEFAULT_ZOOM_LEVEL = 3;
+    private static final int MAP_MAX_ZOOM_LEVEL = 20;
 
     private long backPressedTime = 0;
     private boolean isTracked = false;
@@ -106,7 +106,7 @@ public class MapActivity extends AppCompatActivity implements NavigationView.OnN
         serviceIntent = new Intent(this,GPSTrackerService.class);
         startService(serviceIntent);
 
-        rotateSensorInit();
+        rotationSensorInit();
         broadcastReceiverInit();
 
         mapInit();
@@ -116,6 +116,7 @@ public class MapActivity extends AppCompatActivity implements NavigationView.OnN
         userMarkerOverlayInit();
         routeOverlayInit();
         locationInfoOverlay = (TextView) findViewById(R.id.map_info);
+
 
         Courier.addOnStatusChangedListener(new Courier.CourierListener() {
             @Override
@@ -135,6 +136,19 @@ public class MapActivity extends AppCompatActivity implements NavigationView.OnN
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
+        ImageButton showLocation = (ImageButton) findViewById(R.id.show_current_location);
+        assert showLocation != null;
+        showLocation.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (userLocationGeoPoint != null)
+                {
+                    mapController.setZoom(17);
+                    mapController.animateTo(userLocationGeoPoint);
+                }
+            }
+        });
+
         navigationView = (NavigationView) findViewById(R.id.nav_view);
         assert navigationView != null;
         navigationView.setNavigationItemSelectedListener(this);
@@ -150,7 +164,8 @@ public class MapActivity extends AppCompatActivity implements NavigationView.OnN
         map.setTileSource(TileSourceFactory.MAPNIK);
         map.setBuiltInZoomControls(true);
         map.setMultiTouchControls(true);
-        map.setMinZoomLevel(MAP_MIN_ZOM_LEVEL);
+        map.setMinZoomLevel(MAP_MIN_ZOOM_LEVEL);
+        map.setMaxZoomLevel(MAP_MAX_ZOOM_LEVEL);
         map.setBuiltInZoomControls(false);
 
         mapController = map.getController();
@@ -175,7 +190,7 @@ public class MapActivity extends AppCompatActivity implements NavigationView.OnN
                 boolean isRefresh = intent.getBooleanExtra("isRefresh", false);
                 if(isRefresh)
                 {
-                    ArrayList<Point> places = DataBase.getPoints();
+                    ArrayList<Point> places = DataBase.getTargetPoints();
                     refreshMapPoints(places);
                 }
 
@@ -186,7 +201,7 @@ public class MapActivity extends AppCompatActivity implements NavigationView.OnN
             }
         };
     }
-    private void rotateSensorInit()
+    private void rotationSensorInit()
     {
         SensorEventListener mSensorListener = new SensorEventListener() {
 
@@ -234,7 +249,7 @@ public class MapActivity extends AppCompatActivity implements NavigationView.OnN
         registerReceiver(broadcastReceiver, intentFilter);
 
         //Points refresh
-        ArrayList<Point> places = DataBase.getPoints();
+        ArrayList<Point> places = DataBase.getTargetPoints();
         refreshMapPoints(places);
 
         //Courier status refresh
@@ -312,6 +327,11 @@ public class MapActivity extends AppCompatActivity implements NavigationView.OnN
         else if(id == R.id.nav_settings)
         {
             Intent intent = new Intent(this, SettingsActivity.class);
+            startActivity(intent);
+        }
+        else if(id == R.id.nav_about)
+        {
+            Intent intent = new Intent(this, AboutActivity.class);
             startActivity(intent);
         }
 

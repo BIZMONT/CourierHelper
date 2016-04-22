@@ -16,7 +16,7 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.bizmont.courierhelper.Adapters.TasksAdapter;
+import com.bizmont.courierhelper.Adapters.TasksListViewAdapter;
 import com.bizmont.courierhelper.DataBase.DataBase;
 import com.bizmont.courierhelper.OtherStuff.Courier;
 import com.bizmont.courierhelper.OtherStuff.FileChooser;
@@ -32,7 +32,7 @@ public class TasksActivity extends AppCompatActivity
     private final String LOG_TAG = "TasksLog";
 
     ListView tasksList;
-    TasksAdapter tasksAdapter;
+    TasksListViewAdapter tasksListViewAdapter;
 
     NavigationView navigationView;
 
@@ -55,10 +55,10 @@ public class TasksActivity extends AppCompatActivity
                 DataBase.addData(file);
 
                 tasks = DataBase.getActiveTasks(0);
-                tasksAdapter = new TasksAdapter(TasksActivity.this, R.layout.tasks_listview_row, tasks);
-                tasksList.setAdapter(tasksAdapter);
+                tasksListViewAdapter = new TasksListViewAdapter(TasksActivity.this, R.layout.tasks_listview_row, tasks);
+                tasksList.setAdapter(tasksListViewAdapter);
 
-                Intent locationIntent = new Intent(GPSTrackerService.BROADCAST_SEND_ACTION);
+                Intent locationIntent = new Intent(GPSTrackerService.BROADCAST_RECEIVE_ACTION);
                 locationIntent.putExtra("Update points", true);
                 sendBroadcast(locationIntent);
             }
@@ -83,8 +83,8 @@ public class TasksActivity extends AppCompatActivity
         tasks = DataBase.getActiveTasks(0);
 
         tasksList = (ListView) findViewById(R.id.tasks_listview);
-        tasksAdapter = new TasksAdapter(TasksActivity.this, R.layout.tasks_listview_row, tasks);
-        tasksList.setAdapter(tasksAdapter);
+        tasksListViewAdapter = new TasksListViewAdapter(TasksActivity.this, R.layout.tasks_listview_row, tasks);
+        tasksList.setAdapter(tasksListViewAdapter);
 
         tasksList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -154,6 +154,12 @@ public class TasksActivity extends AppCompatActivity
             Intent intent = new Intent(this, SettingsActivity.class);
             startActivity(intent);
         }
+        else if(id == R.id.nav_about)
+        {
+            Intent intent = new Intent(this, AboutActivity.class);
+            startActivity(intent);
+        }
+
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         assert drawer != null;
         drawer.closeDrawer(GravityCompat.START);

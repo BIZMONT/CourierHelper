@@ -17,12 +17,12 @@ import com.bizmont.courierhelper.Services.GPSTrackerService;
 import com.bizmont.courierhelper.Task.Task;
 import com.bizmont.courierhelper.Task.TaskState;
 
-public class WarehouseAdapter extends ArrayAdapter {
+public class WarehouseTasksListViewAdapter extends ArrayAdapter {
     private Context context;
     private int layoutResourceId;
     private Task[] tasks = null;
 
-    public WarehouseAdapter(Context context, int layoutResourceId, Task[] tasks)
+    public WarehouseTasksListViewAdapter(Context context, int layoutResourceId, Task[] tasks)
     {
         super(context, layoutResourceId, tasks);
         this.layoutResourceId = layoutResourceId;
@@ -72,7 +72,7 @@ public class WarehouseAdapter extends ArrayAdapter {
                     DataBase.setTaskStatus(TaskState.IN_WAREHOUSE, checkBox.getId());
                 }
 
-                Intent locationIntent = new Intent(GPSTrackerService.BROADCAST_SEND_ACTION);
+                Intent locationIntent = new Intent(GPSTrackerService.BROADCAST_RECEIVE_ACTION);
                 locationIntent.putExtra("Update points", true);
                 context.sendBroadcast(locationIntent);
             }

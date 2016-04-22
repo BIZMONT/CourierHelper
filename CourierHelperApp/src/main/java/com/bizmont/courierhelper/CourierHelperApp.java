@@ -19,7 +19,7 @@ public class CourierHelperApp extends Application
         Courier.initializeInstance(getUsername(), CourierState.NOT_ACTIVE);
         super.onCreate();
 
-        DataBase.initializeDatabase(getApplicationContext());
+        DataBase.initialize(getApplicationContext());
 
     }
 
@@ -40,5 +40,12 @@ public class CourierHelperApp extends Application
                 return parts[0];
         }
         return getString(R.string.unknown_user);
+    }
+
+    @Override
+    public void onTerminate()
+    {
+        super.onTerminate();
+        DataBase.close();
     }
 }

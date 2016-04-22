@@ -16,12 +16,12 @@ import com.bizmont.courierhelper.Task.TaskState;
 import com.bizmont.courierhelper.Task.Task;
 import com.bizmont.courierhelper.R;
 
-public class TasksAdapter extends ArrayAdapter {
+public class TasksListViewAdapter extends ArrayAdapter {
     private Context context;
     private int layoutResourceId;
     private Task[] tasks = null;
 
-    public TasksAdapter(Context context, int layoutResourceId, Task[] tasks)
+    public TasksListViewAdapter(Context context, int layoutResourceId, Task[] tasks)
     {
         super(context, layoutResourceId, tasks);
         this.layoutResourceId = layoutResourceId;
