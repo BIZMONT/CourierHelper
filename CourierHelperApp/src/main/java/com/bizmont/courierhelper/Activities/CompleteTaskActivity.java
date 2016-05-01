@@ -1,6 +1,9 @@
 package com.bizmont.courierhelper.Activities;
 
+import android.content.ComponentName;
 import android.content.Intent;
+import android.content.ServiceConnection;
+import android.os.IBinder;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -13,7 +16,7 @@ import android.widget.Toast;
 import com.bizmont.courierhelper.DataBase.DataBase;
 import com.bizmont.courierhelper.OtherStuff.TaskPassDecoder;
 import com.bizmont.courierhelper.R;
-import com.bizmont.courierhelper.Services.GPSTrackerService;
+import com.bizmont.courierhelper.Services.GPSTracker;
 import com.bizmont.courierhelper.Task.TaskState;
 
 public class CompleteTaskActivity extends AppCompatActivity
@@ -28,6 +31,7 @@ public class CompleteTaskActivity extends AppCompatActivity
 
     int id;
     String code;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,7 +52,6 @@ public class CompleteTaskActivity extends AppCompatActivity
 
         code = DataBase.getTaskCode(id);
     }
-
     public void onCheckButtonClick(View view)
     {
         if(TaskPassDecoder.isMatches(String.valueOf(id), code, codeEdit.getText().toString()))
@@ -88,7 +91,7 @@ public class CompleteTaskActivity extends AppCompatActivity
         {
             DataBase.setTaskStatus(TaskState.NOT_DELIVERED, id);
         }
-        Intent intent = new Intent(GPSTrackerService.BROADCAST_RECEIVE_ACTION);
+        Intent intent = new Intent(GPSTracker.BROADCAST_RECEIVE_ACTION);
         intent.putExtra("Update points", true);
         onBackPressed();
     }

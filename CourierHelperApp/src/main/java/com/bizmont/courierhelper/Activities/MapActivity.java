@@ -31,12 +31,14 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bizmont.courierhelper.DataBase.DataBase;
+import com.bizmont.courierhelper.RouteBuilderTask;
 import com.bizmont.courierhelper.OtherStuff.Courier;
 import com.bizmont.courierhelper.Point.Point;
 import com.bizmont.courierhelper.R;
-import com.bizmont.courierhelper.Services.GPSTrackerService;
+import com.bizmont.courierhelper.Services.GPSTracker;
 
 import org.osmdroid.api.IMapController;
+import org.osmdroid.bonuspack.overlays.FolderOverlay;
 import org.osmdroid.bonuspack.overlays.Marker;
 import org.osmdroid.bonuspack.overlays.Polygon;
 import org.osmdroid.bonuspack.overlays.Polyline;
@@ -50,13 +52,14 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.ExecutionException;
 
 public class MapActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener
 {
     private static final String LOG_TAG = "CourierHelperLog";
     private static final int MAP_MIN_ZOOM_LEVEL = 2;
     private static final int DEFAULT_ZOOM_LEVEL = 3;
-    private static final int MAP_MAX_ZOOM_LEVEL = 20;
+    private static final int MAP_MAX_ZOOM_LEVEL = 18;
 
     private long backPressedTime = 0;
     private boolean isTracked = false;
@@ -68,7 +71,7 @@ public class MapActivity extends AppCompatActivity implements NavigationView.OnN
     private NavigationView navigationView;
     private Marker userLocationMarker;
     private Polygon accuracyRadius;
-    private ArrayList<Overlay> markersOverlays;
+    private FolderOverlay markersOverlays;
     private Polyline route;
     private ArrayList<GeoPoint> routePoints;
     private GeoPoint userLocationGeoPoint;
@@ -103,7 +106,7 @@ public class MapActivity extends AppCompatActivity implements NavigationView.OnN
 
             }
         };
-        serviceIntent = new Intent(this,GPSTrackerService.class);
+        serviceIntent = new Intent(this,GPSTracker.class);
         startService(serviceIntent);
 
         rotationSensorInit();
@@ -116,6 +119,7 @@ public class MapActivity extends AppCompatActivity implements NavigationView.OnN
         userMarkerOverlayInit();
         routeOverlayInit();
         locationInfoOverlay = (TextView) findViewById(R.id.map_info);
+        //roadInit();
 
 
         Courier.addOnStatusChangedListener(new Courier.CourierListener() {
@@ -234,6 +238,10 @@ public class MapActivity extends AppCompatActivity implements NavigationView.OnN
         routePoints = new ArrayList<>();
         map.getOverlays().add(route);
     }
+    private void roadInit()
+    {
+
+    }
 
     @Override
     protected void onResume()
@@ -245,7 +253,7 @@ public class MapActivity extends AppCompatActivity implements NavigationView.OnN
         if (!navigationView.getMenu().findItem(R.id.nav_map).isChecked()) {
             navigationView.getMenu().findItem(R.id.nav_map).setChecked(true);
         }
-        IntentFilter intentFilter = new IntentFilter(GPSTrackerService.BROADCAST_SEND_ACTION);
+        IntentFilter intentFilter = new IntentFilter(GPSTracker.BROADCAST_SEND_ACTION);
         registerReceiver(broadcastReceiver, intentFilter);
 
         //Points refresh
@@ -254,22 +262,6 @@ public class MapActivity extends AppCompatActivity implements NavigationView.OnN
 
         //Courier status refresh
         refreshCourierInfo();
-
-        Intent intent = getIntent();
-        int taskID = intent.getIntExtra("taskID", 0);
-        Log.d(LOG_TAG,"Showing task #" + taskID);
-        if(taskID !=0)
-        {
-            for(Overlay overlay : markersOverlays)
-            {
-                Marker marker = (Marker) overlay;
-                if(marker.getTitle().contains(Integer.toString(taskID)))
-                {
-                    mapController.setZoom(17);
-                    mapController.animateTo(marker.getPosition());
-                }
-            }
-        }
 
         Log.d(LOG_TAG, "MapActivity onResume");
     }
@@ -284,6 +276,29 @@ public class MapActivity extends AppCompatActivity implements NavigationView.OnN
         Log.d(LOG_TAG, "MapActivity onDestroy");
         unregisterReceiver(broadcastReceiver);
         super.onDestroy();
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        int taskID = intent.getIntExtra("taskID", 0);
+        Log.d(LOG_TAG,"Showing task #" + String.valueOf(taskID));
+        if(taskID != 0)
+        {
+            for(Overlay overlay : markersOverlays.getItems())
+            {
+                if(!(overlay instanceof Marker))
+                {
+                    continue;
+                }
+                Marker marker = (Marker) overlay;
+                if(marker.getTitle().contains(Integer.toString(taskID)))
+                {
+                    mapController.setZoom(17);
+                    mapController.animateTo(marker.getPosition());
+                }
+            }
+        }
     }
 
     @Override
@@ -347,10 +362,10 @@ public class MapActivity extends AppCompatActivity implements NavigationView.OnN
         if(userLocationGeoPoint == null)
         {
             map.getOverlays().add(userLocationMarker);
-            mapController.setZoom(17);
+            mapController.setZoom(MAP_MAX_ZOOM_LEVEL);
             mapController.animateTo(new GeoPoint(location));
         }
-        showPositionInfo(location);
+        //showPositionInfo(location);
 
         userLocationGeoPoint = new GeoPoint(location);
         userLocationMarker.setPosition(userLocationGeoPoint);
@@ -398,9 +413,9 @@ public class MapActivity extends AppCompatActivity implements NavigationView.OnN
     {
         if(markersOverlays != null)
         {
-            map.getOverlays().removeAll(markersOverlays);
+            map.getOverlays().remove(markersOverlays);
         }
-        markersOverlays = new ArrayList<>();
+        markersOverlays = new FolderOverlay(this);
         for(Point point : points)
         {
             Polygon radius = new Polygon(this);
@@ -413,7 +428,7 @@ public class MapActivity extends AppCompatActivity implements NavigationView.OnN
             markersOverlays.add(radius);
             markersOverlays.add(point.InitializeMarker(this,map));
         }
-        map.getOverlays().addAll(markersOverlays);
+        map.getOverlays().add(markersOverlays);
     }
     private void refreshCourierInfo()
     {

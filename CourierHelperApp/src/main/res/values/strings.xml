@@ -93,4 +93,8 @@
     <string name="open_warehouse">Open</string>
     <string name="get_tasks">Get tasks</string>
     <string name="wrong_code">Wrong code! Please, try again</string>
+    <string name="shipping_is_fulfilled">Shipping is fulfilled</string>
+    <string name="enter_code_here">Enter code here:</string>
+    <string name="check">Check</string>
+    <string name="code_accepted">Code accepted</string>
 </resources>

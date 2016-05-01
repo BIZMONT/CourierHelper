@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -65,11 +66,12 @@ public class TasksListViewAdapter extends ArrayAdapter {
         holder.taskName.setText(task.getAddress());
 
         ImageButton imageButton = (ImageButton)row.findViewById(R.id.task_row_show);
-        imageButton.setOnClickListener(new View.OnClickListener() {
+        imageButton.setOnClickListener(new ImageButtonOnClickListener(task.getId()) {
             @Override
-            public void onClick(View v) {
+            public void onClick(View v)
+            {
                 Intent intent = new Intent(context, MapActivity.class);
-                intent.putExtra("taskID", task.getId());
+                intent.putExtra("taskID",taskID);
                 intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 context.startActivity(intent);
             }
@@ -83,6 +85,20 @@ public class TasksListViewAdapter extends ArrayAdapter {
         TextView taskID;
         TextView taskName;
         TextView taskState;
+    }
+
+    private class ImageButtonOnClickListener implements View.OnClickListener
+    {
+        int taskID;
+        public ImageButtonOnClickListener(int taskID)
+        {
+            this.taskID = taskID;
+        }
+
+        @Override
+        public void onClick(View v)
+        {
+        }
     }
 }
 

@@ -20,7 +20,7 @@ import com.bizmont.courierhelper.Adapters.TasksListViewAdapter;
 import com.bizmont.courierhelper.DataBase.DataBase;
 import com.bizmont.courierhelper.OtherStuff.Courier;
 import com.bizmont.courierhelper.OtherStuff.FileChooser;
-import com.bizmont.courierhelper.Services.GPSTrackerService;
+import com.bizmont.courierhelper.Services.GPSTracker;
 import com.bizmont.courierhelper.Task.Task;
 import com.bizmont.courierhelper.R;
 
@@ -58,7 +58,7 @@ public class TasksActivity extends AppCompatActivity
                 tasksListViewAdapter = new TasksListViewAdapter(TasksActivity.this, R.layout.tasks_listview_row, tasks);
                 tasksList.setAdapter(tasksListViewAdapter);
 
-                Intent locationIntent = new Intent(GPSTrackerService.BROADCAST_RECEIVE_ACTION);
+                Intent locationIntent = new Intent(GPSTracker.BROADCAST_RECEIVE_ACTION);
                 locationIntent.putExtra("Update points", true);
                 sendBroadcast(locationIntent);
             }
@@ -90,7 +90,7 @@ public class TasksActivity extends AppCompatActivity
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Intent intent = new Intent(getApplicationContext(), TaskDetailsActivity.class);
-                intent.putExtra("id", tasks[position].getId());
+                intent.putExtra("taskID", tasks[position].getId());
                 Log.d(LOG_TAG, "id " + tasks[position].getId());
                 startActivity(intent);
             }

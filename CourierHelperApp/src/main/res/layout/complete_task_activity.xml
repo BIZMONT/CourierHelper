@@ -14,7 +14,7 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal">
         <TextView
-            android:text="Test"
+            android:text="@string/shipping_is_fulfilled"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"/>
@@ -31,29 +31,42 @@
         <LinearLayout
             android:id="@+id/complete_with_code"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
             <TextView
-                android:text="Enter code here:"
+                android:text="@string/enter_code_here"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:gravity="center_vertical"/>
             <EditText
                 android:id="@+id/complete_code"
                 android:inputType="number"
                 android:maxLength="8"
                 android:layout_width="100dp"
-                android:layout_height="wrap_content" />
-            <Button
-                android:id="@+id/button_check_password"
-                android:text="Check"
-                android:onClick="onCheckButtonClick"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:gravity="center_vertical"/>
+            <LinearLayout
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-            <ImageView
-                android:id="@+id/complete_correct"
-                android:src="@drawable/ic_complete"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:visibility="gone"/>
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:gravity="center_vertical"
+                android:orientation="vertical">
+                <Button
+                    android:id="@+id/button_check_password"
+                    android:text="@string/check"
+                    android:onClick="onCheckButtonClick"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+                <ImageView
+                    android:id="@+id/complete_correct"
+                    android:src="@drawable/ic_complete"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:visibility="gone"
+                    android:contentDescription="@string/code_accepted" />
+            </LinearLayout>
         </LinearLayout>
         <LinearLayout
             android:id="@+id/complete_with_reason"
@@ -71,7 +84,7 @@
     </RelativeLayout>
     <Button
         android:id="@+id/complete_button"
-        android:text="Complete"
+        android:text="@string/complete_task"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:onClick="onClickComplete"/>

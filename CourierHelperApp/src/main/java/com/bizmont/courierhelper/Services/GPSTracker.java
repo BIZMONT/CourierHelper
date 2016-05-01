@@ -31,16 +31,20 @@ import com.bizmont.courierhelper.Point.DeliveryPoint;
 import com.bizmont.courierhelper.Point.Point;
 import com.bizmont.courierhelper.Point.WarehousePoint;
 import com.bizmont.courierhelper.R;
+import com.bizmont.courierhelper.RouteBuilderTask;
 import com.bizmont.courierhelper.Task.TaskState;
 
+import org.osmdroid.bonuspack.overlays.Polyline;
+import org.osmdroid.bonuspack.routing.Road;
 import org.osmdroid.util.GeoPoint;
 
 import java.util.ArrayList;
+import java.util.concurrent.ExecutionException;
 
-public class GPSTrackerService extends Service implements LocationListener
+public class GPSTracker extends Service implements LocationListener
 {
     //constants
-    public static final String BROADCAST_SEND_ACTION = "com.bizmont.courierhelper.cordinates"; //filter to map activity
+    public static final String BROADCAST_SEND_ACTION = "com.bizmont.courierhelper.coordinates"; //filter to map activity
     public static final String BROADCAST_RECEIVE_ACTION = "com.bizmont.courierhelper.actions"; //filter to service
 
     public static final int LOCATION_REFRESH_RATE = 0; //seconds
@@ -64,7 +68,6 @@ public class GPSTrackerService extends Service implements LocationListener
     private boolean isLocationDisabled;
 
     NotificationCompat.Builder nearPointNotify;
-    NotificationCompat.Builder locationDisabledNotify;
     NotificationManager notificationManager;
 
     ArrayList<Point> points;
@@ -83,7 +86,7 @@ public class GPSTrackerService extends Service implements LocationListener
             {
                 if(intent.getBooleanExtra("Update points",false))
                 {
-                    Log.d(LOG_TAG, "Service has update points");
+                    Log.d(LOG_TAG, "Point updated");
                     points = DataBase.getTargetPoints();
                     checkPoints(lastFix);
                 }
@@ -94,28 +97,8 @@ public class GPSTrackerService extends Service implements LocationListener
 
         notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 
-        //Location disabled notification
-        locationDisabledNotify = new NotificationCompat.Builder(this)
-                .setSmallIcon(R.drawable.ic_location_off_notify)
-                .setContentTitle(getString(R.string.location_disabled))
-                .setContentText(getString(R.string.location_disabled_message));
-        Intent resultIntent = new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-        PendingIntent resultPendingIntent =
-                PendingIntent.getActivity(
-                        this,
-                        0,
-                        resultIntent,
-                        PendingIntent.FLAG_UPDATE_CURRENT
-                );
-        locationDisabledNotify.setContentIntent(resultPendingIntent);
-
         //Service status notification
-        NotificationCompat.Builder serviceStatusNotify = new NotificationCompat.Builder(this)
-                .setSmallIcon(R.drawable.ic_service_active_notify)
-                .setContentTitle("Courier Helper")
-                .setContentText(getString(R.string.service_work))
-                .setOngoing(true);
-        notificationManager.notify(STATE_NOTIFICATION_ID, serviceStatusNotify.build());
+        showServiceStatusNotify();
 
         //Location manager
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
@@ -123,7 +106,7 @@ public class GPSTrackerService extends Service implements LocationListener
             locationManager.addNmeaListener(new GpsStatus.NmeaListener() {
                 @Override
                 public void onNmeaReceived(long timestamp, String nmea) {
-                    GPSTrackerService.this.nmea = nmea;
+                    GPSTracker.this.nmea = nmea;
                 }
             });
             locationManager.addGpsStatusListener(new GpsStatus.Listener() {
@@ -156,9 +139,9 @@ public class GPSTrackerService extends Service implements LocationListener
             locationManager.removeUpdates(this);
         }
 
-        notificationManager.cancel(LOCATION_ALERT_NOTIFICATION_ID);
-        notificationManager.cancel(STATE_NOTIFICATION_ID);
-        notificationManager.cancel(POINT_NOTIFICATION_ID);
+        hideLocationAlertNotify();
+        hideServiceStateNotify();
+        hideOnPointNotify();
 
         unregisterReceiver(broadcastReceiver);
 
@@ -174,6 +157,14 @@ public class GPSTrackerService extends Service implements LocationListener
         sendLocationInfoBroadcast(lastFix, getSatellitesInUse());
         checkPoints(lastFix);
         return new Binder();
+    }
+    @Override
+    public void onRebind(Intent intent)
+    {
+        Log.d(LOG_TAG, "Service onRebind");
+        super.onRebind(intent);
+        sendLocationInfoBroadcast(lastFix, getSatellitesInUse());
+        checkPoints(lastFix);
     }
     @Override
     public boolean onUnbind(Intent intent)
@@ -198,6 +189,7 @@ public class GPSTrackerService extends Service implements LocationListener
     @Override
     public void onProviderEnabled(String provider)
     {
+        hideLocationAlertNotify();
         isLocationDisabled = false;
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED &&
                 ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
@@ -217,7 +209,7 @@ public class GPSTrackerService extends Service implements LocationListener
             if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) &&
                     !locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
                 isLocationDisabled = true;
-                notificationManager.notify(LOCATION_ALERT_NOTIFICATION_ID, locationDisabledNotify.build());
+                showLocationAlertNotify();
             }
         }
     }
@@ -267,7 +259,7 @@ public class GPSTrackerService extends Service implements LocationListener
         if (location.getAccuracy() < LOCATION_MIN_ACCURACY &&
                 lastFix.distanceTo(location) > 7)
         {
-            if(location.getProvider() == "gps" &&  satellitesInUse < LOCATION_MIN_SATELLITES)
+            if(location.getProvider().equals("gps") &&  satellitesInUse < LOCATION_MIN_SATELLITES)
             {
                 return false;
             }
@@ -280,8 +272,6 @@ public class GPSTrackerService extends Service implements LocationListener
     }
     private void checkPoints(Location location)
     {
-        Intent resultIntent;
-        PendingIntent resultPendingIntent;
         GeoPoint lastFixGP = new GeoPoint(this.lastFix);
         GeoPoint currentGP;
 
@@ -299,42 +289,120 @@ public class GPSTrackerService extends Service implements LocationListener
             {
                 if(point.getClass() == WarehousePoint.class)
                 {
-                    Courier.getInstance().setState(CourierState.IN_WAREHOUSE);
-                    Log.d(LOG_TAG,"Service change courier state to " + Courier.getInstance().getState());
-
-                    resultIntent = new Intent(this, WarehouseActivity.class);
-                    resultIntent.putExtra("ID", point.getID());
-                    resultPendingIntent =
-                            PendingIntent.getActivity(this, (int) System.currentTimeMillis(), resultIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-
-                    nearPointNotify = new NotificationCompat.Builder(this)
-                            .setSmallIcon(R.drawable.ic_warehouse_notify)
-                            .setContentTitle("Courier Helper")
-                            .setContentText(getString(R.string.near_warehouse) + point.getID())
-                            .addAction(R.drawable.ic_warehouse,getString(R.string.open_warehouse) ,resultPendingIntent);
-
-                    notificationManager.notify(POINT_NOTIFICATION_ID, nearPointNotify.build());
+                    showWarehouseNotify(point);
                 }
                 else if(((DeliveryPoint)point).getState() != TaskState.IN_WAREHOUSE)
                 {
-                    Courier.getInstance().setState(CourierState.AT_THE_POINT);
-                    Log.d(LOG_TAG,"Service change courier state to " + Courier.getInstance().getState());
-
-                    resultIntent = new Intent(this, CompleteTaskActivity.class);
-                    resultIntent.putExtra("ID", point.getID());
-                    resultPendingIntent =
-                            PendingIntent.getActivity(this, (int) System.currentTimeMillis(), resultIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-
-
-                    nearPointNotify = new NotificationCompat.Builder(this)
-                            .setSmallIcon(R.drawable.ic_task_notify)
-                            .setContentTitle("Courier Helper")
-                            .setContentText(getString(R.string.near_target) + point.getID())
-                    .addAction(R.drawable.ic_task_blue, getString(R.string.complete_task), resultPendingIntent);
-
-                    notificationManager.notify(POINT_NOTIFICATION_ID, nearPointNotify.build());
+                    showTargetNotify(point);
                 }
+                return;
             }
+        }
+        hideOnPointNotify();
+    }
+
+    private void showServiceStatusNotify()
+    {
+        NotificationCompat.Builder serviceStatusNotify = new NotificationCompat.Builder(this)
+                .setSmallIcon(R.drawable.ic_service_active_notify)
+                .setContentTitle("Courier Helper")
+                .setContentText(getString(R.string.service_work))
+                .setOngoing(true);
+        notificationManager.notify(STATE_NOTIFICATION_ID, serviceStatusNotify.build());
+    }
+    private void showWarehouseNotify(Point point)
+    {
+        Intent resultIntent;
+        PendingIntent resultPendingIntent;
+
+        Courier.getInstance().setState(CourierState.IN_WAREHOUSE);
+        Log.d(LOG_TAG,"Service change courier state to " + Courier.getInstance().getState());
+
+        resultIntent = new Intent(this, WarehouseActivity.class);
+        resultIntent.putExtra("ID", point.getID());
+        resultPendingIntent =
+                PendingIntent.getActivity(this, (int) System.currentTimeMillis(), resultIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        nearPointNotify = new NotificationCompat.Builder(this)
+                .setSmallIcon(R.drawable.ic_warehouse_notify)
+                .setContentTitle("Courier Helper")
+                .setContentText(getString(R.string.near_warehouse) + point.getID())
+                .addAction(R.drawable.ic_warehouse,getString(R.string.open_warehouse) ,resultPendingIntent);
+
+        notificationManager.notify(POINT_NOTIFICATION_ID, nearPointNotify.build());
+    }
+    private void showTargetNotify(Point point)
+    {
+        Intent resultIntent;
+        PendingIntent resultPendingIntent;
+
+        Courier.getInstance().setState(CourierState.AT_THE_POINT);
+        Log.d(LOG_TAG,"Service change courier state to " + Courier.getInstance().getState());
+
+        resultIntent = new Intent(this, CompleteTaskActivity.class);
+        resultIntent.putExtra("ID", point.getID());
+        resultPendingIntent =
+                PendingIntent.getActivity(this, (int) System.currentTimeMillis(), resultIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+
+        nearPointNotify = new NotificationCompat.Builder(this)
+                .setSmallIcon(R.drawable.ic_task_notify)
+                .setContentTitle("Courier Helper")
+                .setContentText(getString(R.string.near_target) + point.getID())
+                .addAction(R.drawable.ic_task_blue, getString(R.string.complete_task), resultPendingIntent);
+
+        notificationManager.notify(POINT_NOTIFICATION_ID, nearPointNotify.build());
+    }
+    private void showLocationAlertNotify()
+    {
+        NotificationCompat.Builder locationDisabledNotify = new NotificationCompat.Builder(this)
+                .setSmallIcon(R.drawable.ic_location_off_notify)
+                .setContentTitle(getString(R.string.location_disabled))
+                .setContentText(getString(R.string.location_disabled_message));
+        Intent resultIntent = new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+        PendingIntent resultPendingIntent =
+                PendingIntent.getActivity(
+                        this,
+                        0,
+                        resultIntent,
+                        PendingIntent.FLAG_UPDATE_CURRENT
+                );
+        locationDisabledNotify.setContentIntent(resultPendingIntent);
+        notificationManager.notify(LOCATION_ALERT_NOTIFICATION_ID, locationDisabledNotify.build());
+    }
+
+    private void hideLocationAlertNotify()
+    {
+        notificationManager.cancel(LOCATION_ALERT_NOTIFICATION_ID);
+    }
+    private void hideServiceStateNotify()
+    {
+        notificationManager.cancel(STATE_NOTIFICATION_ID);
+    }
+    private void hideOnPointNotify()
+    {
+        notificationManager.cancel(POINT_NOTIFICATION_ID);
+    }
+
+    private void buildOptimalPath()
+    {
+        ArrayList<GeoPoint> routePoints = new ArrayList<>();
+        routePoints.add(new GeoPoint(lastFix));
+        for (Point point: points)
+        {
+            if(point instanceof DeliveryPoint && ((DeliveryPoint)point).getState() == TaskState.ON_THE_WAY)
+                routePoints.add(new GeoPoint(point.getLatitude(),point.getLongitude()));
+        }
+        routePoints.add(new GeoPoint(lastFix));
+
+        Road road = null;
+        RouteBuilderTask tr = new RouteBuilderTask();
+        tr.execute(routePoints);
+        try
+        {
+            road = tr.get();
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
         }
     }
 }

@@ -34,7 +34,7 @@
             android:theme="@style/AppTheme.NoActionBar" />
 
         <service
-            android:name=".Services.GPSTrackerService"
+            android:name=".Services.GPSTracker"
             android:process=":GPSTrackerService" />
 
         <activity
