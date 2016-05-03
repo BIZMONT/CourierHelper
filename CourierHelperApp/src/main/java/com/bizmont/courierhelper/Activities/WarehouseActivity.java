@@ -9,7 +9,9 @@ import android.widget.ListView;
 
 import com.bizmont.courierhelper.Adapters.WarehouseTasksListViewAdapter;
 import com.bizmont.courierhelper.DataBase.DataBase;
+import com.bizmont.courierhelper.OtherStuff.ExtrasNames;
 import com.bizmont.courierhelper.R;
+import com.bizmont.courierhelper.Services.GPSTracker;
 import com.bizmont.courierhelper.Task.Task;
 
 public class WarehouseActivity extends AppCompatActivity
@@ -17,12 +19,13 @@ public class WarehouseActivity extends AppCompatActivity
     ListView tasksList;
     Task[] tasks;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.warehouse_activity);
         Intent intent = getIntent();
-        int id = intent.getIntExtra("ID",0);
+        int id = intent.getIntExtra(ExtrasNames.WAREHOUSE_ID, 0);
         setTitle("Warehouse #" + id);
 
         tasks = DataBase.getActiveTasks(id);
@@ -35,16 +38,20 @@ public class WarehouseActivity extends AppCompatActivity
             public void onItemClick(AdapterView<?> parent, View view, int position, long id)
             {
                 Intent intent = new Intent(getApplicationContext(), TaskDetailsActivity.class);
-                intent.putExtra("id", tasks[position].getId());
+                intent.putExtra(ExtrasNames.TASK_ID, tasks[position].getId());
                 startActivity(intent);
             }
         });
     }
 
     @Override
-    protected void onPause()
+    protected void onStop()
     {
+        super.onStop();
 
-        super.onPause();
+        Intent intent = new Intent(GPSTracker.BROADCAST_RECEIVE_ACTION);
+        intent.putExtra(ExtrasNames.IS_CREATE_ROUTE, true);
+        intent.putExtra(ExtrasNames.IS_UPDATE_POINTS, true);
+        sendBroadcast(intent);
     }
 }

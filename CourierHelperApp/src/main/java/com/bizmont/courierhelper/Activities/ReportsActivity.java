@@ -10,7 +10,6 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
@@ -82,16 +81,18 @@ public class ReportsActivity extends AppCompatActivity implements NavigationView
             }
         });
 
-        reportsList = (ListView) findViewById(R.id.reports_listview);
-        reportsListViewAdapter = new ReportsListViewAdapter(ReportsActivity.this, R.layout.reports_listview_row, reports);
-        reportsList.setAdapter(reportsListViewAdapter);
+        if(reports != null) {
+            reportsList = (ListView) findViewById(R.id.reports_listview);
+            reportsListViewAdapter = new ReportsListViewAdapter(ReportsActivity.this, R.layout.reports_listview_row, reports);
+            reportsList.setAdapter(reportsListViewAdapter);
 
-        reportsList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Toast.makeText(ReportsActivity.this,"Hello",Toast.LENGTH_SHORT).show();
-            }
-        });
+            reportsList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    Toast.makeText(ReportsActivity.this, "Hello", Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
     }
 
     @Override

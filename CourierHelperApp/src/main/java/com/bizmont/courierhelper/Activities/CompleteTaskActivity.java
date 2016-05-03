@@ -1,9 +1,6 @@
 package com.bizmont.courierhelper.Activities;
 
-import android.content.ComponentName;
 import android.content.Intent;
-import android.content.ServiceConnection;
-import android.os.IBinder;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -14,6 +11,7 @@ import android.widget.Switch;
 import android.widget.Toast;
 
 import com.bizmont.courierhelper.DataBase.DataBase;
+import com.bizmont.courierhelper.OtherStuff.ExtrasNames;
 import com.bizmont.courierhelper.OtherStuff.TaskPassDecoder;
 import com.bizmont.courierhelper.R;
 import com.bizmont.courierhelper.Services.GPSTracker;
@@ -41,7 +39,7 @@ public class CompleteTaskActivity extends AppCompatActivity
         isComplete = false;
 
         Intent intent = getIntent();
-        id = intent.getIntExtra("ID",0);
+        id = intent.getIntExtra(ExtrasNames.TASK_ID,0);
         setTitle("Complete task #" + id);
 
         codeEdit = (EditText)findViewById(R.id.complete_code);
@@ -85,14 +83,14 @@ public class CompleteTaskActivity extends AppCompatActivity
     {
         if(isComplete)
         {
-            DataBase.setTaskStatus(TaskState.DELIVERED, id);
+            DataBase.setTaskState(TaskState.DELIVERED, id);
         }
         else
         {
-            DataBase.setTaskStatus(TaskState.NOT_DELIVERED, id);
+            DataBase.setTaskState(TaskState.NOT_DELIVERED, id);
         }
         Intent intent = new Intent(GPSTracker.BROADCAST_RECEIVE_ACTION);
-        intent.putExtra("Update points", true);
+        intent.putExtra(ExtrasNames.IS_UPDATE_POINTS, true);
         onBackPressed();
     }
 

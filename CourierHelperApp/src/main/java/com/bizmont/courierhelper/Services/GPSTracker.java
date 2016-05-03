@@ -27,14 +27,14 @@ import com.bizmont.courierhelper.Activities.WarehouseActivity;
 import com.bizmont.courierhelper.DataBase.DataBase;
 import com.bizmont.courierhelper.OtherStuff.Courier;
 import com.bizmont.courierhelper.OtherStuff.CourierState;
+import com.bizmont.courierhelper.OtherStuff.ExtrasNames;
 import com.bizmont.courierhelper.Point.DeliveryPoint;
 import com.bizmont.courierhelper.Point.Point;
 import com.bizmont.courierhelper.Point.WarehousePoint;
 import com.bizmont.courierhelper.R;
-import com.bizmont.courierhelper.RouteBuilderTask;
+import com.bizmont.courierhelper.PathBuilderTask;
 import com.bizmont.courierhelper.Task.TaskState;
 
-import org.osmdroid.bonuspack.overlays.Polyline;
 import org.osmdroid.bonuspack.routing.Road;
 import org.osmdroid.util.GeoPoint;
 
@@ -71,6 +71,7 @@ public class GPSTracker extends Service implements LocationListener
     NotificationManager notificationManager;
 
     ArrayList<Point> points;
+    ArrayList<Road> path;
 
     BroadcastReceiver broadcastReceiver;
 
@@ -84,11 +85,16 @@ public class GPSTracker extends Service implements LocationListener
             @Override
             public void onReceive(Context context, Intent intent)
             {
-                if(intent.getBooleanExtra("Update points",false))
+                if(intent.getBooleanExtra(ExtrasNames.IS_UPDATE_POINTS,false))
                 {
-                    Log.d(LOG_TAG, "Point updated");
                     points = DataBase.getTargetPoints();
-                    checkPoints(lastFix);
+                    Log.d(LOG_TAG, "Point updated");
+                }
+                if (intent.getBooleanExtra(ExtrasNames.IS_CREATE_ROUTE,false))
+                {
+                    path = buildOptimalPath();
+                    Log.d(LOG_TAG, "Route created");
+                    sendPathBroadcast();
                 }
             }
         };
@@ -154,8 +160,14 @@ public class GPSTracker extends Service implements LocationListener
     public IBinder onBind(Intent arg0)
     {
         Log.d(LOG_TAG, "Service onBind");
-        sendLocationInfoBroadcast(lastFix, getSatellitesInUse());
+        sendLocationBroadcast(lastFix, getSatellitesInUse());
         checkPoints(lastFix);
+
+        if (path !=null)
+        {
+            sendPathBroadcast();
+        }
+
         return new Binder();
     }
     @Override
@@ -163,8 +175,13 @@ public class GPSTracker extends Service implements LocationListener
     {
         Log.d(LOG_TAG, "Service onRebind");
         super.onRebind(intent);
-        sendLocationInfoBroadcast(lastFix, getSatellitesInUse());
+        sendLocationBroadcast(lastFix, getSatellitesInUse());
         checkPoints(lastFix);
+
+        if (path !=null)
+        {
+            sendPathBroadcast();
+        }
     }
     @Override
     public boolean onUnbind(Intent intent)
@@ -241,18 +258,28 @@ public class GPSTracker extends Service implements LocationListener
             checkPoints(location);
         }
     }
-    private void sendLocationInfoBroadcast(Location location, int satellitesInUse)
+    private void sendLocationBroadcast(Location location, int satellitesInUse)
     {
         Intent locationIntent = new Intent(BROADCAST_SEND_ACTION);
 
-        locationIntent.putExtra("location", location);
-        locationIntent.putExtra("nmea", nmea);
-        locationIntent.putExtra("satellitesInUse", satellitesInUse);
-        locationIntent.putExtra("isTracked",isTracked);
+        locationIntent.putExtra(ExtrasNames.IS_LOCATION, true);
+        locationIntent.putExtra(ExtrasNames.LOCATION, location);
+        locationIntent.putExtra(ExtrasNames.NMEA, nmea);
+        locationIntent.putExtra(ExtrasNames.SATELLITES_IN_USE, satellitesInUse);
+        locationIntent.putExtra(ExtrasNames.IS_TRACK,isTracked);
 
         sendBroadcast(locationIntent);
         Log.d(LOG_TAG, "Location sent (" + location.getLatitude() + " " + location.getLongitude() + ")");
     }
+    private void sendPathBroadcast()
+    {
+        Intent pathIntent = new Intent(BROADCAST_SEND_ACTION);
+        pathIntent.putExtra(ExtrasNames.IS_PATH, true);
+        pathIntent.putExtra(ExtrasNames.PATH, path);
+        sendBroadcast(pathIntent);
+        Log.d(LOG_TAG, "Path sent");
+    }
+
     private boolean isLocationValid(Location location)
     {
         int satellitesInUse = getSatellitesInUse();
@@ -265,7 +292,7 @@ public class GPSTracker extends Service implements LocationListener
             }
             lastFix = location;
             Log.d(LOG_TAG,"Last fix changed to" + lastFix.getLatitude() + " " + lastFix.getLongitude());
-            sendLocationInfoBroadcast(location, satellitesInUse);
+            sendLocationBroadcast(location, satellitesInUse);
             return true;
         }
         return false;
@@ -319,16 +346,16 @@ public class GPSTracker extends Service implements LocationListener
         Log.d(LOG_TAG,"Service change courier state to " + Courier.getInstance().getState());
 
         resultIntent = new Intent(this, WarehouseActivity.class);
-        resultIntent.putExtra("ID", point.getID());
+        resultIntent.putExtra(ExtrasNames.WAREHOUSE_ID, point.getID());
+        resultIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         resultPendingIntent =
                 PendingIntent.getActivity(this, (int) System.currentTimeMillis(), resultIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         nearPointNotify = new NotificationCompat.Builder(this)
                 .setSmallIcon(R.drawable.ic_warehouse_notify)
                 .setContentTitle("Courier Helper")
-                .setContentText(getString(R.string.near_warehouse) + point.getID())
-                .addAction(R.drawable.ic_warehouse,getString(R.string.open_warehouse) ,resultPendingIntent);
-
+                .setContentText(getString(R.string.near_warehouse) + point.getID());
+        nearPointNotify.setContentIntent(resultPendingIntent);
         notificationManager.notify(POINT_NOTIFICATION_ID, nearPointNotify.build());
     }
     private void showTargetNotify(Point point)
@@ -340,7 +367,8 @@ public class GPSTracker extends Service implements LocationListener
         Log.d(LOG_TAG,"Service change courier state to " + Courier.getInstance().getState());
 
         resultIntent = new Intent(this, CompleteTaskActivity.class);
-        resultIntent.putExtra("ID", point.getID());
+        resultIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        resultIntent.putExtra(ExtrasNames.TASK_ID, point.getID());
         resultPendingIntent =
                 PendingIntent.getActivity(this, (int) System.currentTimeMillis(), resultIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
@@ -348,9 +376,8 @@ public class GPSTracker extends Service implements LocationListener
         nearPointNotify = new NotificationCompat.Builder(this)
                 .setSmallIcon(R.drawable.ic_task_notify)
                 .setContentTitle("Courier Helper")
-                .setContentText(getString(R.string.near_target) + point.getID())
-                .addAction(R.drawable.ic_task_blue, getString(R.string.complete_task), resultPendingIntent);
-
+                .setContentText(getString(R.string.near_target) + point.getID());
+        nearPointNotify.setContentIntent(resultPendingIntent);
         notificationManager.notify(POINT_NOTIFICATION_ID, nearPointNotify.build());
     }
     private void showLocationAlertNotify()
@@ -384,25 +411,28 @@ public class GPSTracker extends Service implements LocationListener
         notificationManager.cancel(POINT_NOTIFICATION_ID);
     }
 
-    private void buildOptimalPath()
+    private ArrayList<Road> buildOptimalPath()
     {
         ArrayList<GeoPoint> routePoints = new ArrayList<>();
         routePoints.add(new GeoPoint(lastFix));
         for (Point point: points)
         {
             if(point instanceof DeliveryPoint && ((DeliveryPoint)point).getState() == TaskState.ON_THE_WAY)
-                routePoints.add(new GeoPoint(point.getLatitude(),point.getLongitude()));
+            {
+                routePoints.add(new GeoPoint(point.getLatitude(), point.getLongitude()));
+            }
         }
-        routePoints.add(new GeoPoint(lastFix));
 
-        Road road = null;
-        RouteBuilderTask tr = new RouteBuilderTask();
+        ArrayList<Road> roads = null;
+        PathBuilderTask tr = new PathBuilderTask();
         tr.execute(routePoints);
         try
         {
-            road = tr.get();
-        } catch (InterruptedException | ExecutionException e) {
+            roads = tr.get();
+        } catch (InterruptedException | ExecutionException e)
+        {
             e.printStackTrace();
         }
+        return roads;
     }
 }

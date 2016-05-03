@@ -21,7 +21,6 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -31,7 +30,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bizmont.courierhelper.DataBase.DataBase;
-import com.bizmont.courierhelper.RouteBuilderTask;
+import com.bizmont.courierhelper.OtherStuff.ExtrasNames;
 import com.bizmont.courierhelper.OtherStuff.Courier;
 import com.bizmont.courierhelper.Point.Point;
 import com.bizmont.courierhelper.R;
@@ -42,6 +41,8 @@ import org.osmdroid.bonuspack.overlays.FolderOverlay;
 import org.osmdroid.bonuspack.overlays.Marker;
 import org.osmdroid.bonuspack.overlays.Polygon;
 import org.osmdroid.bonuspack.overlays.Polyline;
+import org.osmdroid.bonuspack.routing.Road;
+import org.osmdroid.bonuspack.routing.RoadManager;
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
@@ -52,7 +53,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
-import java.util.concurrent.ExecutionException;
 
 public class MapActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener
 {
@@ -76,6 +76,7 @@ public class MapActivity extends AppCompatActivity implements NavigationView.OnN
     private ArrayList<GeoPoint> routePoints;
     private GeoPoint userLocationGeoPoint;
     private TextView locationInfoOverlay;
+    private ArrayList<Road> roads;
 
     //location info
     private int satellitesInUse;
@@ -119,7 +120,6 @@ public class MapActivity extends AppCompatActivity implements NavigationView.OnN
         userMarkerOverlayInit();
         routeOverlayInit();
         locationInfoOverlay = (TextView) findViewById(R.id.map_info);
-        //roadInit();
 
 
         Courier.addOnStatusChangedListener(new Courier.CourierListener() {
@@ -131,11 +131,9 @@ public class MapActivity extends AppCompatActivity implements NavigationView.OnN
         });
 
         //Interface items
-        Toolbar toolbar = (Toolbar) findViewById(R.id.map_toolbar);
-        setSupportActionBar(toolbar);
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, null, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         assert drawer != null;
         drawer.addDrawerListener(toggle);
         toggle.syncState();
@@ -186,21 +184,40 @@ public class MapActivity extends AppCompatActivity implements NavigationView.OnN
     {
         broadcastReceiver = new BroadcastReceiver() {
             public void onReceive(Context context, Intent intent) {
-                Location location = intent.getParcelableExtra("location");
-
-                nmeaString = intent.getStringExtra("nmea");
-                satellitesInUse = intent.getIntExtra("satellitesInUse", 0);
-                isTracked = intent.getBooleanExtra("isTracked", false);
-                boolean isRefresh = intent.getBooleanExtra("isRefresh", false);
-                if(isRefresh)
+                if(intent.getBooleanExtra(ExtrasNames.IS_LOCATION,false))
                 {
-                    ArrayList<Point> places = DataBase.getTargetPoints();
-                    refreshMapPoints(places);
-                }
+                    Location location = intent.getParcelableExtra(ExtrasNames.LOCATION);
 
-                Log.d(LOG_TAG, "locationReceived");
-                if(location.getLatitude() != 0 && location.getLongitude() !=0) {
-                    showMarkerOnMap(location);
+                    nmeaString = intent.getStringExtra(ExtrasNames.NMEA);
+                    satellitesInUse = intent.getIntExtra(ExtrasNames.SATELLITES_IN_USE, 0);
+                    isTracked = intent.getBooleanExtra(ExtrasNames.IS_TRACK, false);
+                    boolean isRefresh = intent.getBooleanExtra(ExtrasNames.IS_REFRESH, false);
+                    if(isRefresh)
+                    {
+                        ArrayList<Point> places = DataBase.getTargetPoints();
+                        refreshMapPoints(places);
+                    }
+
+                    Log.d(LOG_TAG, "locationReceived");
+                    if(location.getLatitude() != 0 && location.getLongitude() !=0) {
+                        showMarkerOnMap(location);
+                    }
+                }
+                if(intent.getBooleanExtra(ExtrasNames.IS_PATH,false))
+                {
+                    roads = intent.getParcelableArrayListExtra(ExtrasNames.PATH);
+                    if(roads !=null)
+                    {
+                        FolderOverlay roadsOverlay = new FolderOverlay(getApplicationContext());
+                        for (Road road:roads)
+                        {
+                            Polyline pathPart = RoadManager.buildRoadOverlay(road, getApplicationContext());
+                            pathPart.setColor(Color.GRAY);
+                            roadsOverlay.add(pathPart);
+                        }
+                        map.getOverlays().add(roadsOverlay);
+                        map.invalidate();
+                    }
                 }
             }
         };
@@ -237,10 +254,6 @@ public class MapActivity extends AppCompatActivity implements NavigationView.OnN
         route = new Polyline(this);
         routePoints = new ArrayList<>();
         map.getOverlays().add(route);
-    }
-    private void roadInit()
-    {
-
     }
 
     @Override
@@ -281,7 +294,7 @@ public class MapActivity extends AppCompatActivity implements NavigationView.OnN
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
-        int taskID = intent.getIntExtra("taskID", 0);
+        int taskID = intent.getIntExtra(ExtrasNames.TASK_ID, 0);
         Log.d(LOG_TAG,"Showing task #" + String.valueOf(taskID));
         if(taskID != 0)
         {

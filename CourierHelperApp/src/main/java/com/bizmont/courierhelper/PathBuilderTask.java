@@ -2,6 +2,7 @@ package com.bizmont.courierhelper;
 
 import android.content.Context;
 import android.os.AsyncTask;
+import android.util.Log;
 
 import com.bizmont.courierhelper.Point.Point;
 import com.squareup.okhttp.Route;
@@ -22,30 +23,45 @@ import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class RouteBuilderTask extends AsyncTask<ArrayList<GeoPoint>,Void, Road>
+public class PathBuilderTask extends AsyncTask<ArrayList<GeoPoint>,Void, ArrayList<Road>>
 {
     public static final String MAPQUEST_SERVICE = "http://open.mapquestapi.com/directions/v2/optimizedroute?";
     private static final String MAPQUEST_API_KEY = "w9zLBh8dLYSm5pM3iC579DspUgg29jur";
 
+    private final static String LOG_TAG = "RouteBuilder";
+
     @Override
-    protected Road doInBackground(ArrayList<GeoPoint>... params)
+    protected ArrayList<Road> doInBackground(ArrayList<GeoPoint>... params)
     {
         ArrayList<GeoPoint> points = params[0];
 
         int[] sequence = getSequence(getRequestUrl(points));
+        if(sequence == null)
+        {
+            return null;
+        }
 
         ArrayList<GeoPoint> sortedPoints = new ArrayList<>();
 
         for (int i = 0; i< sequence.length;i++)
         {
-            sortedPoints.set(i, points.get(sequence[i]));
+            sortedPoints.add(i, points.get(sequence[i]));
         }
 
         RoadManager roadManager = new MapQuestRoadManager(MAPQUEST_API_KEY);
         roadManager.addRequestOption("routeType=pedestrian");
-        Road road = roadManager.getRoad(sortedPoints);
 
-        return road;
+        ArrayList<Road> roads = new ArrayList<>();
+        for (int i = 0; i<sortedPoints.size()-1;i++)
+        {
+            ArrayList<GeoPoint> startEnd = new ArrayList<>();
+            startEnd.add(sortedPoints.get(i));
+            startEnd.add(sortedPoints.get(i+1));
+            Road road = roadManager.getRoad(startEnd);
+            roads.add(road);
+        }
+
+        return roads;
     }
     private String getRequestUrl(ArrayList<GeoPoint> points)
     {
@@ -94,14 +110,22 @@ public class RouteBuilderTask extends AsyncTask<ArrayList<GeoPoint>,Void, Road>
     }
     public static int[] parseSequence(String string)
     {
-        Pattern p = Pattern.compile("<locationSequence>(.*?)</locationSequence>");
-        Matcher matcher = p.matcher(string);
-        matcher.find();
+        Matcher matcher;
+        try {
+            Pattern p = Pattern.compile("<locationSequence>(.*?)</locationSequence>");
+            matcher = p.matcher(string);
+            matcher.find();
+        }
+        catch (Exception ex)
+        {
+            return null;
+        }
+
         String[] sequenceString = matcher.group(1).split(",");
         int[] sequence = new int[sequenceString.length];
-        for(int i = 0;i<sequence.length;i++)
+        for(int i = 0; i < sequence.length; i++)
         {
-            sequence[i] = Integer.getInteger(sequenceString[i]);
+            sequence[i] = Integer.parseInt(sequenceString[i]);
         }
         return sequence;
     }

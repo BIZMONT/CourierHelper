@@ -11,6 +11,7 @@ import android.widget.CheckBox;
 import android.widget.TextView;
 
 import com.bizmont.courierhelper.DataBase.DataBase;
+import com.bizmont.courierhelper.OtherStuff.ExtrasNames;
 import com.bizmont.courierhelper.R;
 import com.bizmont.courierhelper.Services.GPSTracker;
 import com.bizmont.courierhelper.Task.Task;
@@ -63,16 +64,12 @@ public class WarehouseTasksListViewAdapter extends ArrayAdapter {
                 CheckBox checkBox = (CheckBox) v;
                 if(checkBox.isChecked())
                 {
-                    DataBase.setTaskStatus(TaskState.ON_THE_WAY, checkBox.getId());
+                    DataBase.setTaskState(TaskState.ON_THE_WAY, taskID);
                 }
                 else
                 {
-                    DataBase.setTaskStatus(TaskState.IN_WAREHOUSE, checkBox.getId());
+                    DataBase.setTaskState(TaskState.IN_WAREHOUSE, taskID);
                 }
-
-                Intent locationIntent = new Intent(GPSTracker.BROADCAST_RECEIVE_ACTION);
-                locationIntent.putExtra("Update points", true);
-                context.sendBroadcast(locationIntent);
             }
         });
         return row;

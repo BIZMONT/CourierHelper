@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,6 +12,7 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.bizmont.courierhelper.Activities.MapActivity;
+import com.bizmont.courierhelper.OtherStuff.ExtrasNames;
 import com.bizmont.courierhelper.Task.TaskState;
 import com.bizmont.courierhelper.Task.Task;
 import com.bizmont.courierhelper.R;
@@ -71,7 +71,7 @@ public class TasksListViewAdapter extends ArrayAdapter {
             public void onClick(View v)
             {
                 Intent intent = new Intent(context, MapActivity.class);
-                intent.putExtra("taskID",taskID);
+                intent.putExtra(ExtrasNames.TASK_ID,taskID);
                 intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 context.startActivity(intent);
             }

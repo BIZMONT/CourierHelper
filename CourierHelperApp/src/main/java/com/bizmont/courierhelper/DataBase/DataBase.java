@@ -76,7 +76,7 @@ public final class DataBase
             Log.d(LOG_TAG,"Error in parsing file: " + e.getMessage());
         }
     }
-    public static void setTaskStatus(TaskState state, int taskId)
+    public static void setTaskState(TaskState state, int taskId)
     {
         ContentValues contentValues = new ContentValues();
         contentValues.put("State",state.toString());
@@ -127,7 +127,6 @@ public final class DataBase
 
             do
             {
-                Log.d(LOG_TAG, cursor.getString(stateColIndex));
                 points.add(new DeliveryPoint(
                         cursor.getString(taskAddressColIndex),
                         cursor.getDouble(taskLatColIndex),
@@ -156,8 +155,6 @@ public final class DataBase
         cursor.close();
 
         DatabaseManager.getInstance().closeDatabase();
-
-        Log.d(LOG_TAG, "Points: " + points.size());
         return points;
     }
     public static Task[] getActiveTasks(int warehouseId)
