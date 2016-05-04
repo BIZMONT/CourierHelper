@@ -23,10 +23,10 @@ android {
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     testCompile 'junit:junit:4.12'
+    compile files('libs/sun.misc.BASE64Decoder.jar')
     compile 'com.android.support:appcompat-v7:23.3.0'
     compile 'com.android.support:design:23.3.0'
-    compile 'com.github.MKergall.osmbonuspack:OSMBonusPack:v5.7'
-    compile 'org.osmdroid:osmdroid-android:5.1'
     compile 'com.android.support:support-v4:23.3.0'
-    compile files('libs/sun.misc.BASE64Decoder.jar')
+    compile 'org.osmdroid:osmdroid-android:5.1'
+    compile 'com.github.MKergall.osmbonuspack:OSMBonusPack:v5.7'
 }

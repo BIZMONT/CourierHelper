@@ -20,7 +20,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bizmont.courierhelper.Adapters.ReportsListViewAdapter;
-import com.bizmont.courierhelper.OtherStuff.Courier;
+import com.bizmont.courierhelper.Courier.Courier;
 import com.bizmont.courierhelper.Task.TaskReport;
 import com.bizmont.courierhelper.R;
 

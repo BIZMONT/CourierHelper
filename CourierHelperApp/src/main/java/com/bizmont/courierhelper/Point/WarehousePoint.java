@@ -14,8 +14,6 @@ import java.util.List;
 
 public class WarehousePoint extends Point
 {
-    private List<Task> tasks;
-
     public WarehousePoint(String address, double latitude, double longitude, float radius, int ID)
     {
         this.address = address;

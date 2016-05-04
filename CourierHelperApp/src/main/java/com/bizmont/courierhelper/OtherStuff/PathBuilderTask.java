@@ -1,4 +1,4 @@
-package com.bizmont.courierhelper;
+package com.bizmont.courierhelper.OtherStuff;
 
 import android.content.Context;
 import android.os.AsyncTask;
@@ -111,17 +111,18 @@ public class PathBuilderTask extends AsyncTask<ArrayList<GeoPoint>,Void, ArrayLi
     public static int[] parseSequence(String string)
     {
         Matcher matcher;
+        String[] sequenceString;
         try {
             Pattern p = Pattern.compile("<locationSequence>(.*?)</locationSequence>");
             matcher = p.matcher(string);
             matcher.find();
+            sequenceString = matcher.group(1).split(",");
         }
         catch (Exception ex)
         {
             return null;
         }
 
-        String[] sequenceString = matcher.group(1).split(",");
         int[] sequence = new int[sequenceString.length];
         for(int i = 0; i < sequence.length; i++)
         {

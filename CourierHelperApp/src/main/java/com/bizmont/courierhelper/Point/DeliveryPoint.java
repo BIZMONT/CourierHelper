@@ -67,7 +67,7 @@ public class DeliveryPoint extends Point
 
         marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
         marker.setPosition(new GeoPoint(latitude,longitude));
-        marker.setTitle(context.getString(R.string.task_number) + Integer.toString(ID) + "State " + state);
+        marker.setTitle(context.getString(R.string.task_number) + Integer.toString(ID));
         marker.setSubDescription(context.getString(R.string.address) + ": " + address);
         return marker;
     }

@@ -31,7 +31,7 @@ import android.widget.Toast;
 
 import com.bizmont.courierhelper.DataBase.DataBase;
 import com.bizmont.courierhelper.OtherStuff.ExtrasNames;
-import com.bizmont.courierhelper.OtherStuff.Courier;
+import com.bizmont.courierhelper.Courier.Courier;
 import com.bizmont.courierhelper.Point.Point;
 import com.bizmont.courierhelper.R;
 import com.bizmont.courierhelper.Services.GPSTracker;
@@ -59,10 +59,9 @@ public class MapActivity extends AppCompatActivity implements NavigationView.OnN
     private static final String LOG_TAG = "CourierHelperLog";
     private static final int MAP_MIN_ZOOM_LEVEL = 2;
     private static final int DEFAULT_ZOOM_LEVEL = 3;
-    private static final int MAP_MAX_ZOOM_LEVEL = 18;
+    private static final int MAP_MAX_ZOOM_LEVEL = 19;
 
     private long backPressedTime = 0;
-    private boolean isTracked = false;
 
     private MapView map;
     private IMapController mapController;
@@ -72,11 +71,9 @@ public class MapActivity extends AppCompatActivity implements NavigationView.OnN
     private Marker userLocationMarker;
     private Polygon accuracyRadius;
     private FolderOverlay markersOverlays;
-    private Polyline route;
-    private ArrayList<GeoPoint> routePoints;
     private GeoPoint userLocationGeoPoint;
     private TextView locationInfoOverlay;
-    private ArrayList<Road> roads;
+    private FolderOverlay pathOverlay;
 
     //location info
     private int satellitesInUse;
@@ -118,7 +115,6 @@ public class MapActivity extends AppCompatActivity implements NavigationView.OnN
         //Overlays
         accuracyRadiusOverlayInit();
         userMarkerOverlayInit();
-        routeOverlayInit();
         locationInfoOverlay = (TextView) findViewById(R.id.map_info);
 
 
@@ -163,7 +159,7 @@ public class MapActivity extends AppCompatActivity implements NavigationView.OnN
     {
         map = (MapView) findViewById(R.id.map);
         assert map != null;
-        map.setTileSource(TileSourceFactory.MAPNIK);
+        map.setTileSource(TileSourceFactory.MAPQUESTOSM);
         map.setBuiltInZoomControls(true);
         map.setMultiTouchControls(true);
         map.setMinZoomLevel(MAP_MIN_ZOOM_LEVEL);
@@ -190,7 +186,6 @@ public class MapActivity extends AppCompatActivity implements NavigationView.OnN
 
                     nmeaString = intent.getStringExtra(ExtrasNames.NMEA);
                     satellitesInUse = intent.getIntExtra(ExtrasNames.SATELLITES_IN_USE, 0);
-                    isTracked = intent.getBooleanExtra(ExtrasNames.IS_TRACK, false);
                     boolean isRefresh = intent.getBooleanExtra(ExtrasNames.IS_REFRESH, false);
                     if(isRefresh)
                     {
@@ -205,17 +200,18 @@ public class MapActivity extends AppCompatActivity implements NavigationView.OnN
                 }
                 if(intent.getBooleanExtra(ExtrasNames.IS_PATH,false))
                 {
-                    roads = intent.getParcelableArrayListExtra(ExtrasNames.PATH);
+                    ArrayList<Road> roads = intent.getParcelableArrayListExtra(ExtrasNames.PATH);
                     if(roads !=null)
                     {
-                        FolderOverlay roadsOverlay = new FolderOverlay(getApplicationContext());
+                        map.getOverlays().remove(pathOverlay);
+                        pathOverlay = new FolderOverlay(getApplicationContext());
                         for (Road road:roads)
                         {
                             Polyline pathPart = RoadManager.buildRoadOverlay(road, getApplicationContext());
                             pathPart.setColor(Color.GRAY);
-                            roadsOverlay.add(pathPart);
+                            pathOverlay.add(pathPart);
                         }
-                        map.getOverlays().add(roadsOverlay);
+                        map.getOverlays().add(pathOverlay);
                         map.invalidate();
                     }
                 }
@@ -248,12 +244,6 @@ public class MapActivity extends AppCompatActivity implements NavigationView.OnN
         userLocationMarker.setIcon(ContextCompat.getDrawable(this, R.drawable.ic_map_location));
         userLocationMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER);
         userLocationMarker.setFlat(true);
-    }
-    private void routeOverlayInit()
-    {
-        route = new Polyline(this);
-        routePoints = new ArrayList<>();
-        map.getOverlays().add(route);
     }
 
     @Override
@@ -290,7 +280,6 @@ public class MapActivity extends AppCompatActivity implements NavigationView.OnN
         unregisterReceiver(broadcastReceiver);
         super.onDestroy();
     }
-
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
@@ -378,18 +367,13 @@ public class MapActivity extends AppCompatActivity implements NavigationView.OnN
             mapController.setZoom(MAP_MAX_ZOOM_LEVEL);
             mapController.animateTo(new GeoPoint(location));
         }
-        //showPositionInfo(location);
+        showPositionInfo(location);
 
         userLocationGeoPoint = new GeoPoint(location);
         userLocationMarker.setPosition(userLocationGeoPoint);
         userLocationMarker.setTitle(Courier.getInstance().getName() + " " + Courier.getInstance().getState());
         userLocationMarker.setSubDescription(convertPointToAddress(userLocationGeoPoint));
         accuracyRadius.setPoints(Polygon.pointsAsCircle(userLocationGeoPoint, location.getAccuracy()));
-
-        if(isTracked) {
-            routePoints.add(userLocationGeoPoint);
-            route.setPoints(routePoints);
-        }
 
         map.invalidate();
     }

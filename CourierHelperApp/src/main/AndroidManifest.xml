@@ -53,7 +53,7 @@
         <activity
             android:name=".Activities.WarehouseActivity"
             android:label="Warehouse #" />
-        <activity android:name=".Activities.CompleteTaskActivity"></activity>
+        <activity android:name=".Activities.CompleteTaskActivity" />
     </application>
 
 </manifest>

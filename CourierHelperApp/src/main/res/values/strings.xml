@@ -97,4 +97,5 @@
     <string name="enter_code_here">Enter code here:</string>
     <string name="check">Check</string>
     <string name="code_accepted">Code accepted</string>
+    <string name="animate_to_location_marker">Animate to location marker</string>
 </resources>

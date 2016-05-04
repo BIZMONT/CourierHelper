@@ -1,6 +1,4 @@
-package com.bizmont.courierhelper.OtherStuff;
-
-import android.content.SharedPreferences;
+package com.bizmont.courierhelper.Courier;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -5,8 +5,8 @@ import android.accounts.AccountManager;
 import android.app.Application;
 
 import com.bizmont.courierhelper.DataBase.DataBase;
-import com.bizmont.courierhelper.OtherStuff.Courier;
-import com.bizmont.courierhelper.OtherStuff.CourierState;
+import com.bizmont.courierhelper.Courier.Courier;
+import com.bizmont.courierhelper.Courier.CourierState;
 
 import java.util.LinkedList;
 import java.util.List;
