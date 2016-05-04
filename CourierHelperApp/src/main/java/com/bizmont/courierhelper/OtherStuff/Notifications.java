@@ -1,18 +1,16 @@
-package com.bizmont.courierhelper;
+package com.bizmont.courierhelper.OtherStuff;
 
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.media.RingtoneManager;
 import android.support.v4.app.NotificationCompat;
-import android.util.Log;
 
 import com.bizmont.courierhelper.Activities.CompleteTaskActivity;
 import com.bizmont.courierhelper.Activities.WarehouseActivity;
-import com.bizmont.courierhelper.OtherStuff.ExtrasNames;
 import com.bizmont.courierhelper.Point.Point;
+import com.bizmont.courierhelper.R;
 
 public final class Notifications
 {

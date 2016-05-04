@@ -1,8 +1,8 @@
 package com.bizmont.courierhelper.Activities;
 
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
@@ -43,12 +43,10 @@ public class WarehouseActivity extends AppCompatActivity
             }
         });
     }
-
     @Override
-    protected void onStop()
+    public void onBackPressed()
     {
-        super.onStop();
-
+        super.onBackPressed();
         Intent intent = new Intent(GPSTracker.BROADCAST_RECEIVE_ACTION);
         intent.putExtra(ExtrasNames.IS_CREATE_ROUTE, true);
         intent.putExtra(ExtrasNames.IS_UPDATE_POINTS, true);

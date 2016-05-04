@@ -3,7 +3,6 @@ package com.bizmont.courierhelper.Services;
 import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
-import android.support.annotation.Nullable;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -27,7 +26,8 @@ public class ServerListener extends Service
     void schedule()
     {
         if (timerTask != null) timerTask.cancel();
-        if (interval > 0) {
+        if (interval > 0)
+        {
             timerTask = new TimerTask() {
                 public void run()
                 {

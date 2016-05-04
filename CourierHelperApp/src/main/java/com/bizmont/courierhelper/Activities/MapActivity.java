@@ -1,4 +1,5 @@
 package com.bizmont.courierhelper.Activities;
+
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -29,25 +30,24 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bizmont.courierhelper.Courier.Courier;
 import com.bizmont.courierhelper.DataBase.DataBase;
 import com.bizmont.courierhelper.OtherStuff.ExtrasNames;
-import com.bizmont.courierhelper.Courier.Courier;
 import com.bizmont.courierhelper.Point.Point;
 import com.bizmont.courierhelper.R;
 import com.bizmont.courierhelper.Services.GPSTracker;
 
 import org.osmdroid.api.IMapController;
+import org.osmdroid.bonuspack.kml.KmlDocument;
 import org.osmdroid.bonuspack.overlays.FolderOverlay;
 import org.osmdroid.bonuspack.overlays.Marker;
 import org.osmdroid.bonuspack.overlays.Polygon;
-import org.osmdroid.bonuspack.overlays.Polyline;
-import org.osmdroid.bonuspack.routing.Road;
-import org.osmdroid.bonuspack.routing.RoadManager;
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.Overlay;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -116,7 +116,7 @@ public class MapActivity extends AppCompatActivity implements NavigationView.OnN
         accuracyRadiusOverlayInit();
         userMarkerOverlayInit();
         locationInfoOverlay = (TextView) findViewById(R.id.map_info);
-
+        getPathFromFile();
 
         Courier.addOnStatusChangedListener(new Courier.CourierListener() {
             @Override
@@ -152,7 +152,6 @@ public class MapActivity extends AppCompatActivity implements NavigationView.OnN
         navigationView.setNavigationItemSelectedListener(this);
         navigationView.getMenu().findItem(R.id.nav_map).setChecked(true);
 
-        //
     }
 
     private void mapInit()
@@ -200,20 +199,7 @@ public class MapActivity extends AppCompatActivity implements NavigationView.OnN
                 }
                 if(intent.getBooleanExtra(ExtrasNames.IS_PATH,false))
                 {
-                    ArrayList<Road> roads = intent.getParcelableArrayListExtra(ExtrasNames.PATH);
-                    if(roads !=null)
-                    {
-                        map.getOverlays().remove(pathOverlay);
-                        pathOverlay = new FolderOverlay(getApplicationContext());
-                        for (Road road:roads)
-                        {
-                            Polyline pathPart = RoadManager.buildRoadOverlay(road, getApplicationContext());
-                            pathPart.setColor(Color.GRAY);
-                            pathOverlay.add(pathPart);
-                        }
-                        map.getOverlays().add(pathOverlay);
-                        map.invalidate();
-                    }
+                    getPathFromFile();
                 }
             }
         };
@@ -432,5 +418,19 @@ public class MapActivity extends AppCompatActivity implements NavigationView.OnN
         View headerView = navigationView.getHeaderView(0);
         ((TextView) headerView.findViewById(R.id.courier_name)).setText(Courier.getInstance().getName());
         ((TextView) headerView.findViewById(R.id.courier_status)).setText(Courier.getInstance().getState().toString());
+    }
+    private void getPathFromFile()
+    {
+        map.getOverlays().remove(pathOverlay);
+
+        KmlDocument kmlDocument = new KmlDocument();
+        File file = kmlDocument.getDefaultPathForAndroid("recommended_path.kml");
+        if(file.exists())
+        {
+            kmlDocument.parseKMLFile(file);
+            pathOverlay = (FolderOverlay) kmlDocument.mKmlRoot.buildOverlay(map,null,null,kmlDocument);
+            map.getOverlays().add(pathOverlay);
+            map.invalidate();
+        }
     }
 }

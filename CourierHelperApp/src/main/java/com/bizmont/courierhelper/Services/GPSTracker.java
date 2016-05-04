@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.location.GpsSatellite;
 import android.location.GpsStatus;
 import android.location.Location;
@@ -20,18 +21,22 @@ import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 
 import com.bizmont.courierhelper.DataBase.DataBase;
-import com.bizmont.courierhelper.Notifications;
 import com.bizmont.courierhelper.OtherStuff.ExtrasNames;
+import com.bizmont.courierhelper.OtherStuff.Notifications;
+import com.bizmont.courierhelper.OtherStuff.PathBuilderTask;
 import com.bizmont.courierhelper.Point.DeliveryPoint;
 import com.bizmont.courierhelper.Point.Point;
 import com.bizmont.courierhelper.Point.WarehousePoint;
-import com.bizmont.courierhelper.OtherStuff.PathBuilderTask;
 import com.bizmont.courierhelper.Task.TaskState;
 
+import org.osmdroid.bonuspack.kml.KmlDocument;
+import org.osmdroid.bonuspack.overlays.Polyline;
 import org.osmdroid.bonuspack.routing.Road;
+import org.osmdroid.bonuspack.routing.RoadManager;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.util.NetworkLocationIgnorer;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutionException;
 
@@ -85,6 +90,8 @@ public class GPSTracker extends Service implements LocationListener
                 if (intent.getBooleanExtra(ExtrasNames.IS_CREATE_ROUTE,false))
                 {
                     path = buildOptimalPath();
+                    savePathToFile(path);
+
                     Log.d(LOG_TAG, "Route created");
                     sendPathBroadcast();
                 }
@@ -92,6 +99,8 @@ public class GPSTracker extends Service implements LocationListener
         };
         IntentFilter intentFilter = new IntentFilter(BROADCAST_RECEIVE_ACTION);
         registerReceiver(broadcastReceiver,intentFilter);
+
+        //path = readPathFromFile();
 
 
         //Service status notification
@@ -154,12 +163,6 @@ public class GPSTracker extends Service implements LocationListener
         Log.d(LOG_TAG, "Service onBind");
         sendLocationBroadcast(lastFix);
         isOnPoint(lastFix);
-
-        if (path !=null)
-        {
-            sendPathBroadcast();
-        }
-
         return new Binder();
     }
     @Override
@@ -169,11 +172,6 @@ public class GPSTracker extends Service implements LocationListener
         super.onRebind(intent);
         sendLocationBroadcast(lastFix);
         isOnPoint(lastFix);
-
-        if (path !=null)
-        {
-            sendPathBroadcast();
-        }
     }
     @Override
     public boolean onUnbind(Intent intent)
@@ -263,7 +261,7 @@ public class GPSTracker extends Service implements LocationListener
     {
         Intent pathIntent = new Intent(BROADCAST_SEND_ACTION);
         pathIntent.putExtra(ExtrasNames.IS_PATH, true);
-        pathIntent.putExtra(ExtrasNames.PATH, path);
+        //pathIntent.putExtra(ExtrasNames.PATH, path);
         sendBroadcast(pathIntent);
         Log.d(LOG_TAG, "Path sent");
     }
@@ -324,7 +322,6 @@ public class GPSTracker extends Service implements LocationListener
         }
 
         notifications.hideOnPointNotify();
-        Log.d(LOG_TAG, "OnPointNotify was disabled");
         return false;
     }
 
@@ -351,5 +348,25 @@ public class GPSTracker extends Service implements LocationListener
             e.printStackTrace();
         }
         return roads;
+    }
+    private void savePathToFile(ArrayList<Road> path)
+    {
+        KmlDocument kmlDocument = new KmlDocument();
+        File recommendedPathFile = kmlDocument.getDefaultPathForAndroid("recommended_path.kml");
+        if(recommendedPathFile.exists())
+        {
+            recommendedPathFile.delete();
+        }
+        for (Road road:path)
+        {
+            Polyline pathPart = RoadManager.buildRoadOverlay(road, getApplicationContext());
+            pathPart.setColor(Color.GRAY);
+            kmlDocument.mKmlRoot.addOverlay(pathPart,kmlDocument);
+        }
+        kmlDocument.saveAsKML(recommendedPathFile);
+    }
+    private void readPathFromFile()
+    {
+
     }
 }
