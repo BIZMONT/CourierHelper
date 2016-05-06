@@ -4,13 +4,10 @@ import android.content.Context;
 import android.support.v4.content.ContextCompat;
 
 import com.bizmont.courierhelper.R;
-import com.bizmont.courierhelper.Task.Task;
 
 import org.osmdroid.bonuspack.overlays.Marker;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
-
-import java.util.List;
 
 public class WarehousePoint extends Point
 {
@@ -24,9 +21,9 @@ public class WarehousePoint extends Point
     }
 
     @Override
-    public Marker InitializeMarker(Context context, MapView map)
+    public Marker createMarker(Context context, MapView map)
     {
-        marker = new Marker(map);
+        Marker marker = new Marker(map);
         marker.setIcon(ContextCompat.getDrawable(context, R.drawable.ic_warehouse));
         marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER);
         marker.setPosition(new GeoPoint(latitude,longitude));

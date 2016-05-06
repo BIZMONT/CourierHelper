@@ -11,7 +11,6 @@ public abstract class Point
     protected double latitude;
     protected double longitude;
     protected String address;
-    protected Marker marker;
     protected float radius = 20;
 
     public double getLatitude() {
@@ -23,9 +22,6 @@ public abstract class Point
     public String getAddress() {
         return address;
     }
-    public Marker getMarker() {
-        return marker;
-    }
     public float getRadius() {
         return radius;
     }
@@ -34,6 +30,6 @@ public abstract class Point
         return ID;
     }
 
-    public abstract Marker InitializeMarker(Context context, MapView map);
+    public abstract Marker createMarker(Context context, MapView map);
 }
 

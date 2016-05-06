@@ -1,8 +1,8 @@
 package com.bizmont.courierhelper.Activities;
 
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -12,10 +12,9 @@ import android.widget.Toast;
 
 import com.bizmont.courierhelper.DataBase.DataBase;
 import com.bizmont.courierhelper.OtherStuff.ExtrasNames;
-import com.bizmont.courierhelper.OtherStuff.TaskPassDecoder;
+import com.bizmont.courierhelper.OtherStuff.TaskCodeDecoder;
 import com.bizmont.courierhelper.R;
 import com.bizmont.courierhelper.Services.GPSTracker;
-import com.bizmont.courierhelper.Task.TaskState;
 
 public class CompleteTaskActivity extends AppCompatActivity
 {
@@ -27,7 +26,7 @@ public class CompleteTaskActivity extends AppCompatActivity
 
     boolean isComplete;
 
-    int id;
+    int taskId;
     String code;
 
 
@@ -39,8 +38,8 @@ public class CompleteTaskActivity extends AppCompatActivity
         isComplete = false;
 
         Intent intent = getIntent();
-        id = intent.getIntExtra(ExtrasNames.TASK_ID,0);
-        setTitle("Complete task #" + id);
+        taskId = intent.getIntExtra(ExtrasNames.TASK_ID,0);
+        setTitle("Complete task #" + taskId);
 
         codeEdit = (EditText)findViewById(R.id.complete_code);
         reasonEdit = (EditText)findViewById(R.id.complete_reason);
@@ -48,20 +47,7 @@ public class CompleteTaskActivity extends AppCompatActivity
         codeLayout = (LinearLayout)findViewById(R.id.complete_with_code);
         correctCode = (ImageView)findViewById(R.id.complete_correct);
 
-        code = DataBase.getTaskCode(id);
-    }
-    public void onCheckButtonClick(View view)
-    {
-        if(TaskPassDecoder.isMatches(String.valueOf(id), code, codeEdit.getText().toString()))
-        {
-            correctCode.setVisibility(View.VISIBLE);
-            codeLayout.setEnabled(false);
-            isComplete = true;
-        }
-        else
-        {
-            Toast.makeText(this, R.string.wrong_code,Toast.LENGTH_SHORT).show();
-        }
+        code = DataBase.getTaskCode(taskId);
     }
 
     public void onTypeSwitched(View view)
@@ -81,22 +67,28 @@ public class CompleteTaskActivity extends AppCompatActivity
 
     public void onClickComplete(View view)
     {
-        if(isComplete)
+        Intent intent = new Intent(GPSTracker.BROADCAST_RECEIVE_ACTION);
+        if(codeLayout.getVisibility() == View.VISIBLE)
         {
-            DataBase.setTaskState(TaskState.DELIVERED, id);
+            if(!TaskCodeDecoder.isMatches(String.valueOf(taskId), code, codeEdit.getText().toString()))
+            {
+                Toast.makeText(this, R.string.wrong_code,Toast.LENGTH_SHORT).show();
+                return;
+            }
         }
         else
         {
-            DataBase.setTaskState(TaskState.NOT_DELIVERED, id);
+            if(reasonEdit.getText().length()>1)
+            {
+                intent.putExtra(ExtrasNames.REASON, reasonEdit.getText().toString());
+            }
+            else
+            {
+                Toast.makeText(this, "Please, enter reason", Toast.LENGTH_SHORT).show();
+                return;
+            }
         }
-        Intent intent = new Intent(GPSTracker.BROADCAST_RECEIVE_ACTION);
-        intent.putExtra(ExtrasNames.IS_UPDATE_POINTS, true);
+        intent.putExtra(ExtrasNames.COMPLETE_TASK, taskId);
         onBackPressed();
-    }
-
-    @Override
-    public void onBackPressed()
-    {
-        super.onBackPressed();
     }
 }

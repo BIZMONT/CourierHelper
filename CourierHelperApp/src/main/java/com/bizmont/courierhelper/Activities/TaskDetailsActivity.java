@@ -8,8 +8,8 @@ import android.util.Log;
 import android.widget.TextView;
 
 import com.bizmont.courierhelper.DataBase.DataBase;
+import com.bizmont.courierhelper.Models.Task.TaskDetails;
 import com.bizmont.courierhelper.OtherStuff.ExtrasNames;
-import com.bizmont.courierhelper.Task.TaskDetails;
 import com.bizmont.courierhelper.R;
 
 public class TaskDetailsActivity extends AppCompatActivity

@@ -10,6 +10,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
@@ -17,13 +18,15 @@ import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.bizmont.courierhelper.Adapters.ReportsListViewAdapter;
-import com.bizmont.courierhelper.Courier.Courier;
-import com.bizmont.courierhelper.Task.TaskReport;
+import com.bizmont.courierhelper.DataBase.DataBase;
+import com.bizmont.courierhelper.Models.Courier.Courier;
+import com.bizmont.courierhelper.Models.Report.Report;
+import com.bizmont.courierhelper.OtherStuff.ExtrasNames;
 import com.bizmont.courierhelper.R;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 
 public class ReportsActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener
@@ -32,6 +35,7 @@ public class ReportsActivity extends AppCompatActivity implements NavigationView
 
     Button datePickerButton;
     ListView reportsList;
+    TextView message;
 
     int year;
     int month;
@@ -40,7 +44,7 @@ public class ReportsActivity extends AppCompatActivity implements NavigationView
     NavigationView navigationView;
     ReportsListViewAdapter reportsListViewAdapter;
 
-    TaskReport[] reports;
+    ArrayList<Report> reports;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -65,23 +69,39 @@ public class ReportsActivity extends AppCompatActivity implements NavigationView
         ((TextView)headerView.findViewById(R.id.courier_name)).setText(Courier.getInstance().getName());
         ((TextView)headerView.findViewById(R.id.courier_status)).setText(Courier.getInstance().getState().toString());
 
+        message = (TextView)findViewById(R.id.empty_list);
 
         Calendar cal = Calendar.getInstance();
         year = cal.get(Calendar.YEAR);
         month = cal.get(Calendar.MONTH) + 1;
         day = cal.get(Calendar.DAY_OF_MONTH);
 
+        String m = String.valueOf(month);
+        String d = String.valueOf(day);
+        if(month < 10){
+
+            m = "0" + (month + 1);
+        }
+        if(day < 10){
+
+            d  = "0" + day ;
+        }
+
         datePickerButton = (Button)findViewById(R.id.date_picker_button);
         assert datePickerButton != null;
-        datePickerButton.setText(day + "/" + (month) + "/" + year);
+        datePickerButton.setText(year + "-" + m + "-" + d);
         datePickerButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 showDialog(DATE_DIALOG_ID);
             }
         });
+        Log.d("Date", datePickerButton.getText().toString());
+
+        reports = DataBase.getReportsWithDate(datePickerButton.getText().toString());
 
         if(reports != null) {
+            message.setVisibility(View.GONE);
             reportsList = (ListView) findViewById(R.id.reports_listview);
             reportsListViewAdapter = new ReportsListViewAdapter(ReportsActivity.this, R.layout.reports_listview_row, reports);
             reportsList.setAdapter(reportsListViewAdapter);
@@ -89,9 +109,15 @@ public class ReportsActivity extends AppCompatActivity implements NavigationView
             reportsList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    Toast.makeText(ReportsActivity.this, "Hello", Toast.LENGTH_SHORT).show();
+                    Intent intent = new Intent(getApplicationContext(), ReportDetailsActivity.class);
+                    intent.putExtra(ExtrasNames.REPORT_ID, reports.get(position).getID());
+                    startActivity(intent);
                 }
             });
+        }
+        else
+        {
+            message.setVisibility(View.VISIBLE);
         }
     }
 
@@ -158,11 +184,24 @@ public class ReportsActivity extends AppCompatActivity implements NavigationView
 
     private DatePickerDialog.OnDateSetListener dPickListener = new DatePickerDialog.OnDateSetListener() {
         @Override
-        public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
+        public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth)
+        {
+            String m = String.valueOf(monthOfYear);
+            String d = String.valueOf(dayOfMonth);
+
             ReportsActivity.this.year = year;
             ReportsActivity.this.month = monthOfYear + 1;
             ReportsActivity.this.day = dayOfMonth;
-            datePickerButton.setText(dayOfMonth + "/" + (monthOfYear + 1) + "/" + year);
+
+            if(monthOfYear < 10){
+
+                m = "0" + (monthOfYear + 1);
+            }
+            if(dayOfMonth < 10){
+
+                d  = "0" + dayOfMonth ;
+            }
+            datePickerButton.setText(d + "/" + m + "/" + year);
 
             reportsListViewAdapter = new ReportsListViewAdapter(ReportsActivity.this, R.layout.reports_listview_row, reports);
             reportsList.setAdapter(reportsListViewAdapter);

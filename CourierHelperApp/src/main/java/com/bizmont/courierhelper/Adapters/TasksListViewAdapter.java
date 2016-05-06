@@ -12,9 +12,9 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.bizmont.courierhelper.Activities.MapActivity;
+import com.bizmont.courierhelper.Models.Task.Task;
+import com.bizmont.courierhelper.Models.Task.TaskState;
 import com.bizmont.courierhelper.OtherStuff.ExtrasNames;
-import com.bizmont.courierhelper.Task.TaskState;
-import com.bizmont.courierhelper.Task.Task;
 import com.bizmont.courierhelper.R;
 
 public class TasksListViewAdapter extends ArrayAdapter {

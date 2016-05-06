@@ -55,5 +55,4 @@
             android:label="Warehouse #" />
         <activity android:name=".Activities.CompleteTaskActivity" />
     </application>
-
 </manifest>

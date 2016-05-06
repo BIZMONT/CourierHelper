@@ -1,4 +1,4 @@
-package com.bizmont.courierhelper.Courier;
+package com.bizmont.courierhelper.Models.Courier;
 
 import java.util.ArrayList;
 import java.util.List;

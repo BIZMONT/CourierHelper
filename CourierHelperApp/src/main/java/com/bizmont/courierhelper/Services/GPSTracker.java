@@ -8,7 +8,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.graphics.Color;
 import android.location.GpsSatellite;
 import android.location.GpsStatus;
 import android.location.Location;
@@ -21,23 +20,30 @@ import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 
 import com.bizmont.courierhelper.DataBase.DataBase;
+import com.bizmont.courierhelper.Models.Report.Report;
+import com.bizmont.courierhelper.Models.Task.TaskState;
 import com.bizmont.courierhelper.OtherStuff.ExtrasNames;
 import com.bizmont.courierhelper.OtherStuff.Notifications;
 import com.bizmont.courierhelper.OtherStuff.PathBuilderTask;
 import com.bizmont.courierhelper.Point.DeliveryPoint;
 import com.bizmont.courierhelper.Point.Point;
 import com.bizmont.courierhelper.Point.WarehousePoint;
-import com.bizmont.courierhelper.Task.TaskState;
+import com.bizmont.courierhelper.RoadFile;
 
-import org.osmdroid.bonuspack.kml.KmlDocument;
 import org.osmdroid.bonuspack.overlays.Polyline;
 import org.osmdroid.bonuspack.routing.Road;
-import org.osmdroid.bonuspack.routing.RoadManager;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.util.NetworkLocationIgnorer;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.concurrent.ExecutionException;
 
 public class GPSTracker extends Service implements LocationListener
@@ -57,25 +63,29 @@ public class GPSTracker extends Service implements LocationListener
     private LocationManager locationManager;
     private GpsStatus gpsStatus;
     private Location lastFix;
-    private String nmea;
 
-    private boolean isTracked;
     private boolean isLocationDisabled;
 
     ArrayList<Point> points;
-    ArrayList<Road> path;
+    Polyline track;
 
     BroadcastReceiver broadcastReceiver;
     Notifications notifications;
 
     NetworkLocationIgnorer networkLocationIgnorer;
 
+    File recommendedPathFile;
+    String startTime;
+    SimpleDateFormat simpleDateFormat;
+
     @Override
     public void onCreate() {
         super.onCreate();
 
-        isTracked = false;
+        track = new Polyline(this);
         networkLocationIgnorer = new NetworkLocationIgnorer();
+        recommendedPathFile = new File(getFilesDir() + "/kml","recommended_path.kml");
+        simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
         broadcastReceiver = new BroadcastReceiver() {
             @Override
@@ -86,22 +96,28 @@ public class GPSTracker extends Service implements LocationListener
                     points = DataBase.getTargetPoints();
                     isOnPoint(lastFix);
                     Log.d(LOG_TAG, "Point updated");
+                    if(isOnTheWayExist())
+                    {
+                        startTime = simpleDateFormat.format(new Date());
+                    }
                 }
                 if (intent.getBooleanExtra(ExtrasNames.IS_CREATE_ROUTE,false))
                 {
-                    path = buildOptimalPath();
-                    savePathToFile(path);
+                    RoadFile.saveRecommendedPathToFile(getApplicationContext(), recommendedPathFile, buildOptimalPath());
 
                     Log.d(LOG_TAG, "Route created");
                     sendPathBroadcast();
+                }
+                int completedTask = intent.getIntExtra(ExtrasNames.COMPLETE_TASK,0);
+                if(completedTask != 0)
+                {
+                    String reason = intent.getStringExtra(ExtrasNames.REASON);
+                    completeTask(completedTask, reason);
                 }
             }
         };
         IntentFilter intentFilter = new IntentFilter(BROADCAST_RECEIVE_ACTION);
         registerReceiver(broadcastReceiver,intentFilter);
-
-        //path = readPathFromFile();
-
 
         //Service status notification
         notifications = new Notifications(this);
@@ -113,7 +129,6 @@ public class GPSTracker extends Service implements LocationListener
             locationManager.addNmeaListener(new GpsStatus.NmeaListener() {
                 @Override
                 public void onNmeaReceived(long timestamp, String nmea) {
-                    GPSTracker.this.nmea = nmea;
                 }
             });
             locationManager.addGpsStatusListener(new GpsStatus.Listener() {
@@ -173,12 +188,6 @@ public class GPSTracker extends Service implements LocationListener
         sendLocationBroadcast(lastFix);
         isOnPoint(lastFix);
     }
-    @Override
-    public boolean onUnbind(Intent intent)
-    {
-        Log.d(LOG_TAG, "Service onUnbind");
-        return true;
-    }
 
     //LocationListener overridden methods
     @Override
@@ -187,8 +196,7 @@ public class GPSTracker extends Service implements LocationListener
         getLocation(location);
     }
     @Override
-    public void onStatusChanged(String provider, int status, Bundle extras) {
-    }
+    public void onStatusChanged(String provider, int status, Bundle extras) {}
     @Override
     public void onProviderEnabled(String provider)
     {
@@ -200,10 +208,7 @@ public class GPSTracker extends Service implements LocationListener
         }
     }
     @Override
-    public void onProviderDisabled(String provider)
-    {
-        checkProvidersAvailability();
-    }
+    public void onProviderDisabled(String provider) {checkProvidersAvailability();}
 
     //Own methods
     private void checkProvidersAvailability()
@@ -242,7 +247,19 @@ public class GPSTracker extends Service implements LocationListener
         if(isLocationValid(location))
         {
             sendLocationBroadcast(location);
-            isOnPoint(location);
+            if(isOnPoint(location))
+            {
+
+            }
+            if(isOnTheWayExist())
+            {
+                track.getPoints().add(new GeoPoint(location.getLatitude(),location.getLongitude()));
+            }
+            else
+            {
+                recommendedPathFile.delete();
+                track = new Polyline(this);
+            }
         }
     }
     private void sendLocationBroadcast(Location location)
@@ -251,8 +268,6 @@ public class GPSTracker extends Service implements LocationListener
 
         locationIntent.putExtra(ExtrasNames.IS_LOCATION, true);
         locationIntent.putExtra(ExtrasNames.LOCATION, location);
-        locationIntent.putExtra(ExtrasNames.NMEA, nmea);
-        locationIntent.putExtra(ExtrasNames.SATELLITES_IN_USE, getSatellitesInUse());
 
         sendBroadcast(locationIntent);
         Log.d(LOG_TAG, "Location sent (" + location.getLatitude() + " " + location.getLongitude() + ")");
@@ -260,8 +275,8 @@ public class GPSTracker extends Service implements LocationListener
     private void sendPathBroadcast()
     {
         Intent pathIntent = new Intent(BROADCAST_SEND_ACTION);
-        pathIntent.putExtra(ExtrasNames.IS_PATH, true);
-        //pathIntent.putExtra(ExtrasNames.PATH, path);
+        pathIntent.putExtra(ExtrasNames.IS_PATH_UPDATE, true);
+
         sendBroadcast(pathIntent);
         Log.d(LOG_TAG, "Path sent");
     }
@@ -324,7 +339,17 @@ public class GPSTracker extends Service implements LocationListener
         notifications.hideOnPointNotify();
         return false;
     }
-
+    private boolean isOnTheWayExist()
+    {
+        for (Point point: points)
+        {
+            if(point instanceof DeliveryPoint && ((DeliveryPoint)point).getState() == TaskState.ON_THE_WAY)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
     private ArrayList<Road> buildOptimalPath()
     {
         ArrayList<GeoPoint> routePoints = new ArrayList<>();
@@ -349,24 +374,52 @@ public class GPSTracker extends Service implements LocationListener
         }
         return roads;
     }
-    private void savePathToFile(ArrayList<Road> path)
+    public void completeTask(int completedTask, String reason)
     {
-        KmlDocument kmlDocument = new KmlDocument();
-        File recommendedPathFile = kmlDocument.getDefaultPathForAndroid("recommended_path.kml");
-        if(recommendedPathFile.exists())
+        if(createReport(completedTask, reason))
         {
-            recommendedPathFile.delete();
+            if(reason == null)
+            {
+                DataBase.setTaskState(TaskState.DELIVERED, completedTask);
+            }
+            else
+            {
+                DataBase.setTaskState(TaskState.NOT_DELIVERED, completedTask);
+            }
         }
-        for (Road road:path)
-        {
-            Polyline pathPart = RoadManager.buildRoadOverlay(road, getApplicationContext());
-            pathPart.setColor(Color.GRAY);
-            kmlDocument.mKmlRoot.addOverlay(pathPart,kmlDocument);
-        }
-        kmlDocument.saveAsKML(recommendedPathFile);
     }
-    private void readPathFromFile()
+    private boolean createReport(int taskId, String reason)
     {
+        File recommended = new File(getFilesDir() + "/kml/recommended_paths", taskId + "_rec.kml");
+        Date date = new Date();
+        String endTime = simpleDateFormat.format(date);
+        String trackFilePath;
 
+        try
+        {
+            File trackFile = new File(getFilesDir() + "/kml/tracks", String.valueOf(taskId) + ".kml");
+            trackFilePath = RoadFile.saveTrackToFile(trackFile, track);
+            copyFile(recommendedPathFile,recommended);
+
+            DataBase.addReport(new Report(0, taskId, recommended.getAbsolutePath(), trackFilePath, startTime, endTime, reason));
+        }
+        catch (IOException ex)
+        {
+            return false;
+        }
+        return true;
+    }
+    private void copyFile(File src, File dst) throws IOException
+    {
+        InputStream in = new FileInputStream(src);
+        OutputStream out = new FileOutputStream(dst);
+
+        byte[] buf = new byte[1024];
+        int len;
+        while ((len = in.read(buf)) > 0) {
+            out.write(buf, 0, len);
+        }
+        in.close();
+        out.close();
     }
 }

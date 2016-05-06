@@ -7,12 +7,14 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
-import com.bizmont.courierhelper.Point.Point;
+import com.bizmont.courierhelper.Models.Report.Report;
+import com.bizmont.courierhelper.Models.Report.ReportDetails;
+import com.bizmont.courierhelper.Models.Task.Task;
+import com.bizmont.courierhelper.Models.Task.TaskDetails;
+import com.bizmont.courierhelper.Models.Task.TaskState;
 import com.bizmont.courierhelper.Point.DeliveryPoint;
+import com.bizmont.courierhelper.Point.Point;
 import com.bizmont.courierhelper.Point.WarehousePoint;
-import com.bizmont.courierhelper.Task.Task;
-import com.bizmont.courierhelper.Task.TaskDetails;
-import com.bizmont.courierhelper.Task.TaskState;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -387,6 +389,100 @@ public final class DataBase
             }
         }
     }
+
+    public static void addReport(Report report)
+    {
+        ContentValues contentValues = new ContentValues();
+
+        SQLiteDatabase database = DatabaseManager.getInstance().openDatabase();
+
+        contentValues.put("TaskID", report.getTaskId());
+        contentValues.put("Track", report.getTrackPath());
+        contentValues.put("RecommendedPath",report.getRecommendedPath());
+        contentValues.put("BeginTime", report.getStarTime());
+        contentValues.put("EndTime", report.getEndTime());
+        contentValues.put("Reason", report.getReason());
+
+        database.insert(Tables.REPORTS, null, contentValues);
+
+        DatabaseManager.getInstance().closeDatabase();
+    }
+
+    public static ArrayList<Report> getReportsWithDate(String date)
+    {
+        ArrayList<Report> reports = new ArrayList<>();
+        date = date.substring(0,9);
+        Cursor cursor;
+
+        SQLiteDatabase database = DatabaseManager.getInstance().openDatabase();
+        cursor = database.query(Tables.REPORTS, null, "EndTime = ?", new String[]{date}, null, null, null);
+
+        if (cursor.moveToFirst())
+        {
+            int IdColIndex = cursor.getColumnIndex("ID");
+            int taskIdColIndex = cursor.getColumnIndex("TaskID");
+            int trackColIndex = cursor.getColumnIndex("Track");
+            int pathColIndex = cursor.getColumnIndex("RecommendedPath");
+            int beginColIndex = cursor.getColumnIndex("BeginTime");
+            int endColIndex = cursor.getColumnIndex("EndTime");
+            int reasonColIndex = cursor.getColumnIndex("Reason");
+
+            do
+            {
+                Report report = new Report(
+                        cursor.getInt(IdColIndex),
+                        cursor.getInt(taskIdColIndex),
+                        cursor.getString(pathColIndex),
+                        cursor.getString(trackColIndex),
+                        cursor.getString(beginColIndex),
+                        cursor.getString(endColIndex),
+                        cursor.getString(reasonColIndex));
+                reports.add(report);
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+
+        DatabaseManager.getInstance().closeDatabase();
+
+        return reports;
+    }
+
+    public static ReportDetails getReportDetails(int id)
+    {
+        Cursor cursor;
+        ReportDetails reportDetails = null;
+
+        SQLiteDatabase database = DatabaseManager.getInstance().openDatabase();
+        cursor = database.query(Tables.REPORTS, null, "ID = ?", new String[]{String.valueOf(id)}, null, null, null);
+
+        if (cursor.moveToFirst())
+        {
+            int IdColIndex = cursor.getColumnIndex("ID");
+            int taskIdColIndex = cursor.getColumnIndex("TaskID");
+            int trackColIndex = cursor.getColumnIndex("Track");
+            int pathColIndex = cursor.getColumnIndex("RecommendedPath");
+            int beginColIndex = cursor.getColumnIndex("BeginTime");
+            int endColIndex = cursor.getColumnIndex("EndTime");
+            int reasonColIndex = cursor.getColumnIndex("Reason");
+
+            do
+            {
+                reportDetails = new ReportDetails(
+                        cursor.getInt(IdColIndex),
+                        cursor.getInt(taskIdColIndex),
+                        cursor.getString(pathColIndex),
+                        cursor.getString(trackColIndex),
+                        cursor.getString(beginColIndex),
+                        cursor.getString(endColIndex),
+                        cursor.getString(reasonColIndex));
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+
+        DatabaseManager.getInstance().closeDatabase();
+
+        return reportDetails;
+    }
 }
 
 class DatabaseManager
@@ -477,9 +573,11 @@ class DataBaseHelper extends SQLiteOpenHelper
                 "(" +
                 "ID integer PRIMARY KEY AUTOINCREMENT, " +
                 "TaskID integer, " +
-                "Track text DEFAULT 'No track'," +
+                "Track text" +
+                "RecommendedPath text," +
                 "BeginTime text," +
                 "EndTime text," +
+                "Reason text," +
                 "FOREIGN KEY (TaskID) REFERENCES " + Tables.TASKS + "(ID)" +
                 ");");
         db.execSQL("CREATE TABLE " + Tables.SENDERS +
@@ -488,6 +586,13 @@ class DataBaseHelper extends SQLiteOpenHelper
                 "Name text, " +
                 "Phone text, " +
                 "Address text" +
+                ");");
+        db.execSQL("CREATE TABLE " + Tables.COURIERS +"" +
+                "(" +
+                "Email text PRIMARY KEY," +
+                "Username text," +
+                "CompletedTasks integer," +
+                "SuccessfulTasks integer" +
                 ");");
     }
 
@@ -505,4 +610,5 @@ final class Tables
     public static final String WAREHOUSES = "Warehouses";
     public static final String REPORTS = "Reports";
     public static final String SENDERS = "Senders";
+    public static final String COURIERS = "Couriers";
 }

@@ -39,26 +39,21 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:gravity="center_vertical"/>
-            <EditText
-                android:id="@+id/complete_code"
-                android:inputType="number"
-                android:maxLength="8"
-                android:layout_width="100dp"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:gravity="center_vertical"/>
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:gravity="center_vertical"
-                android:orientation="vertical">
-                <Button
-                    android:id="@+id/button_check_password"
-                    android:text="@string/check"
-                    android:onClick="onCheckButtonClick"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
+                android:orientation="horizontal">
+                <EditText
+                    android:id="@+id/complete_code"
+                    android:inputType="number"
+                    android:maxLength="8"
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:gravity="center_vertical"/>
+
                 <ImageView
                     android:id="@+id/complete_correct"
                     android:src="@drawable/ic_complete"

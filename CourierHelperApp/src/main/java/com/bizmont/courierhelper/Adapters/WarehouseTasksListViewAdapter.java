@@ -2,7 +2,6 @@ package com.bizmont.courierhelper.Adapters;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,11 +10,9 @@ import android.widget.CheckBox;
 import android.widget.TextView;
 
 import com.bizmont.courierhelper.DataBase.DataBase;
-import com.bizmont.courierhelper.OtherStuff.ExtrasNames;
+import com.bizmont.courierhelper.Models.Task.Task;
+import com.bizmont.courierhelper.Models.Task.TaskState;
 import com.bizmont.courierhelper.R;
-import com.bizmont.courierhelper.Services.GPSTracker;
-import com.bizmont.courierhelper.Task.Task;
-import com.bizmont.courierhelper.Task.TaskState;
 
 public class WarehouseTasksListViewAdapter extends ArrayAdapter {
     private Context context;

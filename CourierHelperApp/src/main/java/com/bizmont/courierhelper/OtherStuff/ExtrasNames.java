@@ -9,9 +9,10 @@ public final class ExtrasNames
     public static final String SATELLITES_IN_USE = "Satellites in use";
     public static final String IS_CREATE_ROUTE = "Create route";
     public static final String IS_REFRESH = "Is refresh";
-    public static final String IS_TRACK = "Is track";
-    public static final String IS_PATH = "Is path";
+    public static final String IS_PATH_UPDATE = "Is path";
     public static final String IS_LOCATION = "Is location";
     public static final String IS_UPDATE_POINTS = "Update points";
-    public static final String PATH = "Path";
+    public static final String REASON = "Reason";
+    public static final String COMPLETE_TASK = "Created task";
+    public static final String REPORT_ID = "Report ID";
 }

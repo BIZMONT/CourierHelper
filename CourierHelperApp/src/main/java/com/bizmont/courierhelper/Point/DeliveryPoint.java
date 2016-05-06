@@ -3,8 +3,8 @@ package com.bizmont.courierhelper.Point;
 import android.content.Context;
 import android.support.v4.content.ContextCompat;
 
+import com.bizmont.courierhelper.Models.Task.TaskState;
 import com.bizmont.courierhelper.R;
-import com.bizmont.courierhelper.Task.TaskState;
 
 import org.osmdroid.bonuspack.overlays.Marker;
 import org.osmdroid.util.GeoPoint;
@@ -39,9 +39,9 @@ public class DeliveryPoint extends Point
     }
 
     @Override
-    public Marker InitializeMarker(Context context, final MapView map)
+    public Marker createMarker(Context context, final MapView map)
     {
-        marker = new Marker(map);
+        Marker marker = new Marker(map);
         switch (state)
         {
             case DELIVERED:

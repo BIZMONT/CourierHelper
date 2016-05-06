@@ -5,9 +5,10 @@ import android.accounts.AccountManager;
 import android.app.Application;
 
 import com.bizmont.courierhelper.DataBase.DataBase;
-import com.bizmont.courierhelper.Courier.Courier;
-import com.bizmont.courierhelper.Courier.CourierState;
+import com.bizmont.courierhelper.Models.Courier.Courier;
+import com.bizmont.courierhelper.Models.Courier.CourierState;
 
+import java.io.File;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -16,11 +17,15 @@ public class CourierHelperApp extends Application
     @Override
     public void onCreate()
     {
-        Courier.initializeInstance(getUsername(), CourierState.NOT_ACTIVE);
         super.onCreate();
+        Courier.initializeInstance(getUsername(), CourierState.NOT_ACTIVE);
 
         DataBase.initialize(getApplicationContext());
 
+        File path = new File(getFilesDir(), "kml/tracks");
+        path.mkdirs();
+        path = new File(getFilesDir(),"kml/recommended_paths");
+        path.mkdirs();
     }
 
     private String getUsername() {

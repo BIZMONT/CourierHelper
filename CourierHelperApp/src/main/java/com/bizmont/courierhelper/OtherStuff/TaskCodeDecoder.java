@@ -5,13 +5,13 @@ import java.io.IOException;
 import Decoder.BASE64Decoder;
 import Decoder.BASE64Encoder;
 
-public class TaskPassDecoder
+public class TaskCodeDecoder
 {
-    public static boolean isMatches(String taskId, String passDB, String enteredPass)
+    public static boolean isMatches(String taskId, String dbCode, String enteredCode)
     {
-        String key = encode(enteredPass,taskId);
-        String decoded = decode(passDB,key);
-        if(decoded.equals(enteredPass))
+        String key = encode(enteredCode,taskId);
+        String decoded = decode(dbCode,key);
+        if(decoded.equals(enteredCode))
         {
          return true;
         }

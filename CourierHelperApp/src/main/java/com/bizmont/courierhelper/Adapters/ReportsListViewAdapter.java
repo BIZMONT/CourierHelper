@@ -9,16 +9,18 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
-import com.bizmont.courierhelper.Task.TaskReport;
-import com.bizmont.courierhelper.Task.TaskState;
+import com.bizmont.courierhelper.Models.Report.Report;
+import com.bizmont.courierhelper.Models.Task.TaskState;
 import com.bizmont.courierhelper.R;
+
+import java.util.ArrayList;
 
 public class ReportsListViewAdapter extends ArrayAdapter {
     private Context context;
     private int layoutResourceId;
-    private TaskReport[] reports = null;
+    private ArrayList<Report> reports = null;
 
-    public ReportsListViewAdapter(Context context, int layoutResourceId, TaskReport[] reports)
+    public ReportsListViewAdapter(Context context, int layoutResourceId, ArrayList<Report> reports)
     {
         super(context,layoutResourceId,reports);
         this.layoutResourceId = layoutResourceId;
@@ -48,18 +50,18 @@ public class ReportsListViewAdapter extends ArrayAdapter {
             holder = (ReportHolder)row.getTag();
         }
 
-        TaskReport report = reports[position];
-        holder.orderID.setText(String.valueOf(report.getId()));
-        holder.orderState.setText(report.getState().toString());
-        if(report.getState() == TaskState.DELIVERED)
+        Report report = reports.get(position);
+        holder.orderID.setText(String.valueOf(report.getTaskId()));
+        if(report.getReason() != null)
         {
-            holder.orderState.setTextColor(Color.GREEN);
+            holder.orderState.setText(TaskState.NOT_DELIVERED.toString());
+            holder.orderState.setTextColor(Color.RED);
         }
         else
         {
-            holder.orderState.setTextColor(Color.RED);
+            holder.orderState.setText(TaskState.DELIVERED.toString());
+            holder.orderState.setTextColor(Color.GREEN);
         }
-        holder.orderName.setText(report.getAddress());
 
         return row;
     }
