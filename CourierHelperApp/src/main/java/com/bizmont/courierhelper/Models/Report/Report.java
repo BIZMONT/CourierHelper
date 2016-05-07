@@ -2,7 +2,7 @@ package com.bizmont.courierhelper.Models.Report;
 
 public class Report
 {
-    private int ID;
+    private int id;
     private int taskId;
     private String recommendedPath;
     private String trackPath;
@@ -10,8 +10,9 @@ public class Report
     private String endTime;
     private String reason;
 
-    public Report(int Id, int taskId, String recommendedPath, String trackPath, String starTime, String endTime, String reason)
+    public Report(int id, int taskId, String recommendedPath, String trackPath, String starTime, String endTime, String reason)
     {
+        this.id = id;
         this.taskId = taskId;
         this.recommendedPath = recommendedPath;
         this.trackPath = trackPath;
@@ -45,6 +46,6 @@ public class Report
     }
 
     public int getID() {
-        return ID;
+        return id;
     }
 }

@@ -43,8 +43,7 @@
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".Activities.TaskDetailsActivity"
-            android:label="@string/title_activity_task_info"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:label="@string/title_activity_task_info" />
         <activity android:name=".Activities.ReportDetailsActivity" />
         <activity
             android:name=".Activities.SettingsActivity"
@@ -55,4 +54,5 @@
             android:label="Warehouse #" />
         <activity android:name=".Activities.CompleteTaskActivity" />
     </application>
+
 </manifest>

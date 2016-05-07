@@ -1,13 +1,7 @@
 package com.bizmont.courierhelper.OtherStuff;
 
-import android.content.Context;
 import android.os.AsyncTask;
-import android.util.Log;
 
-import com.bizmont.courierhelper.Point.Point;
-import com.squareup.okhttp.Route;
-
-import org.osmdroid.bonuspack.overlays.Polyline;
 import org.osmdroid.bonuspack.routing.MapQuestRoadManager;
 import org.osmdroid.bonuspack.routing.Road;
 import org.osmdroid.bonuspack.routing.RoadManager;
@@ -19,7 +13,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 

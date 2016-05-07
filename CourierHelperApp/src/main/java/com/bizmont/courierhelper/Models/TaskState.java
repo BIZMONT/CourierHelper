@@ -1,4 +1,4 @@
-package com.bizmont.courierhelper.Models.Task;
+package com.bizmont.courierhelper.Models;
 
 public enum TaskState
 {

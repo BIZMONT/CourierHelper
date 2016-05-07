@@ -32,8 +32,8 @@ import android.widget.Toast;
 
 import com.bizmont.courierhelper.DataBase.DataBase;
 import com.bizmont.courierhelper.Models.Courier.Courier;
+import com.bizmont.courierhelper.Models.Point;
 import com.bizmont.courierhelper.OtherStuff.ExtrasNames;
-import com.bizmont.courierhelper.Point.Point;
 import com.bizmont.courierhelper.R;
 import com.bizmont.courierhelper.RoadFile;
 import com.bizmont.courierhelper.Services.GPSTracker;

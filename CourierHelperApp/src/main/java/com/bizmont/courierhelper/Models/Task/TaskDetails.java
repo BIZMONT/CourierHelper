@@ -1,85 +1,38 @@
 package com.bizmont.courierhelper.Models.Task;
 
+import com.bizmont.courierhelper.Models.TaskState;
+
 public class TaskDetails extends Task
 {
-    String content;
-    String receiverName;
-    String receiverPhone;
-    String warehouseAddress;
-    String date;
-    String comment;
-    String senderName;
-    String senderAddress;
-    String senderPhone;
+    protected int receiverId;
+    protected int senderId;
+    protected String content;
+    protected String date;
+    protected String comment;
+    private String code;
 
-    public TaskDetails(
-            int id,
-            TaskState state,
-            String address,
-            String content,
-            String receiverName,
-            String receiverPhone,
-            String warehouseAddress,
-            String date,
-            String comment,
-            String senderName,
-            String senderAddress,
-            String senderPhone)
-    {
-        super(id, state, address);
+    public TaskDetails(int id, String address, double latitude, double longitude, TaskState state,
+                       int receiverId, int senderId, int warehouseId, String content, String date,
+                       String comment, String code) {
+        super(id, address, latitude, longitude, state, warehouseId);
 
+        this.receiverId = receiverId;
+        this.senderId = senderId;
         this.content = content;
-        this.receiverName = receiverName;
-        this.receiverPhone = receiverPhone;
-        this.warehouseAddress = warehouseAddress;
         this.date = date;
         this.comment = comment;
-        this.senderName = senderName;
-        this.senderAddress = senderAddress;
-        this.senderPhone = senderPhone;
-    }
-
-    public TaskDetails(Task task, String content, String receiverName, String receiverPhone, String warehouseAddress,
-                       String date, String comment, String senderName, String senderAddress,
-                       String senderPhone)
-    {
-        this(task.getId(), task.getState(), task.getAddress(), content, receiverName, receiverPhone,
-                warehouseAddress, date, comment, senderName, senderAddress, senderPhone);
+        this.code = code;
     }
 
     public String getContent() {
         return content;
     }
-    public String getReceiverName() {
-        return receiverName;
-    }
-    public String getReceiverPhone() {
-        return receiverPhone;
-    }
-    public String getWarehouseAddress() {
-        return warehouseAddress;
-    }
-    public String getDate() {
-        return date;
-    }
+
     public String getComment() {
         return comment;
     }
-    public String getSenderName() {
-        return senderName;
-    }
-    public String getSenderAddress() {
-        return senderAddress;
-    }
-    public String getSenderPhone() {
-        return senderPhone;
-    }
 
-    @Override
-    public String toString()
-    {
-        return "Task: " + this.id + "\n" +
-                "State: " + this.state + "\n" +
-                "Address: " + this.address + this.content + this.receiverName + this.receiverPhone;
+    public String getDate() {
+        return date;
     }
 }

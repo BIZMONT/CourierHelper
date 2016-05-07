@@ -9,7 +9,7 @@ import android.support.v4.app.NotificationCompat;
 
 import com.bizmont.courierhelper.Activities.CompleteTaskActivity;
 import com.bizmont.courierhelper.Activities.WarehouseActivity;
-import com.bizmont.courierhelper.Point.Point;
+import com.bizmont.courierhelper.Models.Point;
 import com.bizmont.courierhelper.R;
 
 public final class Notifications
@@ -64,13 +64,13 @@ public final class Notifications
         PendingIntent resultPendingIntent;
 
         resultIntent = new Intent(context, WarehouseActivity.class);
-        resultIntent.putExtra(ExtrasNames.WAREHOUSE_ID, point.getID());
+        resultIntent.putExtra(ExtrasNames.WAREHOUSE_ID, point.getId());
         resultIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         resultPendingIntent = PendingIntent.getActivity(context, (int) System.currentTimeMillis(),
                 resultIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         nearPointNotify.setSmallIcon(R.drawable.ic_warehouse_notify)
-                .setContentText(context.getString(R.string.near_warehouse) + point.getID());
+                .setContentText(context.getString(R.string.near_warehouse) + point.getId());
 
         nearPointNotify.setContentIntent(resultPendingIntent);
         notificationManager.notify(POINT_NOTIFICATION_ID, nearPointNotify.build());
@@ -83,7 +83,7 @@ public final class Notifications
 
         resultIntent = new Intent(context, CompleteTaskActivity.class);
         resultIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        resultIntent.putExtra(ExtrasNames.TASK_ID, point.getID());
+        resultIntent.putExtra(ExtrasNames.TASK_ID, point.getId());
         resultPendingIntent = PendingIntent.getActivity(context, (int) System.currentTimeMillis(),
                 resultIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 

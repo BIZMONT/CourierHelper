@@ -1,4 +1,4 @@
-package com.bizmont.courierhelper.Point;
+package com.bizmont.courierhelper.Models;
 
 import android.content.Context;
 
@@ -7,7 +7,7 @@ import org.osmdroid.views.MapView;
 
 public abstract class Point
 {
-    protected int ID;
+    protected int id;
     protected double latitude;
     protected double longitude;
     protected String address;
@@ -25,9 +25,8 @@ public abstract class Point
     public float getRadius() {
         return radius;
     }
-
-    public int getID() {
-        return ID;
+    public int getId() {
+        return id;
     }
 
     public abstract Marker createMarker(Context context, MapView map);

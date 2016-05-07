@@ -14,16 +14,20 @@ import com.bizmont.courierhelper.OtherStuff.ExtrasNames;
 import com.bizmont.courierhelper.R;
 import com.bizmont.courierhelper.Services.GPSTracker;
 
+import java.util.ArrayList;
+
 public class WarehouseActivity extends AppCompatActivity
 {
     ListView tasksList;
-    Task[] tasks;
+    ArrayList<Task> tasks;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.warehouse_activity);
+
+
         Intent intent = getIntent();
         int id = intent.getIntExtra(ExtrasNames.WAREHOUSE_ID, 0);
         setTitle("Warehouse #" + id);
@@ -38,7 +42,7 @@ public class WarehouseActivity extends AppCompatActivity
             public void onItemClick(AdapterView<?> parent, View view, int position, long id)
             {
                 Intent intent = new Intent(getApplicationContext(), TaskDetailsActivity.class);
-                intent.putExtra(ExtrasNames.TASK_ID, tasks[position].getId());
+                intent.putExtra(ExtrasNames.TASK_ID, tasks.get(position).getId());
                 startActivity(intent);
             }
         });

@@ -5,8 +5,6 @@ public final class ExtrasNames
     public static final String TASK_ID = "Task ID";
     public static final String WAREHOUSE_ID = "Warehouse ID";
     public static final String LOCATION = "Location";
-    public static final String NMEA = "NMEA";
-    public static final String SATELLITES_IN_USE = "Satellites in use";
     public static final String IS_CREATE_ROUTE = "Create route";
     public static final String IS_REFRESH = "Is refresh";
     public static final String IS_PATH_UPDATE = "Is path";

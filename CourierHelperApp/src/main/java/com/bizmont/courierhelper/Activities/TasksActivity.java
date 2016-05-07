@@ -8,7 +8,6 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -26,18 +25,17 @@ import com.bizmont.courierhelper.R;
 import com.bizmont.courierhelper.Services.GPSTracker;
 
 import java.io.File;
+import java.util.ArrayList;
 
 public class TasksActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
-
-    private final String LOG_TAG = "TasksLog";
 
     ListView tasksList;
     TasksListViewAdapter tasksListViewAdapter;
 
     NavigationView navigationView;
 
-    Task[] tasks;
+    ArrayList<Task> tasks;
 
     FileChooser fileChooser;
 
@@ -91,8 +89,7 @@ public class TasksActivity extends AppCompatActivity
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Intent intent = new Intent(getApplicationContext(), TaskDetailsActivity.class);
-                intent.putExtra(ExtrasNames.TASK_ID, tasks[position].getId());
-                Log.d(LOG_TAG, "id " + tasks[position].getId());
+                intent.putExtra(ExtrasNames.TASK_ID, tasks.get(position).getId());
                 startActivity(intent);
             }
         });

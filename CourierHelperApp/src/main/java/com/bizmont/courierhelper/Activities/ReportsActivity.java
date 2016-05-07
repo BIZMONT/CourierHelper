@@ -201,7 +201,7 @@ public class ReportsActivity extends AppCompatActivity implements NavigationView
 
                 d  = "0" + dayOfMonth ;
             }
-            datePickerButton.setText(d + "/" + m + "/" + year);
+            datePickerButton.setText(d + "-" + m + "-" + year);
 
             reportsListViewAdapter = new ReportsListViewAdapter(ReportsActivity.this, R.layout.reports_listview_row, reports);
             reportsList.setAdapter(reportsListViewAdapter);

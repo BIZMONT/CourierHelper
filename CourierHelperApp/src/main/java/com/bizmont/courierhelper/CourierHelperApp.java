@@ -6,7 +6,7 @@ import android.app.Application;
 
 import com.bizmont.courierhelper.DataBase.DataBase;
 import com.bizmont.courierhelper.Models.Courier.Courier;
-import com.bizmont.courierhelper.Models.Courier.CourierState;
+import com.bizmont.courierhelper.Models.CourierState;
 
 import java.io.File;
 import java.util.LinkedList;

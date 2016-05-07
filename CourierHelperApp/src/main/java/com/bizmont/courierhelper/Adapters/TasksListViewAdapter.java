@@ -13,16 +13,18 @@ import android.widget.TextView;
 
 import com.bizmont.courierhelper.Activities.MapActivity;
 import com.bizmont.courierhelper.Models.Task.Task;
-import com.bizmont.courierhelper.Models.Task.TaskState;
+import com.bizmont.courierhelper.Models.TaskState;
 import com.bizmont.courierhelper.OtherStuff.ExtrasNames;
 import com.bizmont.courierhelper.R;
+
+import java.util.ArrayList;
 
 public class TasksListViewAdapter extends ArrayAdapter {
     private Context context;
     private int layoutResourceId;
-    private Task[] tasks = null;
+    private ArrayList<Task> tasks = null;
 
-    public TasksListViewAdapter(Context context, int layoutResourceId, Task[] tasks)
+    public TasksListViewAdapter(Context context, int layoutResourceId, ArrayList<Task> tasks)
     {
         super(context, layoutResourceId, tasks);
         this.layoutResourceId = layoutResourceId;
@@ -52,16 +54,16 @@ public class TasksListViewAdapter extends ArrayAdapter {
             holder = (TaskHolder)row.getTag();
         }
 
-        final Task task = tasks[position];
+        final Task task = tasks.get(position);
         holder.taskID.setText(String.valueOf(task.getId()));
         holder.taskState.setText(task.getState().toString());
-        if(task.getState() == TaskState.DELIVERED)
+        if(task.getState() == TaskState.IN_WAREHOUSE)
         {
-            holder.taskState.setTextColor(Color.GREEN);
+            holder.taskState.setTextColor(Color.parseColor("#FFC107"));
         }
         else
         {
-            holder.taskState.setTextColor(Color.RED);
+            holder.taskState.setTextColor(Color.parseColor("#03A9F4"));
         }
         holder.taskName.setText(task.getAddress());
 

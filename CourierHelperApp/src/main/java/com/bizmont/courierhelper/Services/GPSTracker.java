@@ -20,14 +20,14 @@ import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 
 import com.bizmont.courierhelper.DataBase.DataBase;
+import com.bizmont.courierhelper.Models.Point;
 import com.bizmont.courierhelper.Models.Report.Report;
-import com.bizmont.courierhelper.Models.Task.TaskState;
+import com.bizmont.courierhelper.Models.Task.Task;
+import com.bizmont.courierhelper.Models.TaskState;
+import com.bizmont.courierhelper.Models.Warehouse.Warehouse;
 import com.bizmont.courierhelper.OtherStuff.ExtrasNames;
 import com.bizmont.courierhelper.OtherStuff.Notifications;
 import com.bizmont.courierhelper.OtherStuff.PathBuilderTask;
-import com.bizmont.courierhelper.Point.DeliveryPoint;
-import com.bizmont.courierhelper.Point.Point;
-import com.bizmont.courierhelper.Point.WarehousePoint;
 import com.bizmont.courierhelper.RoadFile;
 
 import org.osmdroid.bonuspack.overlays.Polyline;
@@ -103,7 +103,8 @@ public class GPSTracker extends Service implements LocationListener
                 }
                 if (intent.getBooleanExtra(ExtrasNames.IS_CREATE_ROUTE,false))
                 {
-                    RoadFile.saveRecommendedPathToFile(getApplicationContext(), recommendedPathFile, buildOptimalPath());
+                    ArrayList<Road> roads = buildOptimalPath();
+                    RoadFile.saveRecommendedPathToFile(getApplicationContext(), recommendedPathFile, roads);
 
                     Log.d(LOG_TAG, "Route created");
                     sendPathBroadcast();
@@ -324,11 +325,11 @@ public class GPSTracker extends Service implements LocationListener
                 {
                     return true;
                 }
-                if(point.getClass() == WarehousePoint.class)
+                if(point.getClass() == Warehouse.class)
                 {
                     notifications.showWarehouseNotify(point);
                 }
-                else if(((DeliveryPoint)point).getState() != TaskState.IN_WAREHOUSE)
+                else if(((Task)point).getState() != TaskState.IN_WAREHOUSE)
                 {
                     notifications.showTargetNotify(point);
                 }
@@ -343,7 +344,7 @@ public class GPSTracker extends Service implements LocationListener
     {
         for (Point point: points)
         {
-            if(point instanceof DeliveryPoint && ((DeliveryPoint)point).getState() == TaskState.ON_THE_WAY)
+            if(point instanceof Task && ((Task)point).getState() == TaskState.ON_THE_WAY)
             {
                 return true;
             }
@@ -356,7 +357,7 @@ public class GPSTracker extends Service implements LocationListener
         routePoints.add(new GeoPoint(lastFix));
         for (Point point: points)
         {
-            if(point instanceof DeliveryPoint && ((DeliveryPoint)point).getState() == TaskState.ON_THE_WAY)
+            if(point instanceof Task && ((Task)point).getState() == TaskState.ON_THE_WAY)
             {
                 routePoints.add(new GeoPoint(point.getLatitude(), point.getLongitude()));
             }

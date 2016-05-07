@@ -1,4 +1,4 @@
-package com.bizmont.courierhelper.Models.Courier;
+package com.bizmont.courierhelper.Models;
 
 public enum CourierState
 {

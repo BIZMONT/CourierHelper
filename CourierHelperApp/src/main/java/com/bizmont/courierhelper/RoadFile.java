@@ -28,6 +28,10 @@ public final class RoadFile
     }
     public static String saveRecommendedPathToFile(Context context, File file, ArrayList<Road> path)
     {
+        if(path == null)
+        {
+            return null;
+        }
         KmlDocument kmlDocument = new KmlDocument();
         if(file.exists())
         {

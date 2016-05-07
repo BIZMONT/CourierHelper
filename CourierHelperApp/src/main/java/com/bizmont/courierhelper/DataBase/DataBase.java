@@ -7,14 +7,15 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
+import com.bizmont.courierhelper.Models.Point;
+import com.bizmont.courierhelper.Models.Receiver.Receiver;
 import com.bizmont.courierhelper.Models.Report.Report;
 import com.bizmont.courierhelper.Models.Report.ReportDetails;
+import com.bizmont.courierhelper.Models.Sender.Sender;
 import com.bizmont.courierhelper.Models.Task.Task;
-import com.bizmont.courierhelper.Models.Task.TaskDetails;
-import com.bizmont.courierhelper.Models.Task.TaskState;
-import com.bizmont.courierhelper.Point.DeliveryPoint;
-import com.bizmont.courierhelper.Point.Point;
-import com.bizmont.courierhelper.Point.WarehousePoint;
+import com.bizmont.courierhelper.Models.Task.TaskFullDetails;
+import com.bizmont.courierhelper.Models.TaskState;
+import com.bizmont.courierhelper.Models.Warehouse.Warehouse;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -42,6 +43,7 @@ public final class DataBase
     {
         DatabaseManager.releaseDatabase();
     }
+
     public static void addData(File file)
     {
         //TODO: catch parsing exceptions
@@ -56,19 +58,19 @@ public final class DataBase
 
             SQLiteDatabase database = DatabaseManager.getInstance().openDatabase();
 
-            PutTasksToDB(table, database);
+            addTasksToDB(table, database);
             Log.d(LOG_TAG,"Tasks added!");
 
             table = document.getElementsByTagName("Warehouse");
-            PutWarehousesToDB(table, database);
+            addWarehousesToDB(table, database);
             Log.d(LOG_TAG,"Warehouses added!");
 
             table = document.getElementsByTagName("Receiver");
-            PutReceiversToDB(table, database);
+            addReceiversToDB(table, database);
             Log.d(LOG_TAG,"Receivers added!");
 
             table = document.getElementsByTagName("Sender");
-            PutSendersToDB(table, database);
+            addSendersToDB(table, database);
             Log.d(LOG_TAG,"Senders added!");
 
             DatabaseManager.getInstance().closeDatabase();
@@ -78,6 +80,24 @@ public final class DataBase
             Log.d(LOG_TAG,"Error in parsing file: " + e.getMessage());
         }
     }
+    public static void addReport(Report report)
+    {
+        ContentValues contentValues = new ContentValues();
+
+        SQLiteDatabase database = DatabaseManager.getInstance().openDatabase();
+
+        contentValues.put("TaskID", report.getTaskId());
+        contentValues.put("Track", report.getTrackPath());
+        contentValues.put("RecommendedPath",report.getRecommendedPath());
+        contentValues.put("BeginTime", report.getStarTime());
+        contentValues.put("EndTime", report.getEndTime());
+        contentValues.put("Reason", report.getReason());
+
+        database.insert(Tables.REPORTS, null, contentValues);
+
+        DatabaseManager.getInstance().closeDatabase();
+    }
+
     public static void setTaskState(TaskState state, int taskId)
     {
         ContentValues contentValues = new ContentValues();
@@ -102,6 +122,8 @@ public final class DataBase
                 Tables.TASKS + ".Address AS TaskAddress, " +
                 Tables.TASKS + ".Latitude AS TaskLat, " +
                 Tables.TASKS + ".Longitude AS TaskLong, " +
+                Tables.TASKS + ".ReceiverID, " +
+                Tables.TASKS + ".SenderID, " +
                 Tables.WAREHOUSES + ".ID AS WarehouseID, " +
                 Tables.WAREHOUSES + ".Address AS WarehouseAddress, " +
                 Tables.WAREHOUSES + ".Latitude AS WarehouseLat, " +
@@ -129,28 +151,22 @@ public final class DataBase
 
             do
             {
-                points.add(new DeliveryPoint(
-                        cursor.getString(taskAddressColIndex),
-                        cursor.getDouble(taskLatColIndex),
-                        cursor.getDouble(taskLongColIndex),
-                        TaskState.Parse(cursor.getString(stateColIndex)),
-                        cursor.getInt(taskIDColIndex),
-                        cursor.getDouble(warehouseLatColIndex),
-                        cursor.getDouble(warehouseLongColIndex)
-                ));
+                points.add(new Task(cursor.getInt(taskIDColIndex),cursor.getString(taskAddressColIndex),
+                        cursor.getDouble(taskLatColIndex),cursor.getDouble(taskLongColIndex),
+                        TaskState.Parse(cursor.getString(stateColIndex)), cursor.getInt(warehouseIDColIndex)));
 
                 int warehouseID = cursor.getInt(warehouseIDColIndex);
                 if(!warehouses.contains(warehouseID))
                 {
-                    WarehousePoint warehousePoint = new WarehousePoint(
+                    Warehouse warehouse = new Warehouse(
+                            warehouseID,
                             cursor.getString(warehouseAddressColIndex),
                             cursor.getDouble(warehouseLatColIndex),
                             cursor.getDouble(warehouseLongColIndex),
-                            cursor.getFloat(warehouseRadiusColIndex),
-                            warehouseID
+                            cursor.getFloat(warehouseRadiusColIndex)
                     );
                     warehouses.add(warehouseID);
-                    points.add(warehousePoint);
+                    points.add(warehouse);
                 }
             } while (cursor.moveToNext());
         }
@@ -159,9 +175,9 @@ public final class DataBase
         DatabaseManager.getInstance().closeDatabase();
         return points;
     }
-    public static Task[] getActiveTasks(int warehouseId)
+    public static ArrayList<Task> getActiveTasks(int warehouseId)
     {
-        Task[] tasks;
+        ArrayList<Task> tasks = new ArrayList<>();
         Cursor cursor;
 
         SQLiteDatabase database = DatabaseManager.getInstance().openDatabase();
@@ -179,21 +195,22 @@ public final class DataBase
                     null, null, null);
         }
 
-        tasks = new Task[cursor.getCount()];
-
         if (cursor.moveToFirst())
         {
-            int idColIndex = cursor.getColumnIndex("ID");
-            int addressColIndex = cursor.getColumnIndex("Address");
+            int taskIDColIndex = cursor.getColumnIndex("ID");
+            int taskAddressColIndex = cursor.getColumnIndex("Address");
             int stateColIndex = cursor.getColumnIndex("State");
+            int taskLatColIndex = cursor.getColumnIndex("Latitude");
+            int taskLongColIndex = cursor.getColumnIndex("Longitude");
+            int warehouseIDColIndex = cursor.getColumnIndex("WarehouseID");
 
-            int i = 0;
             do
             {
-                tasks[i] = new Task(cursor.getInt(idColIndex),
-                        TaskState.Parse(cursor.getString(stateColIndex)),
-                        cursor.getString(addressColIndex));
-                i++;
+                Task task = new Task(cursor.getInt(taskIDColIndex),cursor.getString(taskAddressColIndex),
+                        cursor.getDouble(taskLatColIndex),cursor.getDouble(taskLongColIndex),
+                        TaskState.Parse(cursor.getString(stateColIndex)), cursor.getInt(warehouseIDColIndex));
+
+                tasks.add(task);
             } while (cursor.moveToNext());
         }
         cursor.close();
@@ -201,50 +218,32 @@ public final class DataBase
         DatabaseManager.getInstance().closeDatabase();
         return tasks;
     }
-    public static TaskDetails getTaskDetails(int taskId)
+    public static TaskFullDetails getFullTaskDetails(int taskId)
     {
-        TaskDetails taskDetails = null;
-
-        String sqlCommand = "SELECT " +
-                Tables.TASKS + ".State, " +
-                Tables.TASKS + ".Address AS ReceiverAddress, " +
-                Tables.TASKS + ".Content, " +
-                Tables.TASKS + ".Date, " +
-                Tables.TASKS + ".Comment, " +
-                Tables.RECEIVERS + ".Name, " +
-                Tables.RECEIVERS + ".Phone, " +
-                Tables.SENDERS + ".Address AS SenderAddress, " +
-                Tables.SENDERS + ".Name AS SenderName, " +
-                Tables.SENDERS + ".Phone AS SenderPhone, " +
-                Tables.WAREHOUSES + ".Address AS WarehouseAddress " +
-                "FROM " + Tables.TASKS +
-                " LEFT OUTER JOIN " + Tables.RECEIVERS + " ON " + Tables.TASKS + ".ReceiverID = " + Tables.RECEIVERS + ".ID " +
-                "LEFT OUTER JOIN " + Tables.WAREHOUSES + " ON " + Tables.TASKS + ".WarehouseID = " + Tables.WAREHOUSES + ".ID " +
-                "LEFT OUTER JOIN " + Tables.SENDERS + " ON " + Tables.TASKS + ".SenderID = " + Tables.SENDERS + ".ID " +
-                "WHERE " + Tables.TASKS + ".ID = ?;";
+        TaskFullDetails taskFullDetails = null;
 
         Cursor cursor;
         SQLiteDatabase database = DatabaseManager.getInstance().openDatabase();
 
-        cursor = database.rawQuery(sqlCommand,new String[]{Integer.toString(taskId)});
+        cursor = database.query(Tables.TASKS, null, "ID = ?", new String[]{String.valueOf(taskId)}, null, null, null);
 
         if (cursor.moveToFirst())
         {
             do
             {
-                taskDetails = new TaskDetails(
+                taskFullDetails = new TaskFullDetails(
                         taskId,
+                        cursor.getString(cursor.getColumnIndex("Address")),
+                        cursor.getDouble(cursor.getColumnIndex("Latitude")),
+                        cursor.getDouble(cursor.getColumnIndex("Longitude")),
                         TaskState.Parse(cursor.getString(cursor.getColumnIndex("State"))),
-                        cursor.getString(cursor.getColumnIndex("ReceiverAddress")),
+                        cursor.getInt(cursor.getColumnIndex("ReceiverID")),
+                        cursor.getInt(cursor.getColumnIndex("SenderID")),
+                        cursor.getInt(cursor.getColumnIndex("WarehouseID")),
                         cursor.getString(cursor.getColumnIndex("Content")),
-                        cursor.getString(cursor.getColumnIndex("Name")),
-                        cursor.getString(cursor.getColumnIndex("Phone")),
-                        cursor.getString(cursor.getColumnIndex("WarehouseAddress")),
                         cursor.getString(cursor.getColumnIndex("Date")),
                         cursor.getString(cursor.getColumnIndex("Comment")),
-                        cursor.getString(cursor.getColumnIndex("SenderName")),
-                        cursor.getString(cursor.getColumnIndex("SenderAddress")),
-                        cursor.getString(cursor.getColumnIndex("SenderPhone"))
+                        cursor.getString(cursor.getColumnIndex("Code"))
                         );
             } while (cursor.moveToNext());
         }
@@ -252,7 +251,7 @@ public final class DataBase
         cursor.close();
         DatabaseManager.getInstance().closeDatabase();
 
-        return taskDetails;
+        return taskFullDetails;
     }
     public static String getTaskCode(int taskId)
     {
@@ -275,137 +274,6 @@ public final class DataBase
         DatabaseManager.getInstance().closeDatabase();
 
         return result;
-    }
-
-    private static void PutReceiversToDB(NodeList receivers, SQLiteDatabase database)
-    {
-        ContentValues contentValues = new ContentValues();
-
-        for (int i = 0; i < receivers.getLength(); i++)
-        {
-            Node receiver = receivers.item(i);
-            if (receiver.getNodeType() == Node.ELEMENT_NODE)
-            {
-                Element element = (Element) receiver;
-
-                Cursor cursor = database.query(Tables.RECEIVERS, new String[]{"ID"}, "ID=?",
-                        new String[]{element.getAttribute("ID")}, null, null, null);
-                if(cursor.getCount() == 0) {
-
-                    contentValues.put("ID", Integer.parseInt(element.getAttribute("ID")));
-                    contentValues.put("Name", element.getAttribute("Name"));
-                    contentValues.put("Phone", element.getAttribute("Phone"));
-
-                    database.insert(Tables.RECEIVERS, null, contentValues);
-                }
-                cursor.close();
-            }
-        }
-    }
-    private static void PutWarehousesToDB(NodeList warehouses, SQLiteDatabase database)
-    {
-        ContentValues contentValues = new ContentValues();
-
-        for (int i = 0; i < warehouses.getLength(); i++)
-        {
-            Node warehouse = warehouses.item(i);
-            if (warehouse.getNodeType() == Node.ELEMENT_NODE)
-            {
-                Element element = (Element) warehouse;
-
-                Cursor cursor = database.query(Tables.WAREHOUSES, new String[]{"ID"}, "ID=?",
-                        new String[]{element.getAttribute("ID")}, null, null, null);
-                if(cursor.getCount() == 0) {
-                    contentValues.put("ID", Integer.parseInt(element.getAttribute("ID")));
-                    contentValues.put("Address", element.getAttribute("Address"));
-                    contentValues.put("Latitude", Float.parseFloat(element.getAttribute("Latitude")));
-                    contentValues.put("Longitude", Float.parseFloat(element.getAttribute("Longitude")));
-                    contentValues.put("Radius", Float.parseFloat(element.getAttribute("Radius")));
-
-                    database.insert(Tables.WAREHOUSES, null, contentValues);
-                }
-                cursor.close();
-            }
-        }
-    }
-    private static void PutTasksToDB(NodeList tasks, SQLiteDatabase database)
-    {
-        ContentValues contentValues = new ContentValues();
-
-        for (int i = 0; i < tasks.getLength(); i++)
-        {
-            Node task = tasks.item(i);
-
-            if (task.getNodeType() == Node.ELEMENT_NODE)
-            {
-                Element element = (Element) task;
-
-                Cursor cursor = database.query(Tables.TASKS, new String[]{"ID"}, "ID=?",
-                        new String[]{element.getAttribute("ID")}, null, null, null);
-                if(cursor.getCount() == 0)
-                {
-                    contentValues.put("ID", Integer.parseInt(element.getAttribute("ID")));
-                    contentValues.put("State", TaskState.IN_WAREHOUSE.toString());
-                    contentValues.put("Content", element.getAttribute("Content"));
-                    contentValues.put("ReceiverID", Integer.parseInt(element.getAttribute("ReceiverID")));
-                    contentValues.put("SenderID", Integer.parseInt(element.getAttribute("SenderID")));
-                    contentValues.put("Address", element.getAttribute("Address"));
-                    contentValues.put("Latitude", Float.parseFloat(element.getAttribute("Latitude")));
-                    contentValues.put("Longitude", Float.parseFloat(element.getAttribute("Longitude")));
-                    contentValues.put("WarehouseID", Integer.parseInt(element.getAttribute("WarehouseID")));
-                    contentValues.put("Date", element.getAttribute("Date"));
-                    contentValues.put("Comment", element.getAttribute("Comment"));
-                    contentValues.put("Code", element.getAttribute("Code"));
-
-                    database.insert(Tables.TASKS, null, contentValues);
-                }
-                cursor.close();
-            }
-        }
-    }
-    private static void PutSendersToDB(NodeList senders, SQLiteDatabase database)
-    {
-        ContentValues contentValues = new ContentValues();
-
-        for (int i = 0; i < senders.getLength(); i++)
-        {
-            Node sender = senders.item(i);
-            if (sender.getNodeType() == Node.ELEMENT_NODE)
-            {
-                Element element = (Element) sender;
-
-                Cursor cursor = database.query(Tables.SENDERS, new String[]{"ID"}, "ID=?",
-                        new String[]{element.getAttribute("ID")}, null, null, null);
-                if(cursor.getCount() == 0) {
-
-                    contentValues.put("ID", Integer.parseInt(element.getAttribute("ID")));
-                    contentValues.put("Name", element.getAttribute("Name"));
-                    contentValues.put("Phone", element.getAttribute("Phone"));
-                    contentValues.put("Address", element.getAttribute("Address"));
-
-                    database.insert(Tables.SENDERS, null, contentValues);
-                }
-                cursor.close();
-            }
-        }
-    }
-
-    public static void addReport(Report report)
-    {
-        ContentValues contentValues = new ContentValues();
-
-        SQLiteDatabase database = DatabaseManager.getInstance().openDatabase();
-
-        contentValues.put("TaskID", report.getTaskId());
-        contentValues.put("Track", report.getTrackPath());
-        contentValues.put("RecommendedPath",report.getRecommendedPath());
-        contentValues.put("BeginTime", report.getStarTime());
-        contentValues.put("EndTime", report.getEndTime());
-        contentValues.put("Reason", report.getReason());
-
-        database.insert(Tables.REPORTS, null, contentValues);
-
-        DatabaseManager.getInstance().closeDatabase();
     }
 
     public static ArrayList<Report> getReportsWithDate(String date)
@@ -446,7 +314,6 @@ public final class DataBase
 
         return reports;
     }
-
     public static ReportDetails getReportDetails(int id)
     {
         Cursor cursor;
@@ -482,6 +349,202 @@ public final class DataBase
         DatabaseManager.getInstance().closeDatabase();
 
         return reportDetails;
+    }
+
+    public static Sender getSender(int senderId)
+    {
+        Cursor cursor;
+        Sender sender = null;
+
+        SQLiteDatabase database = DatabaseManager.getInstance().openDatabase();
+        cursor = database.query(Tables.SENDERS, null, "ID = ?", new String[]{String.valueOf(senderId)}, null, null, null);
+
+        if (cursor.moveToFirst())
+        {
+            int idColIndex = cursor.getColumnIndex("ID");
+            int nameColIndex = cursor.getColumnIndex("Name");
+            int addressColIndex = cursor.getColumnIndex("Address");
+            int phoneColIndex = cursor.getColumnIndex("Phone");
+
+            do
+            {
+                sender = new Sender(cursor.getInt(idColIndex), cursor.getString(nameColIndex),
+                        cursor.getString(addressColIndex),cursor.getString(phoneColIndex));
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+
+        DatabaseManager.getInstance().closeDatabase();
+
+        return sender;
+    }
+    public static Receiver getReceiver(int receiverId)
+    {
+        Cursor cursor;
+        Receiver receiver = null;
+
+        SQLiteDatabase database = DatabaseManager.getInstance().openDatabase();
+        cursor = database.query(Tables.RECEIVERS, null, "ID = ?", new String[]{String.valueOf(receiverId)}, null, null, null);
+
+        if (cursor.moveToFirst())
+        {
+            int idColIndex = cursor.getColumnIndex("ID");
+            int nameColIndex = cursor.getColumnIndex("Name");
+            int phoneColIndex = cursor.getColumnIndex("Phone");
+
+            do
+            {
+                receiver = new Receiver(cursor.getInt(idColIndex), cursor.getString(nameColIndex),
+                        cursor.getString(phoneColIndex));
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+
+        DatabaseManager.getInstance().closeDatabase();
+
+        return receiver;
+    }
+    public static Warehouse getWarehouse(int warehouseId) {
+        Cursor cursor;
+        Warehouse warehouse = null;
+
+        SQLiteDatabase database = DatabaseManager.getInstance().openDatabase();
+        cursor = database.query(Tables.WAREHOUSES, null, "ID = ?", new String[]{String.valueOf(warehouseId)}, null, null, null);
+
+        if (cursor.moveToFirst())
+        {
+            int idColIndex = cursor.getColumnIndex("ID");
+            int address = cursor.getColumnIndex("Address");
+            int latColIndex = cursor.getColumnIndex("Latitude");
+            int longColIndex = cursor.getColumnIndex("Longitude");
+            int radColIndex = cursor.getColumnIndex("Radius");
+
+            do
+            {
+                warehouse = new Warehouse(cursor.getInt(idColIndex), cursor.getString(address),
+                        cursor.getDouble(latColIndex),cursor.getDouble(longColIndex),
+                        cursor.getFloat(radColIndex));
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+
+        DatabaseManager.getInstance().closeDatabase();
+
+        return warehouse;
+    }
+
+
+    private static void addReceiversToDB(NodeList receivers, SQLiteDatabase database)
+    {
+        ContentValues contentValues = new ContentValues();
+
+        for (int i = 0; i < receivers.getLength(); i++)
+        {
+            Node receiver = receivers.item(i);
+            if (receiver.getNodeType() == Node.ELEMENT_NODE)
+            {
+                Element element = (Element) receiver;
+
+                Cursor cursor = database.query(Tables.RECEIVERS, new String[]{"ID"}, "ID=?",
+                        new String[]{element.getAttribute("ID")}, null, null, null);
+                if(cursor.getCount() == 0) {
+
+                    contentValues.put("ID", Integer.parseInt(element.getAttribute("ID")));
+                    contentValues.put("Name", element.getAttribute("Name"));
+                    contentValues.put("Phone", element.getAttribute("Phone"));
+
+                    database.insert(Tables.RECEIVERS, null, contentValues);
+                }
+                cursor.close();
+            }
+        }
+    }
+    private static void addWarehousesToDB(NodeList warehouses, SQLiteDatabase database)
+    {
+        ContentValues contentValues = new ContentValues();
+
+        for (int i = 0; i < warehouses.getLength(); i++)
+        {
+            Node warehouse = warehouses.item(i);
+            if (warehouse.getNodeType() == Node.ELEMENT_NODE)
+            {
+                Element element = (Element) warehouse;
+
+                Cursor cursor = database.query(Tables.WAREHOUSES, new String[]{"ID"}, "ID=?",
+                        new String[]{element.getAttribute("ID")}, null, null, null);
+                if(cursor.getCount() == 0) {
+                    contentValues.put("ID", Integer.parseInt(element.getAttribute("ID")));
+                    contentValues.put("Address", element.getAttribute("Address"));
+                    contentValues.put("Latitude", Float.parseFloat(element.getAttribute("Latitude")));
+                    contentValues.put("Longitude", Float.parseFloat(element.getAttribute("Longitude")));
+                    contentValues.put("Radius", Float.parseFloat(element.getAttribute("Radius")));
+
+                    database.insert(Tables.WAREHOUSES, null, contentValues);
+                }
+                cursor.close();
+            }
+        }
+    }
+    private static void addTasksToDB(NodeList tasks, SQLiteDatabase database)
+    {
+        ContentValues contentValues = new ContentValues();
+
+        for (int i = 0; i < tasks.getLength(); i++)
+        {
+            Node task = tasks.item(i);
+
+            if (task.getNodeType() == Node.ELEMENT_NODE)
+            {
+                Element element = (Element) task;
+
+                Cursor cursor = database.query(Tables.TASKS, new String[]{"ID"}, "ID=?",
+                        new String[]{element.getAttribute("ID")}, null, null, null);
+                if(cursor.getCount() == 0)
+                {
+                    contentValues.put("ID", Integer.parseInt(element.getAttribute("ID")));
+                    contentValues.put("State", TaskState.IN_WAREHOUSE.toString());
+                    contentValues.put("Content", element.getAttribute("Content"));
+                    contentValues.put("ReceiverID", Integer.parseInt(element.getAttribute("ReceiverID")));
+                    contentValues.put("SenderID", Integer.parseInt(element.getAttribute("SenderID")));
+                    contentValues.put("Address", element.getAttribute("Address"));
+                    contentValues.put("Latitude", Float.parseFloat(element.getAttribute("Latitude")));
+                    contentValues.put("Longitude", Float.parseFloat(element.getAttribute("Longitude")));
+                    contentValues.put("WarehouseID", Integer.parseInt(element.getAttribute("WarehouseID")));
+                    contentValues.put("Date", element.getAttribute("Date"));
+                    contentValues.put("Comment", element.getAttribute("Comment"));
+                    contentValues.put("Code", element.getAttribute("Code"));
+
+                    database.insert(Tables.TASKS, null, contentValues);
+                }
+                cursor.close();
+            }
+        }
+    }
+    private static void addSendersToDB(NodeList senders, SQLiteDatabase database)
+    {
+        ContentValues contentValues = new ContentValues();
+
+        for (int i = 0; i < senders.getLength(); i++)
+        {
+            Node sender = senders.item(i);
+            if (sender.getNodeType() == Node.ELEMENT_NODE)
+            {
+                Element element = (Element) sender;
+
+                Cursor cursor = database.query(Tables.SENDERS, new String[]{"ID"}, "ID=?",
+                        new String[]{element.getAttribute("ID")}, null, null, null);
+                if(cursor.getCount() == 0) {
+
+                    contentValues.put("ID", Integer.parseInt(element.getAttribute("ID")));
+                    contentValues.put("Name", element.getAttribute("Name"));
+                    contentValues.put("Phone", element.getAttribute("Phone"));
+                    contentValues.put("Address", element.getAttribute("Address"));
+
+                    database.insert(Tables.SENDERS, null, contentValues);
+                }
+                cursor.close();
+            }
+        }
     }
 }
 
@@ -541,13 +604,13 @@ class DataBaseHelper extends SQLiteOpenHelper
                 "(" +
                 "ID integer PRIMARY KEY, " +
                 "State text, " +
-                "Content text, " +
                 "ReceiverID integer, " +
                 "SenderID integer, " +
                 "Address text, " +
                 "Latitude real, " +
                 "Longitude real, " +
                 "WarehouseID integer, " +
+                "Content text, " +
                 "Date text, " +
                 "Comment text, " +
                 "Code text, " +

@@ -10,7 +10,7 @@ import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
 import com.bizmont.courierhelper.Models.Report.Report;
-import com.bizmont.courierhelper.Models.Task.TaskState;
+import com.bizmont.courierhelper.Models.TaskState;
 import com.bizmont.courierhelper.R;
 
 import java.util.ArrayList;

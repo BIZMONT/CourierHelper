@@ -48,6 +48,24 @@ public class CompleteTaskActivity extends AppCompatActivity
         correctCode = (ImageView)findViewById(R.id.complete_correct);
 
         code = DataBase.getTaskCode(taskId);
+
+        codeEdit.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus)
+            {
+                if(!hasFocus)
+                {
+                    if(!TaskCodeDecoder.isMatches(String.valueOf(taskId), code, codeEdit.getText().toString()))
+                    {
+                        correctCode.setVisibility(View.VISIBLE);
+                    }
+                    else
+                    {
+                        correctCode.setVisibility(View.INVISIBLE);
+                    }
+                }
+            }
+        });
     }
 
     public void onTypeSwitched(View view)
@@ -90,5 +108,12 @@ public class CompleteTaskActivity extends AppCompatActivity
         }
         intent.putExtra(ExtrasNames.COMPLETE_TASK, taskId);
         onBackPressed();
+    }
+
+    public void onClickTaskDetails(View view)
+    {
+        Intent intent = new Intent(getApplicationContext(), TaskDetailsActivity.class);
+        intent.putExtra(ExtrasNames.TASK_ID, taskId);
+        startActivity(intent);
     }
 }

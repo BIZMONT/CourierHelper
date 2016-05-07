@@ -1,23 +1,24 @@
-package com.bizmont.courierhelper.Point;
+package com.bizmont.courierhelper.Models.Warehouse;
 
 import android.content.Context;
 import android.support.v4.content.ContextCompat;
 
+import com.bizmont.courierhelper.Models.Point;
 import com.bizmont.courierhelper.R;
 
 import org.osmdroid.bonuspack.overlays.Marker;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
 
-public class WarehousePoint extends Point
+public class Warehouse extends Point
 {
-    public WarehousePoint(String address, double latitude, double longitude, float radius, int ID)
+    public Warehouse(int id, String address, double latitude, double longitude, float radius)
     {
         this.address = address;
         this.latitude = latitude;
         this.longitude = longitude;
         this.radius = radius;
-        this.ID = ID;
+        this.id = id;
     }
 
     @Override

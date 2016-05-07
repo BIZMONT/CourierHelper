@@ -50,6 +50,8 @@ public class ReportDetailsActivity extends AppCompatActivity {
         if(id != 0)
         {
             details = DataBase.getReportDetails(id);
+            setTitle(getString(R.string.task_number) + details.getTaskId());
+
             startTime = (TextView)findViewById(R.id.report_begin_time);
             startTime.setText(details.getStarTime());
             endTime = (TextView)findViewById(R.id.report_end_time);

@@ -11,15 +11,17 @@ import android.widget.TextView;
 
 import com.bizmont.courierhelper.DataBase.DataBase;
 import com.bizmont.courierhelper.Models.Task.Task;
-import com.bizmont.courierhelper.Models.Task.TaskState;
+import com.bizmont.courierhelper.Models.TaskState;
 import com.bizmont.courierhelper.R;
+
+import java.util.ArrayList;
 
 public class WarehouseTasksListViewAdapter extends ArrayAdapter {
     private Context context;
     private int layoutResourceId;
-    private Task[] tasks = null;
+    private ArrayList<Task> tasks = null;
 
-    public WarehouseTasksListViewAdapter(Context context, int layoutResourceId, Task[] tasks)
+    public WarehouseTasksListViewAdapter(Context context, int layoutResourceId, ArrayList<Task>  tasks)
     {
         super(context, layoutResourceId, tasks);
         this.layoutResourceId = layoutResourceId;
@@ -48,13 +50,13 @@ public class WarehouseTasksListViewAdapter extends ArrayAdapter {
             holder = (Holder)row.getTag();
         }
 
-        holder.taskID.setText(String.valueOf(tasks[position].getId()));
-        if (tasks[position].getState() == TaskState.ON_THE_WAY)
+        holder.taskID.setText(String.valueOf(tasks.get(position).getId()));
+        if (tasks.get(position).getState() == TaskState.ON_THE_WAY)
         {
             holder.checkBox.setChecked(true);
         }
 
-        holder.checkBox.setOnClickListener(new CheckBoxOnClickListener(tasks[position].getId()) {
+        holder.checkBox.setOnClickListener(new CheckBoxOnClickListener(tasks.get(position).getId()) {
             @Override
             public void onClick(View v)
             {
