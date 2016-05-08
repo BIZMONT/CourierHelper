@@ -13,7 +13,6 @@
     <string name="task_number">Замовлення №</string>
     <string name="title_activity_tasks">Активні завдання</string>
     <string name="title_activity_task_info">Деталі завдання</string>
-    <string name="complete_button">Завершити</string>
     <string name="show_on_map">Показати на карті</string>
     <string name="address">Адреса</string>
     <string name="comments">Коментар</string>
@@ -31,7 +30,9 @@
     <string name="get_tasks">Отримати завдання</string>
     <string name="near_target">Ви біля точки доставки №</string>
     <string name="near_warehouse">Ви біля складу №</string>
-    <string name="open_warehouse">Відкрити</string>
     <string name="service_work">Сервіс активний</string>
     <string name="unknown_user">Невідомий користувач</string>
+    <string name="code_accepted">Код прийнято</string>
+    <string name="empty_task"></string>
+    <string name="enter_code_here">Введіть код сюди:</string>
 </resources>

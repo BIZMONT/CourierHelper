@@ -3,7 +3,6 @@ package com.bizmont.courierhelper.Adapters;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,7 +12,6 @@ import android.widget.TextView;
 
 import com.bizmont.courierhelper.Activities.MapActivity;
 import com.bizmont.courierhelper.Models.Task.Task;
-import com.bizmont.courierhelper.Models.TaskState;
 import com.bizmont.courierhelper.OtherStuff.ExtrasNames;
 import com.bizmont.courierhelper.R;
 
@@ -57,14 +55,6 @@ public class TasksListViewAdapter extends ArrayAdapter {
         final Task task = tasks.get(position);
         holder.taskID.setText(String.valueOf(task.getId()));
         holder.taskState.setText(task.getState().toString());
-        if(task.getState() == TaskState.IN_WAREHOUSE)
-        {
-            holder.taskState.setTextColor(Color.parseColor("#FFC107"));
-        }
-        else
-        {
-            holder.taskState.setTextColor(Color.parseColor("#03A9F4"));
-        }
         holder.taskName.setText(task.getAddress());
 
         ImageButton imageButton = (ImageButton)row.findViewById(R.id.task_row_show);

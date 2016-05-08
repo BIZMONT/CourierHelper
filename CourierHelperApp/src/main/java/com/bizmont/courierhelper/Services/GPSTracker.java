@@ -85,7 +85,7 @@ public class GPSTracker extends Service implements LocationListener
         track = new Polyline(this);
         networkLocationIgnorer = new NetworkLocationIgnorer();
         recommendedPathFile = new File(getFilesDir() + "/kml","recommended_path.kml");
-        simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss",getResources().getConfiguration().locale);
 
         broadcastReceiver = new BroadcastReceiver() {
             @Override
@@ -248,10 +248,6 @@ public class GPSTracker extends Service implements LocationListener
         if(isLocationValid(location))
         {
             sendLocationBroadcast(location);
-            if(isOnPoint(location))
-            {
-
-            }
             if(isOnTheWayExist())
             {
                 track.getPoints().add(new GeoPoint(location.getLatitude(),location.getLongitude()));

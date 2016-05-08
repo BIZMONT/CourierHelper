@@ -274,12 +274,12 @@ public class MapActivity extends AppCompatActivity implements NavigationView.OnN
     protected void onPause() {
         super.onPause();
         Log.d(LOG_TAG, "MapActivity onPause");
+        unregisterReceiver(broadcastReceiver);
         unbindService(serviceConnection);
     }
     @Override
     protected void onDestroy() {
         Log.d(LOG_TAG, "MapActivity onDestroy");
-        unregisterReceiver(broadcastReceiver);
         super.onDestroy();
     }
     @Override

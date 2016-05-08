@@ -53,9 +53,7 @@ public class TasksActivity extends AppCompatActivity
             public void fileSelected(File file) {
                 DataBase.addData(file);
 
-                tasks = DataBase.getActiveTasks(0);
-                tasksListViewAdapter = new TasksListViewAdapter(TasksActivity.this, R.layout.tasks_listview_row, tasks);
-                tasksList.setAdapter(tasksListViewAdapter);
+                updateList();
 
                 Intent locationIntent = new Intent(GPSTracker.BROADCAST_RECEIVE_ACTION);
                 locationIntent.putExtra(ExtrasNames.IS_UPDATE_POINTS, true);
@@ -81,10 +79,6 @@ public class TasksActivity extends AppCompatActivity
 
         tasks = DataBase.getActiveTasks(0);
 
-        tasksList = (ListView) findViewById(R.id.tasks_listview);
-        tasksListViewAdapter = new TasksListViewAdapter(TasksActivity.this, R.layout.tasks_listview_row, tasks);
-        tasksList.setAdapter(tasksListViewAdapter);
-
         tasksList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -99,6 +93,7 @@ public class TasksActivity extends AppCompatActivity
     protected void onResume()
     {
         super.onResume();
+        updateList();
         if (!navigationView.getMenu().findItem(R.id.nav_tasks).isChecked())
         {
             navigationView.getMenu().findItem(R.id.nav_tasks).setChecked(true);
@@ -162,5 +157,12 @@ public class TasksActivity extends AppCompatActivity
         assert drawer != null;
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    private void updateList()
+    {
+        tasks = DataBase.getActiveTasks(0);
+        tasksListViewAdapter = new TasksListViewAdapter(TasksActivity.this, R.layout.tasks_listview_row, tasks);
+        tasksList.setAdapter(tasksListViewAdapter);
     }
 }

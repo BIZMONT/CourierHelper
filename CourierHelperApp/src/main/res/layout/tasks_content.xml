@@ -6,9 +6,9 @@
     android:layout_height="match_parent"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context="com.bizmont.courierhelper.Activities.TasksActivity"
-    tools:showIn="@layout/tasks_app_bar">
+    tools:showIn="@layout/tasks_app_bar"
+    android:background="@color/deep_background">
     <ListView
-        android:id="@+id/tasks_listview"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:divider="#00000000" />
