@@ -279,11 +279,12 @@ public final class DataBase
     public static ArrayList<Report> getReportsWithDate(String date)
     {
         ArrayList<Report> reports = new ArrayList<>();
-        date = date.substring(0,9);
+        date = date.substring(0,10);
+        Log.d(LOG_TAG, "Date " + date);
         Cursor cursor;
 
         SQLiteDatabase database = DatabaseManager.getInstance().openDatabase();
-        cursor = database.query(Tables.REPORTS, null, "EndTime = ?", new String[]{date}, null, null, null);
+        cursor = database.query(Tables.REPORTS, null, "EndTime LIKE ?", new String[]{date + "%"}, null, null, null);
 
         if (cursor.moveToFirst())
         {
@@ -311,7 +312,6 @@ public final class DataBase
         cursor.close();
 
         DatabaseManager.getInstance().closeDatabase();
-
         return reports;
     }
     public static ReportDetails getReportDetails(int id)
@@ -636,7 +636,7 @@ class DataBaseHelper extends SQLiteOpenHelper
                 "(" +
                 "ID integer PRIMARY KEY AUTOINCREMENT, " +
                 "TaskID integer, " +
-                "Track text" +
+                "Track text, " +
                 "RecommendedPath text," +
                 "BeginTime text," +
                 "EndTime text," +

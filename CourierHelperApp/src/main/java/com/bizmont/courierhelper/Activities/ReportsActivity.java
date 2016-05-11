@@ -73,7 +73,7 @@ public class ReportsActivity extends AppCompatActivity implements NavigationView
 
         Calendar cal = Calendar.getInstance();
         year = cal.get(Calendar.YEAR);
-        month = cal.get(Calendar.MONTH) + 1;
+        month = cal.get(Calendar.MONTH);
         day = cal.get(Calendar.DAY_OF_MONTH);
 
         String m = String.valueOf(month);
@@ -201,8 +201,8 @@ public class ReportsActivity extends AppCompatActivity implements NavigationView
 
                 d  = "0" + dayOfMonth ;
             }
-            datePickerButton.setText(d + "-" + m + "-" + year);
-
+            datePickerButton.setText(year + "-" + m + "-" + d);
+            reports = DataBase.getReportsWithDate(datePickerButton.getText().toString());
             reportsListViewAdapter = new ReportsListViewAdapter(ReportsActivity.this, R.layout.reports_listview_row, reports);
             reportsList.setAdapter(reportsListViewAdapter);
         }

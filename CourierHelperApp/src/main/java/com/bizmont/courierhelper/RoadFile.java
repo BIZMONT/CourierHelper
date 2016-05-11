@@ -3,12 +3,14 @@ package com.bizmont.courierhelper;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.util.Log;
 
 import org.osmdroid.bonuspack.kml.KmlDocument;
 import org.osmdroid.bonuspack.overlays.FolderOverlay;
 import org.osmdroid.bonuspack.overlays.Polyline;
 import org.osmdroid.bonuspack.routing.Road;
 import org.osmdroid.bonuspack.routing.RoadManager;
+import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
 
 import java.io.File;
@@ -48,6 +50,10 @@ public final class RoadFile
     }
     public static String saveTrackToFile(File file, Polyline track)
     {
+        Log.d("File road", "Saving track to file");
+        for (GeoPoint point:track.getPoints()) {
+            Log.d("File road", "Point: " + point.getLatitude() + ", " + point.getLongitude());
+        }
         KmlDocument kmlDocument = new KmlDocument();
         kmlDocument.mKmlRoot.addOverlay(track,kmlDocument);
         kmlDocument.saveAsKML(file);

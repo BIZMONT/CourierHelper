@@ -77,8 +77,7 @@ public class TasksActivity extends AppCompatActivity
         ((TextView)headerView.findViewById(R.id.courier_name)).setText(Courier.getInstance().getName());
         ((TextView)headerView.findViewById(R.id.courier_status)).setText(Courier.getInstance().getState().toString());
 
-        tasks = DataBase.getActiveTasks(0);
-
+        tasksList = (ListView) findViewById(R.id.tasks_listview);
         tasksList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {

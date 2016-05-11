@@ -67,7 +67,7 @@ public class GPSTracker extends Service implements LocationListener
     private boolean isLocationDisabled;
 
     ArrayList<Point> points;
-    Polyline track;
+    ArrayList<GeoPoint> track;
 
     BroadcastReceiver broadcastReceiver;
     Notifications notifications;
@@ -82,7 +82,7 @@ public class GPSTracker extends Service implements LocationListener
     public void onCreate() {
         super.onCreate();
 
-        track = new Polyline(this);
+        track = new ArrayList<>();
         networkLocationIgnorer = new NetworkLocationIgnorer();
         recommendedPathFile = new File(getFilesDir() + "/kml","recommended_path.kml");
         simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss",getResources().getConfiguration().locale);
@@ -112,8 +112,12 @@ public class GPSTracker extends Service implements LocationListener
                 int completedTask = intent.getIntExtra(ExtrasNames.COMPLETE_TASK,0);
                 if(completedTask != 0)
                 {
+                    Log.d(LOG_TAG, "Complete task" + completedTask);
                     String reason = intent.getStringExtra(ExtrasNames.REASON);
                     completeTask(completedTask, reason);
+
+                    points = DataBase.getTargetPoints();
+                    isOnPoint(lastFix);
                 }
             }
         };
@@ -190,6 +194,12 @@ public class GPSTracker extends Service implements LocationListener
         isOnPoint(lastFix);
     }
 
+    @Override
+    public boolean onUnbind(Intent intent) {
+        Log.d(LOG_TAG,"Service onUnbind");
+        return true;
+    }
+
     //LocationListener overridden methods
     @Override
     public void onLocationChanged(Location location) {
@@ -248,14 +258,23 @@ public class GPSTracker extends Service implements LocationListener
         if(isLocationValid(location))
         {
             sendLocationBroadcast(location);
+            if(isOnPoint(location))
+            {
+
+            }
             if(isOnTheWayExist())
             {
-                track.getPoints().add(new GeoPoint(location.getLatitude(),location.getLongitude()));
+                track.add(new GeoPoint(location.getLatitude(),location.getLongitude()));
+                Log.d(LOG_TAG, "Added point(" + location.getLatitude() + ", " + location.getLongitude() + ") to track");
+                Log.d(LOG_TAG, "umber of points: " + track.size());
             }
             else
             {
                 recommendedPathFile.delete();
-                track = new Polyline(this);
+                sendPathBroadcast();
+                track.clear();
+                Log.d(LOG_TAG, "Track and path was cleared");
+                Log.d(LOG_TAG, "Track size:"+ track.size());
             }
         }
     }
@@ -285,6 +304,7 @@ public class GPSTracker extends Service implements LocationListener
 
         if(networkLocationIgnorer.shouldIgnore(location.getProvider(),currentTime))
         {
+            Log.d(LOG_TAG, "Location was ignored: " + location.getLatitude() + " " + location.getLongitude());
             return false;
         }
 
@@ -300,7 +320,7 @@ public class GPSTracker extends Service implements LocationListener
                 return  false;
             }
             lastFix = location;
-            Log.d(LOG_TAG,"Last fix changed to" + lastFix.getLatitude() + " " + lastFix.getLongitude());
+            Log.d(LOG_TAG,"Last fix changed to " + lastFix.getLatitude() + ", " + lastFix.getLongitude());
             return true;
         }
         return false;
@@ -375,6 +395,7 @@ public class GPSTracker extends Service implements LocationListener
     {
         if(createReport(completedTask, reason))
         {
+            Log.d(LOG_TAG, "Report created for task " + completedTask);
             if(reason == null)
             {
                 DataBase.setTaskState(TaskState.DELIVERED, completedTask);
@@ -395,13 +416,21 @@ public class GPSTracker extends Service implements LocationListener
         try
         {
             File trackFile = new File(getFilesDir() + "/kml/tracks", String.valueOf(taskId) + ".kml");
-            trackFilePath = RoadFile.saveTrackToFile(trackFile, track);
+            Log.d(LOG_TAG,"Number of points: " + track.size());
+
+            Polyline trackLine = new Polyline(this);
+            trackLine.setPoints(track);
+
+            trackFilePath = RoadFile.saveTrackToFile(trackFile, trackLine);
+            Log.d(LOG_TAG, "Track saved for task #" + taskId + " to " + trackFilePath);
             copyFile(recommendedPathFile,recommended);
+            Log.d(LOG_TAG, "Recommended path for task " + taskId + " saved to " + recommended.getAbsolutePath());
 
             DataBase.addReport(new Report(0, taskId, recommended.getAbsolutePath(), trackFilePath, startTime, endTime, reason));
         }
         catch (IOException ex)
         {
+            Log.d(LOG_TAG, "Exception" + ex.getMessage());
             return false;
         }
         return true;

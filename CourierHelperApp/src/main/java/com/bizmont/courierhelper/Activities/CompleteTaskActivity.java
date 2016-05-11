@@ -53,10 +53,11 @@ public class CompleteTaskActivity extends AppCompatActivity
             @Override
             public void onFocusChange(View v, boolean hasFocus)
             {
+                EditText editText = (EditText)v;
                 if(!hasFocus)
                 {
-                    if(!TaskCodeDecoder.isMatches(String.valueOf(taskId), code, codeEdit.getText().toString()))
-                    {
+                    if (editText.getText().length() == 8 &&
+                            !TaskCodeDecoder.isMatches(String.valueOf(taskId), code, editText.getText().toString())) {
                         correctCode.setVisibility(View.VISIBLE);
                     }
                     else
@@ -107,6 +108,7 @@ public class CompleteTaskActivity extends AppCompatActivity
             }
         }
         intent.putExtra(ExtrasNames.COMPLETE_TASK, taskId);
+        sendBroadcast(intent);
         onBackPressed();
     }
 
