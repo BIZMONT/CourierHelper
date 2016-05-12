@@ -2,7 +2,7 @@ package com.bizmont.courierhelper;
 
 
 import android.content.Context;
-import android.graphics.Color;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 
 import org.osmdroid.bonuspack.kml.KmlDocument;
@@ -14,6 +14,11 @@ import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 
 public final class RoadFile
@@ -42,7 +47,8 @@ public final class RoadFile
         for (Road road:path)
         {
             Polyline pathPart = RoadManager.buildRoadOverlay(road, context);
-            pathPart.setColor(Color.GRAY);
+            pathPart.setColor(ContextCompat.getColor(context,R.color.on_the_way));
+            pathPart.setWidth(5);
             kmlDocument.mKmlRoot.addOverlay(pathPart,kmlDocument);
         }
         kmlDocument.saveAsKML(file);
@@ -58,5 +64,19 @@ public final class RoadFile
         kmlDocument.mKmlRoot.addOverlay(track,kmlDocument);
         kmlDocument.saveAsKML(file);
         return file.getAbsolutePath();
+    }
+
+    public static void copyFile(File src, File dst) throws IOException
+    {
+        InputStream in = new FileInputStream(src);
+        OutputStream out = new FileOutputStream(dst);
+
+        byte[] buf = new byte[1024];
+        int len;
+        while ((len = in.read(buf)) > 0) {
+            out.write(buf, 0, len);
+        }
+        in.close();
+        out.close();
     }
 }

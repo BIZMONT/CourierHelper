@@ -13,6 +13,7 @@ import android.location.GpsStatus;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -27,24 +28,27 @@ import com.bizmont.courierhelper.Models.TaskState;
 import com.bizmont.courierhelper.Models.Warehouse.Warehouse;
 import com.bizmont.courierhelper.OtherStuff.ExtrasNames;
 import com.bizmont.courierhelper.OtherStuff.Notifications;
-import com.bizmont.courierhelper.OtherStuff.PathBuilderTask;
 import com.bizmont.courierhelper.RoadFile;
 
 import org.osmdroid.bonuspack.overlays.Polyline;
+import org.osmdroid.bonuspack.routing.MapQuestRoadManager;
 import org.osmdroid.bonuspack.routing.Road;
+import org.osmdroid.bonuspack.routing.RoadManager;
+import org.osmdroid.bonuspack.utils.HttpConnection;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.util.NetworkLocationIgnorer;
 
+import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.concurrent.ExecutionException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class GPSTracker extends Service implements LocationListener
 {
@@ -76,7 +80,7 @@ public class GPSTracker extends Service implements LocationListener
 
     File recommendedPathFile;
     String startTime;
-    SimpleDateFormat simpleDateFormat;
+    static SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     @Override
     public void onCreate() {
@@ -85,7 +89,6 @@ public class GPSTracker extends Service implements LocationListener
         track = new ArrayList<>();
         networkLocationIgnorer = new NetworkLocationIgnorer();
         recommendedPathFile = new File(getFilesDir() + "/kml","recommended_path.kml");
-        simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss",getResources().getConfiguration().locale);
 
         broadcastReceiver = new BroadcastReceiver() {
             @Override
@@ -125,7 +128,7 @@ public class GPSTracker extends Service implements LocationListener
         registerReceiver(broadcastReceiver,intentFilter);
 
         //Service status notification
-        notifications = new Notifications(this);
+        notifications = new Notifications(getApplicationContext());
         notifications.showServiceStatusNotify();
 
         //Location manager
@@ -296,6 +299,14 @@ public class GPSTracker extends Service implements LocationListener
         sendBroadcast(pathIntent);
         Log.d(LOG_TAG, "Path sent");
     }
+    private void sendMessageBroadcast(String message)
+    {
+        Intent messageIntent = new Intent(BROADCAST_SEND_ACTION);
+        messageIntent.putExtra(ExtrasNames.MESSAGE, message);
+
+        sendBroadcast(messageIntent);
+        Log.d(LOG_TAG, "Message was sent");
+    }
 
     private boolean isLocationValid(Location location)
     {
@@ -423,7 +434,7 @@ public class GPSTracker extends Service implements LocationListener
 
             trackFilePath = RoadFile.saveTrackToFile(trackFile, trackLine);
             Log.d(LOG_TAG, "Track saved for task #" + taskId + " to " + trackFilePath);
-            copyFile(recommendedPathFile,recommended);
+            RoadFile.copyFile(recommendedPathFile,recommended);
             Log.d(LOG_TAG, "Recommended path for task " + taskId + " saved to " + recommended.getAbsolutePath());
 
             DataBase.addReport(new Report(0, taskId, recommended.getAbsolutePath(), trackFilePath, startTime, endTime, reason));
@@ -435,17 +446,128 @@ public class GPSTracker extends Service implements LocationListener
         }
         return true;
     }
-    private void copyFile(File src, File dst) throws IOException
-    {
-        InputStream in = new FileInputStream(src);
-        OutputStream out = new FileOutputStream(dst);
+}
 
-        byte[] buf = new byte[1024];
-        int len;
-        while ((len = in.read(buf)) > 0) {
-            out.write(buf, 0, len);
+class PathBuilderTask extends AsyncTask<ArrayList<GeoPoint>,Void, ArrayList<Road>>
+{
+    public static final String MAPQUEST_SERVICE = "http://open.mapquestapi.com/directions/v2/optimizedroute?";
+    private static final String MAPQUEST_API_KEY = "w9zLBh8dLYSm5pM3iC579DspUgg29jur";
+
+    @SafeVarargs
+    @Override
+    protected final ArrayList<Road> doInBackground(ArrayList<GeoPoint>... params)
+    {
+        ArrayList<GeoPoint> points = params[0];
+
+        int[] sequence = getSequence(getRequestUrl(points));
+        if(sequence == null)
+        {
+            return null;
         }
-        in.close();
-        out.close();
+
+        ArrayList<GeoPoint> sortedPoints = new ArrayList<>();
+
+        for (int i = 0; i< sequence.length;i++)
+        {
+            sortedPoints.add(i, points.get(sequence[i]));
+        }
+
+        RoadManager roadManager = new MapQuestRoadManager(MAPQUEST_API_KEY);
+        roadManager.addRequestOption("routeType=pedestrian");
+
+        ArrayList<Road> roads = new ArrayList<>();
+        for (int i = 0; i<sortedPoints.size()-1;i++)
+        {
+            ArrayList<GeoPoint> startEnd = new ArrayList<>();
+            startEnd.add(sortedPoints.get(i));
+            startEnd.add(sortedPoints.get(i+1));
+            Road road = roadManager.getRoad(startEnd);
+            roads.add(road);
+        }
+
+        return roads;
     }
+    private String getRequestUrl(ArrayList<GeoPoint> points)
+    {
+        StringBuilder requestString = new StringBuilder(MAPQUEST_SERVICE);
+        requestString.append("key=" + MAPQUEST_API_KEY);
+        requestString.append("&json={locations:[");
+        for (int i = 0; i < points.size(); i++)
+        {
+            requestString.append("{latLng:{lat:").append(points.get(i).getLatitude()).append(",lng:").append(points.get(i).getLongitude()).append("}}");
+            if (i != points.size() - 1) {
+                requestString.append(",");
+            }
+        }
+        requestString.append("]}");
+        requestString.append("&outFormat=xml");
+        requestString.append("&shapeFormat=cmp");
+        requestString.append("&narrativeType=text");
+        requestString.append("&units=k&fishbone=false");
+        requestString.append("&routeType=pedestrian");
+
+        return requestString.toString();
+    }
+    private int[] getSequence(String requestUrl)
+    {
+        HttpConnection connection = new HttpConnection();
+        StringBuilder responseString = new StringBuilder();
+        try
+        {
+            connection.doGet(requestUrl);
+            InputStream stream = connection.getStream();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
+            String line;
+            while((line = reader.readLine()) != null) {
+                responseString.append(line);
+            }
+        }
+        catch (IOException ex)
+        {
+            Log.d("PathBuilderTask", "Exception was throwed: " + ex.getMessage());
+        }
+        finally
+        {
+            connection.close();
+        }
+        return parseSequence(responseString.toString());
+    }
+    public static int[] parseSequence(String string)
+    {
+        Matcher matcher;
+        String[] sequenceString;
+            Pattern p = Pattern.compile("<locationSequence>(.*?)</locationSequence>");
+            matcher = p.matcher(string);
+        if(matcher.find())
+        {
+            sequenceString = matcher.group(1).split(",");
+        }
+        else
+        {
+            return null;
+        }
+
+        int[] sequence = new int[sequenceString.length];
+        for(int i = 0; i < sequence.length; i++)
+        {
+            sequence[i] = Integer.parseInt(sequenceString[i]);
+        }
+        return sequence;
+    }
+}
+
+class ReportCreatorTask extends AsyncTask<Void,Void,Void>
+{
+    @Override
+    protected Void doInBackground(Void... params) {
+        return null;
+    }
+}
+final class ReportData
+{
+    int taskId;
+    String reason;
+    String startTime;
+    GeoPoint track;
+    File recommendedPathFile;
 }

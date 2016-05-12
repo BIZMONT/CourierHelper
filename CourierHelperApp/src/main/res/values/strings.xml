@@ -87,7 +87,7 @@
     <string name="near_target">You are near target #</string>
     <string name="complete_task">Complete</string>
     <string name="near_warehouse">You are near warehouse #</string>
-    <string name="get_tasks">Get tasks</string>
+    <string name="get_tasks_from_file">Get tasks from file</string>
     <string name="wrong_code">Wrong code! Please, try again</string>
     <string name="shipping_is_fulfilled">Shipping is fulfilled</string>
     <string name="enter_code_here">Enter code here:</string>
@@ -96,4 +96,5 @@
     <string name="user_ico">User ico</string>
     <string name="nothing_to_show">Nothing to show</string>
     <string name="empty_task">Empty task</string>
+    <string name="reason_empty_alert_message">Please, enter reason</string>
 </resources>

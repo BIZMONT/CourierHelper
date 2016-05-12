@@ -142,7 +142,7 @@ public class ReportsActivity extends AppCompatActivity implements NavigationView
     {
         int id = item.getItemId();
 
-        if (id == R.id.action_settings) {
+        if (id == R.id.action_menu_get_tasks_from_file) {
             return true;
         }
 

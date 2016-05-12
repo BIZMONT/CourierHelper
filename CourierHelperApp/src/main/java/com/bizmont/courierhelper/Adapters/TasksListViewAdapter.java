@@ -3,6 +3,7 @@ package com.bizmont.courierhelper.Adapters;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -56,6 +57,7 @@ public class TasksListViewAdapter extends ArrayAdapter {
         holder.taskID.setText(String.valueOf(task.getId()));
         holder.taskState.setText(task.getState().toString());
         holder.taskName.setText(task.getAddress());
+        holder.taskName.setEllipsize(TextUtils.TruncateAt.MARQUEE);
 
         ImageButton imageButton = (ImageButton)row.findViewById(R.id.task_row_show);
         imageButton.setOnClickListener(new ImageButtonOnClickListener(task.getId()) {

@@ -7,7 +7,7 @@
     <string name="menu_tasks">Список активних завдань</string>
     <string name="title_activity_map">Карта</string>
     <string name="title_activity_reports">Звіти</string>
-    <string name="toast_exit_message">Натисніть "Назад" знову для виходу</string>
+    <string name="toast_exit_message">Натисніть "Назад" знову щоб вийти</string>
     <string name="navigation_drawer_close">Закрити навігаційне меню</string>
     <string name="navigation_drawer_open">Відкрити навігаційне меню</string>
     <string name="task_number">Замовлення №</string>
@@ -27,12 +27,18 @@
     <string name="settings">Налаштування</string>
     <string name="title_activity_settings">Налаштування</string>
     <string name="complete_task">Завершити</string>
-    <string name="get_tasks">Отримати завдання</string>
+    <string name="get_tasks_from_file">Отримати завдання з файлу</string>
     <string name="near_target">Ви біля точки доставки №</string>
     <string name="near_warehouse">Ви біля складу №</string>
     <string name="service_work">Сервіс активний</string>
     <string name="unknown_user">Невідомий користувач</string>
     <string name="code_accepted">Код прийнято</string>
-    <string name="empty_task"></string>
+    <string name="empty_task">Невідоме завдання</string>
     <string name="enter_code_here">Введіть код сюди:</string>
+    <string name="wrong_code">Невірний код! Будь ласка, повторіть ще раз</string>
+    <string name="shipping_is_fulfilled">Не доставлено</string>
+    <string name="reason_empty_alert_message">Будь ласка, введіть причину</string>
+    <string name="pref_header_notifications">Сповіщення</string>
+    <string name="pref_title_ringtone">Звук</string>
+    <string name="pref_title_vibrate">Вібрація</string>
 </resources>

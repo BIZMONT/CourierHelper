@@ -13,4 +13,5 @@ public final class ExtrasNames
     public static final String REASON = "Reason";
     public static final String COMPLETE_TASK = "Created task";
     public static final String REPORT_ID = "Report ID";
+    public static final String MESSAGE = "Message";
 }

@@ -118,7 +118,7 @@ public class TasksActivity extends AppCompatActivity
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
 
-        if (id == R.id.action_settings)
+        if (id == R.id.action_menu_get_tasks_from_file)
         {
             fileChooser.showDialog();
         }

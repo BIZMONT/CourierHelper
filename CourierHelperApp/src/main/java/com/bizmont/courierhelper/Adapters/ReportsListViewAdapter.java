@@ -39,9 +39,9 @@ public class ReportsListViewAdapter extends ArrayAdapter {
             row = inflater.inflate(layoutResourceId, parent, false);
 
             holder = new ReportHolder();
-            holder.orderID = (TextView)row.findViewById(R.id.order_id);
-            holder.orderState = (TextView)row.findViewById(R.id.order_state);
-            holder.orderName = (TextView)row.findViewById(R.id.order_name);
+            holder.orderID = (TextView)row.findViewById(R.id.task_id);
+            holder.orderState = (TextView)row.findViewById(R.id.task_state);
+            holder.orderName = (TextView)row.findViewById(R.id.task_name);
 
             row.setTag(holder);
         }

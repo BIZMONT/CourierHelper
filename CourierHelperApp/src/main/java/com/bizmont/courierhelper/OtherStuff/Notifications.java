@@ -4,8 +4,11 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.media.RingtoneManager;
+import android.content.SharedPreferences;
+import android.net.Uri;
+import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
+import android.util.Log;
 
 import com.bizmont.courierhelper.Activities.CompleteTaskActivity;
 import com.bizmont.courierhelper.Activities.WarehouseActivity;
@@ -28,18 +31,20 @@ public final class Notifications
 
     boolean isPointNotifyShows;
 
+    SharedPreferences sharedPreferences;
+
     public Notifications(Context context)
     {
         isPointNotifyShows = false;
 
         this.context = context;
 
-        notificationManager = (NotificationManager) context.getSystemService(context.NOTIFICATION_SERVICE);
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+
+        notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 
         nearPointNotify = new NotificationCompat.Builder(context)
                 .setContentTitle("Courier Helper")
-                .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
-                .setVibrate(new long[]{1000, 1000})
                 .setOngoing(true);
 
         locationDisabledNotify = new NotificationCompat.Builder(context)
@@ -70,7 +75,17 @@ public final class Notifications
                 resultIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         nearPointNotify.setSmallIcon(R.drawable.ic_warehouse_notify)
-                .setContentText(context.getString(R.string.near_warehouse) + point.getId());
+                .setContentText(context.getString(R.string.near_warehouse) + point.getId())
+                .setSound(Uri.parse(sharedPreferences.getString("notifications_ringtone","content://settings/system/notification_sound")));
+        Log.d("Notification", "Uri " + sharedPreferences.getString("notifications_ringtone","content://settings/system/notification_sound"));
+        if(sharedPreferences.getBoolean("notifications_vibrate",true))
+        {
+            nearPointNotify.setVibrate(new long[]{1000, 1000});
+        }
+        else
+        {
+            nearPointNotify.setVibrate(new long[]{});
+        }
 
         nearPointNotify.setContentIntent(resultPendingIntent);
         notificationManager.notify(POINT_NOTIFICATION_ID, nearPointNotify.build());
@@ -88,8 +103,17 @@ public final class Notifications
                 resultIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         nearPointNotify.setSmallIcon(R.drawable.ic_task_notify)
-                .setContentText(context.getString(R.string.near_target));
-
+                .setContentText(context.getString(R.string.near_target) + point.getId())
+                .setSound(Uri.parse(sharedPreferences.getString("notifications_ringtone","content://settings/system/notification_sound")));
+        Log.d("Notification", "Uri " + sharedPreferences.getString("notifications_ringtone","content://settings/system/notification_sound"));
+        if(sharedPreferences.getBoolean("notifications_vibrate",true))
+        {
+            nearPointNotify.setVibrate(new long[]{1000, 1000});
+        }
+        else
+        {
+            nearPointNotify.setVibrate(new long[]{});
+        }
         nearPointNotify.setContentIntent(resultPendingIntent);
         notificationManager.notify(POINT_NOTIFICATION_ID, nearPointNotify.build());
         isPointNotifyShows = true;

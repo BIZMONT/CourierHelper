@@ -28,7 +28,7 @@
                 android:layout_height="wrap_content"
                 android:text="@string/task_number"
                 android:textSize="14sp"
-                android:textColor="@color/light_text"/>
+                android:textColor="@color/list_item"/>
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -39,14 +39,14 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textSize="14sp"
-                    android:textColor="@color/light_text"/>
+                    android:textColor="@color/list_item"/>
                 <TextView
                     android:id="@+id/task_state"
                     android:text="@string/unknown"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textSize="14sp"
-                    android:textColor="@color/light_text"
+                    android:textColor="@color/list_item"
                     android:layout_alignParentRight="true"/>
             </RelativeLayout>
         </LinearLayout>
@@ -61,11 +61,11 @@
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
                 android:textSize="24sp"
-                android:textColor="@color/light_text"/>
+                android:textColor="@color/list_item"/>
             <ImageButton
                 android:id="@+id/task_row_show"
                 android:text="@string/show_on_map"
-                android:src="@drawable/ic_menu_map"
+                android:src="@drawable/ic_row_map"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="#00000000"

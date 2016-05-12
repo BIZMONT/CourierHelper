@@ -91,7 +91,7 @@ public class CompleteTaskActivity extends AppCompatActivity
         {
             if(!TaskCodeDecoder.isMatches(String.valueOf(taskId), code, codeEdit.getText().toString()))
             {
-                Toast.makeText(this, R.string.wrong_code,Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, R.string.wrong_code, Toast.LENGTH_SHORT).show();
                 return;
             }
         }
@@ -103,7 +103,7 @@ public class CompleteTaskActivity extends AppCompatActivity
             }
             else
             {
-                Toast.makeText(this, "Please, enter reason", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, R.string.reason_empty_alert_message, Toast.LENGTH_SHORT).show();
                 return;
             }
         }

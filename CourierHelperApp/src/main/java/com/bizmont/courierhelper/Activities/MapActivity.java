@@ -16,23 +16,26 @@ import android.location.Geocoder;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bizmont.courierhelper.DataBase.DataBase;
 import com.bizmont.courierhelper.Models.Courier.Courier;
 import com.bizmont.courierhelper.Models.Point;
+import com.bizmont.courierhelper.Models.Task.Task;
+import com.bizmont.courierhelper.Models.TaskState;
 import com.bizmont.courierhelper.OtherStuff.ExtrasNames;
 import com.bizmont.courierhelper.R;
 import com.bizmont.courierhelper.RoadFile;
@@ -58,7 +61,7 @@ public class MapActivity extends AppCompatActivity implements NavigationView.OnN
     private static final String LOG_TAG = "CourierHelperLog";
     private static final int MAP_MIN_ZOOM_LEVEL = 2;
     private static final int DEFAULT_ZOOM_LEVEL = 3;
-    private static final int MAP_MAX_ZOOM_LEVEL = 19;
+    private static final int MAP_MAX_ZOOM_LEVEL = 18;
 
     private long backPressedTime = 0;
 
@@ -88,14 +91,9 @@ public class MapActivity extends AppCompatActivity implements NavigationView.OnN
 
         serviceConnection = new ServiceConnection() {
             @Override
-            public void onServiceConnected(ComponentName name, IBinder service) {
-
-            }
-
+            public void onServiceConnected(ComponentName name, IBinder service) {}
             @Override
-            public void onServiceDisconnected(ComponentName name) {
-
-            }
+            public void onServiceDisconnected(ComponentName name) {}
         };
         serviceIntent = new Intent(this,GPSTracker.class);
         startService(serviceIntent);
@@ -118,18 +116,20 @@ public class MapActivity extends AppCompatActivity implements NavigationView.OnN
         });
 
         //Interface items
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, null, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         assert drawer != null;
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
-        ImageButton showLocation = (ImageButton) findViewById(R.id.show_current_location);
-        assert showLocation != null;
-        showLocation.setOnClickListener(new View.OnClickListener() {
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.show_current_location);
+        assert fab != null;
+        fab.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
+            public void onClick(View view) {
                 if (userLocationGeoPoint != null)
                 {
                     mapController.setZoom(17);
@@ -177,12 +177,7 @@ public class MapActivity extends AppCompatActivity implements NavigationView.OnN
                     boolean isRefresh = intent.getBooleanExtra(ExtrasNames.IS_REFRESH, false);
                     if(isRefresh)
                     {
-                        if(markersOverlays != null)
-                        {
-                            map.getOverlays().remove(markersOverlays);
-                        }
-                        markersOverlays = getMapPointsOverlay(getApplicationContext(), map);
-                        map.getOverlays().add(markersOverlays);
+                        getMarkersOverlay();
                     }
 
                     Log.d(LOG_TAG, "locationReceived");
@@ -192,14 +187,7 @@ public class MapActivity extends AppCompatActivity implements NavigationView.OnN
                 }
                 if(intent.getBooleanExtra(ExtrasNames.IS_PATH_UPDATE,false))
                 {
-                    if(pathOverlay != null)
-                    {
-                        map.getOverlays().remove(pathOverlay);
-                    }
-                    File overlayFile = new File( getFilesDir() + "/kml", "recommended_path.kml");
-                    pathOverlay = RoadFile.getOverlayFromFile(getApplicationContext(),overlayFile,map);
-                    map.getOverlays().add(pathOverlay);
-                    map.invalidate();
+                    getPathOverlay();
                 }
             }
         };
@@ -237,31 +225,22 @@ public class MapActivity extends AppCompatActivity implements NavigationView.OnN
     {
         super.onResume();
 
+        //Register broadcast receiver
         IntentFilter intentFilter = new IntentFilter(GPSTracker.BROADCAST_SEND_ACTION);
         registerReceiver(broadcastReceiver, intentFilter);
 
         bindService(serviceIntent, serviceConnection, BIND_AUTO_CREATE);
 
+        //Set focus to this activity in navigation view
         if (!navigationView.getMenu().findItem(R.id.nav_map).isChecked()) {
             navigationView.getMenu().findItem(R.id.nav_map).setChecked(true);
         }
 
         //Points update
-        if(markersOverlays != null)
-        {
-            map.getOverlays().remove(markersOverlays);
-        }
-        markersOverlays = getMapPointsOverlay(getApplicationContext(), map);
-        map.getOverlays().add(markersOverlays);
+        getMarkersOverlay();
 
         //Path update
-        if(pathOverlay != null)
-        {
-            map.getOverlays().remove(pathOverlay);
-        }
-        File overlayFile = new File( getFilesDir() + "/kml", "recommended_path.kml");
-        pathOverlay = RoadFile.getOverlayFromFile(getApplicationContext(),overlayFile,map);
-        map.getOverlays().add(pathOverlay);
+        getPathOverlay();
 
         map.invalidate();
 
@@ -318,15 +297,14 @@ public class MapActivity extends AppCompatActivity implements NavigationView.OnN
         }
     }
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.map, menu);
-        return true;
+    public boolean onPrepareOptionsMenu (Menu menu) {
+        return false;
     }
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
 
-        if (id == R.id.action_settings) {
+        if (id == R.id.action_menu_get_tasks_from_file) {
             startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
         }
 
@@ -397,16 +375,29 @@ public class MapActivity extends AppCompatActivity implements NavigationView.OnN
         return address;
     }
 
-    private FolderOverlay getMapPointsOverlay(Context context, MapView mapView)
+    private FolderOverlay buildMapPointsOverlay(Context context, MapView mapView, ArrayList<Point> points)
     {
-        ArrayList<Point> points = DataBase.getTargetPoints();
-
         FolderOverlay pointsFolderOverlay = new FolderOverlay(context);
         for(Point point : points)
         {
             Polygon radius = new Polygon(context);
             radius.setStrokeColor(Color.parseColor("#00000000"));
-            radius.setFillColor(Color.parseColor("#66aaaaaa"));
+            if(point.getClass() == Task.class)
+            {
+                Task task = (Task)point;
+                if(task.getState() == TaskState.ON_THE_WAY)
+                {
+                    radius.setFillColor(ContextCompat.getColor(this,R.color.on_the_way_radius));
+                }
+                else
+                {
+                    radius.setFillColor(ContextCompat.getColor(this,R.color.on_warehouse_radius));
+                }
+            }
+            else
+            {
+                radius.setFillColor(Color.parseColor("#66aaaaaa"));
+            }
             radius.setPoints(Polygon.pointsAsCircle(
                     new GeoPoint(point.getLatitude(),point.getLongitude()),
                     point.getRadius()));
@@ -421,5 +412,27 @@ public class MapActivity extends AppCompatActivity implements NavigationView.OnN
         View headerView = navigationView.getHeaderView(0);
         ((TextView) headerView.findViewById(R.id.courier_name)).setText(Courier.getInstance().getName());
         ((TextView) headerView.findViewById(R.id.courier_status)).setText(Courier.getInstance().getState().toString());
+    }
+
+    private void getPathOverlay()
+    {
+        if(pathOverlay != null)
+        {
+            map.getOverlays().remove(pathOverlay);
+        }
+        File overlayFile = new File( getFilesDir() + "/kml", "recommended_path.kml");
+        pathOverlay = RoadFile.getOverlayFromFile(getApplicationContext(),overlayFile,map);
+        map.getOverlays().add(pathOverlay);
+        map.invalidate();
+    }
+    private void getMarkersOverlay()
+    {
+        if(markersOverlays != null)
+        {
+            map.getOverlays().remove(markersOverlays);
+        }
+        ArrayList<Point> points = DataBase.getTargetPoints();
+        markersOverlays = buildMapPointsOverlay(getApplicationContext(), map, points);
+        map.getOverlays().add(markersOverlays);
     }
 }
