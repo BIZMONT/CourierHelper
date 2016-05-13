@@ -107,6 +107,7 @@ public final class DataBase
         dataBase.update(Tables.TASKS, contentValues, "id=?", new String[]{Integer.toString(taskId)});
         DatabaseManager.getInstance().closeDatabase();
     }
+
     public static ArrayList<Point> getTargetPoints()
     {
         ArrayList<Point> points = new ArrayList<>();
@@ -350,7 +351,37 @@ public final class DataBase
 
         return reportDetails;
     }
+    public static Task getTask(int taskId)
+    {
+        Task task = null;
+        Cursor cursor;
 
+        SQLiteDatabase database = DatabaseManager.getInstance().openDatabase();
+
+            cursor = database.query(Tables.TASKS, null, "ID = ?", new String[]{Integer.toString(taskId)},
+                    null, null, null);
+
+        if (cursor.moveToFirst())
+        {
+            int taskIDColIndex = cursor.getColumnIndex("ID");
+            int taskAddressColIndex = cursor.getColumnIndex("Address");
+            int stateColIndex = cursor.getColumnIndex("State");
+            int taskLatColIndex = cursor.getColumnIndex("Latitude");
+            int taskLongColIndex = cursor.getColumnIndex("Longitude");
+            int warehouseIDColIndex = cursor.getColumnIndex("WarehouseID");
+
+            do
+            {
+                task = new Task(cursor.getInt(taskIDColIndex),cursor.getString(taskAddressColIndex),
+                        cursor.getDouble(taskLatColIndex),cursor.getDouble(taskLongColIndex),
+                        TaskState.Parse(cursor.getString(stateColIndex)), cursor.getInt(warehouseIDColIndex));
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+
+        DatabaseManager.getInstance().closeDatabase();
+        return task;
+    }
     public static Sender getSender(int senderId)
     {
         Cursor cursor;

@@ -1,9 +1,11 @@
-package com.bizmont.courierhelper;
+package com.bizmont.courierhelper.OtherStuff;
 
 
 import android.content.Context;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
+
+import com.bizmont.courierhelper.R;
 
 import org.osmdroid.bonuspack.kml.KmlDocument;
 import org.osmdroid.bonuspack.overlays.FolderOverlay;
@@ -47,7 +49,7 @@ public final class RoadFile
         for (Road road:path)
         {
             Polyline pathPart = RoadManager.buildRoadOverlay(road, context);
-            pathPart.setColor(ContextCompat.getColor(context,R.color.on_the_way));
+            pathPart.setColor(ContextCompat.getColor(context, R.color.on_the_way));
             pathPart.setWidth(5);
             kmlDocument.mKmlRoot.addOverlay(pathPart,kmlDocument);
         }

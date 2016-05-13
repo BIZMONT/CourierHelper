@@ -14,7 +14,7 @@ public class Courier
 
     private static List<CourierListener> listeners = new ArrayList<>();
 
-    private static Courier ourInstance = new Courier();
+    private static Courier instance = new Courier();
 
     private String name;
     private CourierState state;
@@ -33,11 +33,11 @@ public class Courier
 
     public static void initializeInstance(String name, CourierState state)
     {
-        ourInstance = new Courier(name,state);
+        instance = new Courier(name,state);
     }
 
     public static Courier getInstance() {
-        return ourInstance;
+        return instance;
     }
 
     public String getName() {

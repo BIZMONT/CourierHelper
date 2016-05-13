@@ -71,7 +71,7 @@ public class CompleteTaskActivity extends AppCompatActivity
 
     public void onTypeSwitched(View view)
     {
-        Switch switchV =  (Switch) view;
+        Switch switchV = (Switch) view;
         if(switchV.isChecked())
         {
             reasonLayout.setVisibility(View.VISIBLE);

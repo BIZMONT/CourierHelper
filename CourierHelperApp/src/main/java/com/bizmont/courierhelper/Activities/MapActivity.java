@@ -37,8 +37,8 @@ import com.bizmont.courierhelper.Models.Point;
 import com.bizmont.courierhelper.Models.Task.Task;
 import com.bizmont.courierhelper.Models.TaskState;
 import com.bizmont.courierhelper.OtherStuff.ExtrasNames;
+import com.bizmont.courierhelper.OtherStuff.RoadFile;
 import com.bizmont.courierhelper.R;
-import com.bizmont.courierhelper.RoadFile;
 import com.bizmont.courierhelper.Services.GPSTracker;
 
 import org.osmdroid.api.IMapController;
@@ -314,10 +314,13 @@ public class MapActivity extends AppCompatActivity implements NavigationView.OnN
     public boolean onNavigationItemSelected(MenuItem item) {
         int id = item.getItemId();
 
-        if (id == R.id.nav_reports) {
+        if (id == R.id.nav_reports)
+        {
             Intent intent = new Intent(this, ReportsActivity.class);
             startActivity(intent);
-        } else if (id == R.id.nav_tasks) {
+        }
+        else if (id == R.id.nav_tasks)
+        {
             Intent intent = new Intent(this, TasksActivity.class);
             startActivity(intent);
         }
@@ -420,7 +423,7 @@ public class MapActivity extends AppCompatActivity implements NavigationView.OnN
         {
             map.getOverlays().remove(pathOverlay);
         }
-        File overlayFile = new File( getFilesDir() + "/kml", "recommended_path.kml");
+        File overlayFile = new File(getFilesDir() + "/kml", "recommended_path.kml");
         pathOverlay = RoadFile.getOverlayFromFile(getApplicationContext(),overlayFile,map);
         map.getOverlays().add(pathOverlay);
         map.invalidate();

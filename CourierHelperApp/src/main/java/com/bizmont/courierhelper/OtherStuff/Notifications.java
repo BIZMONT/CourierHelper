@@ -39,8 +39,6 @@ public final class Notifications
 
         this.context = context;
 
-        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-
         notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 
         nearPointNotify = new NotificationCompat.Builder(context)
@@ -74,6 +72,8 @@ public final class Notifications
         resultPendingIntent = PendingIntent.getActivity(context, (int) System.currentTimeMillis(),
                 resultIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+
         nearPointNotify.setSmallIcon(R.drawable.ic_warehouse_notify)
                 .setContentText(context.getString(R.string.near_warehouse) + point.getId())
                 .setSound(Uri.parse(sharedPreferences.getString("notifications_ringtone","content://settings/system/notification_sound")));
@@ -102,6 +102,8 @@ public final class Notifications
         resultPendingIntent = PendingIntent.getActivity(context, (int) System.currentTimeMillis(),
                 resultIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+
         nearPointNotify.setSmallIcon(R.drawable.ic_task_notify)
                 .setContentText(context.getString(R.string.near_target) + point.getId())
                 .setSound(Uri.parse(sharedPreferences.getString("notifications_ringtone","content://settings/system/notification_sound")));
@@ -123,6 +125,18 @@ public final class Notifications
         Intent resultIntent = new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS);
         PendingIntent resultPendingIntent = PendingIntent.getActivity(context, 0, resultIntent,
                 PendingIntent.FLAG_UPDATE_CURRENT);
+
+
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        locationDisabledNotify.setSound(Uri.parse(sharedPreferences.getString("notifications_ringtone","content://settings/system/notification_sound")));
+        if(sharedPreferences.getBoolean("notifications_vibrate",true))
+        {
+            locationDisabledNotify.setVibrate(new long[]{1000, 1000});
+        }
+        else
+        {
+            locationDisabledNotify.setVibrate(new long[]{});
+        }
 
         locationDisabledNotify.setContentIntent(resultPendingIntent);
         notificationManager.notify(LOCATION_ALERT_NOTIFICATION_ID, locationDisabledNotify.build());

@@ -28,7 +28,7 @@ import com.bizmont.courierhelper.Models.TaskState;
 import com.bizmont.courierhelper.Models.Warehouse.Warehouse;
 import com.bizmont.courierhelper.OtherStuff.ExtrasNames;
 import com.bizmont.courierhelper.OtherStuff.Notifications;
-import com.bizmont.courierhelper.RoadFile;
+import com.bizmont.courierhelper.OtherStuff.RoadFile;
 
 import org.osmdroid.bonuspack.overlays.Polyline;
 import org.osmdroid.bonuspack.routing.MapQuestRoadManager;

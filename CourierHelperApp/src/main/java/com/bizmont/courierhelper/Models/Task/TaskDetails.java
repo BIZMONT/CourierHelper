@@ -35,4 +35,8 @@ public class TaskDetails extends Task
     public String getDate() {
         return date;
     }
+
+    public String getCode() {
+        return code;
+    }
 }
