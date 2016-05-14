@@ -31,11 +31,12 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bizmont.courierhelper.CourierHelperApp;
 import com.bizmont.courierhelper.DataBase.DataBase;
 import com.bizmont.courierhelper.Models.Courier.Courier;
 import com.bizmont.courierhelper.Models.Point;
 import com.bizmont.courierhelper.Models.Task.Task;
-import com.bizmont.courierhelper.Models.TaskState;
+import com.bizmont.courierhelper.Models.Task.TaskState;
 import com.bizmont.courierhelper.OtherStuff.ExtrasNames;
 import com.bizmont.courierhelper.OtherStuff.RoadFile;
 import com.bizmont.courierhelper.R;
@@ -65,6 +66,8 @@ public class MapActivity extends AppCompatActivity implements NavigationView.OnN
 
     private long backPressedTime = 0;
 
+    private String userEmail;
+
     private MapView map;
     private IMapController mapController;
 
@@ -89,6 +92,8 @@ public class MapActivity extends AppCompatActivity implements NavigationView.OnN
         setContentView(R.layout.map_activity);
         setTitle(R.string.title_activity_map);
 
+        userEmail = ((CourierHelperApp)getApplication()).getCurrentUserEmail();
+
         serviceConnection = new ServiceConnection() {
             @Override
             public void onServiceConnected(ComponentName name, IBinder service) {}
@@ -106,14 +111,6 @@ public class MapActivity extends AppCompatActivity implements NavigationView.OnN
         //Overlays
         accuracyRadiusOverlayInit();
         userMarkerOverlayInit();
-
-        Courier.addOnStatusChangedListener(new Courier.CourierListener() {
-            @Override
-            public void onStatusChanged()
-            {
-                refreshCourierInfo();
-            }
-        });
 
         //Interface items
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -235,6 +232,12 @@ public class MapActivity extends AppCompatActivity implements NavigationView.OnN
         if (!navigationView.getMenu().findItem(R.id.nav_map).isChecked()) {
             navigationView.getMenu().findItem(R.id.nav_map).setChecked(true);
         }
+        View headerView = navigationView.getHeaderView(0);
+        Courier courier = DataBase.getCourier(userEmail);
+        TextView name = (TextView) headerView.findViewById(R.id.courier_name);
+        TextView email = (TextView) headerView.findViewById(R.id.courier_email);
+        name.setText(courier.getName());
+        email.setText(courier.getEmail());
 
         //Points update
         getMarkersOverlay();
@@ -243,9 +246,6 @@ public class MapActivity extends AppCompatActivity implements NavigationView.OnN
         getPathOverlay();
 
         map.invalidate();
-
-        //Courier status refresh
-        refreshCourierInfo();
 
         Log.d(LOG_TAG, "MapActivity onResume");
     }
@@ -314,14 +314,19 @@ public class MapActivity extends AppCompatActivity implements NavigationView.OnN
     public boolean onNavigationItemSelected(MenuItem item) {
         int id = item.getItemId();
 
-        if (id == R.id.nav_reports)
+        if (id == R.id.nav_tasks)
+        {
+            Intent intent = new Intent(this, TasksActivity.class);
+            startActivity(intent);
+        }
+        else if (id == R.id.nav_reports)
         {
             Intent intent = new Intent(this, ReportsActivity.class);
             startActivity(intent);
         }
-        else if (id == R.id.nav_tasks)
+        else if(id == R.id.nav_stats)
         {
-            Intent intent = new Intent(this, TasksActivity.class);
+            Intent intent = new Intent(this, StatisticsActivity.class);
             startActivity(intent);
         }
         else if(id == R.id.nav_settings)
@@ -354,7 +359,8 @@ public class MapActivity extends AppCompatActivity implements NavigationView.OnN
 
         userLocationGeoPoint = new GeoPoint(location);
         userLocationMarker.setPosition(userLocationGeoPoint);
-        userLocationMarker.setTitle(Courier.getInstance().getName() + " " + Courier.getInstance().getState());
+        Courier courier = DataBase.getCourier(userEmail);
+        userLocationMarker.setTitle(courier.getName() + " " + courier.getState());
         userLocationMarker.setSubDescription(convertPointToAddress(userLocationGeoPoint));
         accuracyRadius.setPoints(Polygon.pointsAsCircle(userLocationGeoPoint, location.getAccuracy()));
 
@@ -410,12 +416,6 @@ public class MapActivity extends AppCompatActivity implements NavigationView.OnN
         }
         return pointsFolderOverlay;
     }
-    private void refreshCourierInfo()
-    {
-        View headerView = navigationView.getHeaderView(0);
-        ((TextView) headerView.findViewById(R.id.courier_name)).setText(Courier.getInstance().getName());
-        ((TextView) headerView.findViewById(R.id.courier_status)).setText(Courier.getInstance().getState().toString());
-    }
 
     private void getPathOverlay()
     {
@@ -434,7 +434,7 @@ public class MapActivity extends AppCompatActivity implements NavigationView.OnN
         {
             map.getOverlays().remove(markersOverlays);
         }
-        ArrayList<Point> points = DataBase.getTargetPoints();
+        ArrayList<Point> points = DataBase.getTargetPoints(userEmail);
         markersOverlays = buildMapPointsOverlay(getApplicationContext(), map, points);
         map.getOverlays().add(markersOverlays);
     }

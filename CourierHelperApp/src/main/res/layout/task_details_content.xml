@@ -2,7 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/deep_background">
+    android:background="@color/background">
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="@dimen/map_height">
@@ -13,7 +13,7 @@
             android:layerType="software"/>
         <TextView
             android:id="@+id/map_address_textview"
-            android:text="Address"
+            android:text="@string/address"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
@@ -21,26 +21,24 @@
             android:textSize="@dimen/task_info_group_name_text"
             android:layout_alignParentBottom="true"
             android:background="#44000000"
-            android:textColor="@color/list_item"/>
+            android:textColor="@color/light_text"/>
     </RelativeLayout>
     <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/deep_background">
+        android:layout_height="wrap_content">
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:layout_marginBottom="@dimen/activity_vertical_margin"
-            android:layout_marginLeft="@dimen/activity_horizontal_margin"
-            android:layout_marginRight="@dimen/activity_horizontal_margin"
-            android:layout_marginTop="@dimen/activity_vertical_margin">
+            android:orientation="vertical">
             <!--Receiver info-->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:layout_marginBottom="15dp">
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="10dp"
+                android:layout_marginLeft="16dp"
+                android:layout_marginRight="16dp">
                 <TextView
                     android:text="@string/receiver"
                     android:layout_width="match_parent"
@@ -48,15 +46,13 @@
                     android:textSize="@dimen/task_info_group_name_text"
                     android:textStyle="bold"
                     android:textColor="@color/primary_text"/>
-                <View
-                    android:background="@color/primary_text"
-                    android:layout_width = "match_parent"
-                    android:layout_height="2dip" />
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:layout_margin="10dp">
+                    android:paddingLeft="16dp"
+                    android:paddingTop="8dp"
+                    android:paddingRight="16dp">
                     <!--Name-->
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -101,12 +97,19 @@
                     </LinearLayout>
                 </LinearLayout>
             </LinearLayout>
+            <View
+                android:background="@color/separator"
+                android:layout_width= "match_parent"
+                android:layout_height="1dip" />
             <!--Sender info-->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:layout_marginBottom="8dp">
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="10dp"
+                android:layout_marginLeft="16dp"
+                android:layout_marginRight="16dp">
                 <TextView
                     android:text="@string/sender"
                     android:layout_width="match_parent"
@@ -114,15 +117,13 @@
                     android:textSize="@dimen/task_info_group_name_text"
                     android:textStyle="bold"
                     android:textColor="@color/primary_text"/>
-                <View
-                    android:background="#999999"
-                    android:layout_width = "fill_parent"
-                    android:layout_height="2dip" />
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:layout_margin="10dp">
+                    android:paddingLeft="16dp"
+                    android:paddingTop="8dp"
+                    android:paddingRight="16dp">
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -179,12 +180,19 @@
                     </LinearLayout>
                 </LinearLayout>
             </LinearLayout>
+            <View
+                android:background="@color/separator"
+                android:layout_width= "match_parent"
+                android:layout_height="1dip" />
             <!--Content-->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:layout_marginBottom="8dp">
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="10dp"
+                android:layout_marginLeft="16dp"
+                android:layout_marginRight="16dp">
                 <TextView
                     android:text="@string/content"
                     android:layout_width="match_parent"
@@ -192,25 +200,29 @@
                     android:textSize="@dimen/task_info_group_name_text"
                     android:textStyle="bold"
                     android:textColor="@color/primary_text"/>
-                <View
-                    android:background="#999999"
-                    android:layout_width = "match_parent"
-                    android:layout_height="2dip" />
                 <TextView
                     android:id="@+id/task_content"
                     android:text="@string/unknown"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_margin="10dp"
-                    android:layout_marginBottom="5dp"
+                    android:paddingLeft="16dp"
+                    android:paddingTop="8dp"
+                    android:paddingRight="16dp"
                     android:textSize="@dimen/task_info_group_inner_text" />
             </LinearLayout>
+            <View
+                android:background="@color/separator"
+                android:layout_width= "match_parent"
+                android:layout_height="1dip" />
             <!--Info-->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:layout_marginBottom="8dp">
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="10dp"
+                android:layout_marginLeft="16dp"
+                android:layout_marginRight="16dp">
                 <TextView
                     android:text="Info"
                     android:layout_width="match_parent"
@@ -218,15 +230,13 @@
                     android:textSize="@dimen/task_info_group_name_text"
                     android:textStyle="bold"
                     android:textColor="@color/primary_text"/>
-                <View
-                    android:background="#999999"
-                    android:layout_width = "match_parent"
-                    android:layout_height="2dip" />
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:layout_margin="10dp">
+                    android:paddingLeft="16dp"
+                    android:paddingTop="8dp"
+                    android:paddingRight="16dp">
                     <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -283,11 +293,19 @@
                     </LinearLayout>
                 </LinearLayout>
             </LinearLayout>
+            <View
+                android:background="@color/separator"
+                android:layout_width= "match_parent"
+                android:layout_height="1dip" />
             <!--Comments-->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="10dp"
+                android:layout_marginLeft="16dp"
+                android:layout_marginRight="16dp">
                 <TextView
                     android:text="@string/comments"
                     android:layout_width="match_parent"
@@ -295,18 +313,20 @@
                     android:textSize="@dimen/task_info_group_name_text"
                     android:textStyle="bold"
                     android:textColor="@color/primary_text"/>
-                <View
-                    android:background="#999999"
-                    android:layout_width= "match_parent"
-                    android:layout_height="2dip" />
                 <TextView
                     android:id="@+id/task_comment"
                     android:text="@string/unknown"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_margin="10dp"
+                    android:paddingLeft="16dp"
+                    android:paddingTop="8dp"
+                    android:paddingRight="16dp"
                     android:textSize="@dimen/task_info_group_inner_text"/>
             </LinearLayout>
+            <View
+                android:background="@color/separator"
+                android:layout_width= "match_parent"
+                android:layout_height="1dip" />
         </LinearLayout>
     </ScrollView>
 </LinearLayout>

@@ -11,7 +11,7 @@ import android.widget.TextView;
 
 import com.bizmont.courierhelper.DataBase.DataBase;
 import com.bizmont.courierhelper.Models.Task.Task;
-import com.bizmont.courierhelper.Models.TaskState;
+import com.bizmont.courierhelper.Models.Task.TaskState;
 import com.bizmont.courierhelper.R;
 
 import java.util.ArrayList;

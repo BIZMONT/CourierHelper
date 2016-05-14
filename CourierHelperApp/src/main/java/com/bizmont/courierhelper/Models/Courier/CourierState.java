@@ -1,4 +1,4 @@
-package com.bizmont.courierhelper.Models;
+package com.bizmont.courierhelper.Models.Courier;
 
 public enum CourierState
 {
@@ -21,6 +21,22 @@ public enum CourierState
                 return "In warehouse";
             default:
                 return "Not active";
+        }
+    }
+    public static CourierState parse(String state)
+    {
+        switch (state)
+        {
+            case "Not active":
+                return NOT_ACTIVE;
+            case "On move":
+                return ON_MOVE;
+            case "At point of delivery":
+                return  AT_THE_POINT;
+            case "In warehouse":
+                return IN_WAREHOUSE;
+            default:
+                return NOT_ACTIVE;
         }
     }
 }

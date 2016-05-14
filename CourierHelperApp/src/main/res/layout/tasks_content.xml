@@ -7,10 +7,22 @@
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context="com.bizmont.courierhelper.Activities.TasksActivity"
     tools:showIn="@layout/tasks_app_bar"
-    android:background="@color/deep_background">
-    <ListView
-        android:id="@+id/tasks_listview"
+    android:background="@color/list_view_background">
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:divider="@color/transparent" />
+        android:layout_height="match_parent">
+        <ListView
+            android:id="@+id/tasks_listview"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:divider="@color/transparent" />
+        <TextView
+            android:id="@+id/empty_list"
+            android:text="@string/nothing_to_show"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:visibility="gone"
+            android:textColor="@color/light_text"/>
+    </RelativeLayout>
 </RelativeLayout>

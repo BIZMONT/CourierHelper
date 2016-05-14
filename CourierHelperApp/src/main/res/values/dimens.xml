@@ -6,6 +6,7 @@
     <dimen name="activity_horizontal_margin">16dp</dimen>
     <dimen name="activity_vertical_margin">16dp</dimen>
     <dimen name="task_info_group_inner_text">16sp</dimen>
-    <dimen name="task_info_group_name_text">22sp</dimen>
+    <dimen name="task_info_group_name_text">20sp</dimen>
     <dimen name="map_height">180dp</dimen>
+    <dimen name="fab_margin">16dp</dimen>
 </resources>

@@ -2,7 +2,6 @@ package com.bizmont.courierhelper.Adapters;
 
 import android.app.Activity;
 import android.content.Context;
-import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,7 +9,7 @@ import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
 import com.bizmont.courierhelper.Models.Report.Report;
-import com.bizmont.courierhelper.Models.TaskState;
+import com.bizmont.courierhelper.Models.Task.TaskState;
 import com.bizmont.courierhelper.R;
 
 import java.util.ArrayList;
@@ -55,12 +54,10 @@ public class ReportsListViewAdapter extends ArrayAdapter {
         if(report.getReason() != null)
         {
             holder.orderState.setText(TaskState.NOT_DELIVERED.toString());
-            holder.orderState.setTextColor(Color.RED);
         }
         else
         {
             holder.orderState.setText(TaskState.DELIVERED.toString());
-            holder.orderState.setTextColor(Color.GREEN);
         }
 
         return row;

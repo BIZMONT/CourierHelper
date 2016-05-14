@@ -20,11 +20,13 @@ import android.os.IBinder;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 
+import com.bizmont.courierhelper.CourierHelperApp;
 import com.bizmont.courierhelper.DataBase.DataBase;
+import com.bizmont.courierhelper.Models.Courier.CourierState;
 import com.bizmont.courierhelper.Models.Point;
 import com.bizmont.courierhelper.Models.Report.Report;
 import com.bizmont.courierhelper.Models.Task.Task;
-import com.bizmont.courierhelper.Models.TaskState;
+import com.bizmont.courierhelper.Models.Task.TaskState;
 import com.bizmont.courierhelper.Models.Warehouse.Warehouse;
 import com.bizmont.courierhelper.OtherStuff.ExtrasNames;
 import com.bizmont.courierhelper.OtherStuff.Notifications;
@@ -82,6 +84,8 @@ public class GPSTracker extends Service implements LocationListener
     String startTime;
     static SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
+    String userEmail;
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -89,37 +93,49 @@ public class GPSTracker extends Service implements LocationListener
         track = new ArrayList<>();
         networkLocationIgnorer = new NetworkLocationIgnorer();
         recommendedPathFile = new File(getFilesDir() + "/kml","recommended_path.kml");
+        userEmail = ((CourierHelperApp)getApplication()).getCurrentUserEmail();
 
         broadcastReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent)
             {
-                if(intent.getBooleanExtra(ExtrasNames.IS_UPDATE_POINTS,false))
+                boolean isUpdatePoints = intent.getBooleanExtra(ExtrasNames.IS_UPDATE_POINTS,false);
+                boolean isCreateRoute = intent.getBooleanExtra(ExtrasNames.IS_CREATE_ROUTE,false);
+                int completedTask = intent.getIntExtra(ExtrasNames.COMPLETE_TASK,0);
+
+                if(isUpdatePoints)
                 {
-                    points = DataBase.getTargetPoints();
+                    points = DataBase.getTargetPoints(userEmail);
                     isOnPoint(lastFix);
                     Log.d(LOG_TAG, "Point updated");
-                    if(isOnTheWayExist())
+                    if(isOnTheWayExist() && isCreateRoute)
                     {
                         startTime = simpleDateFormat.format(new Date());
                     }
                 }
-                if (intent.getBooleanExtra(ExtrasNames.IS_CREATE_ROUTE,false))
+                if (isCreateRoute)
                 {
-                    ArrayList<Road> roads = buildOptimalPath();
-                    RoadFile.saveRecommendedPathToFile(getApplicationContext(), recommendedPathFile, roads);
-
-                    Log.d(LOG_TAG, "Route created");
+                    if(!isOnTheWayExist())
+                    {
+                        DataBase.setCourierState(((CourierHelperApp)getApplication()).getCurrentUserEmail(), CourierState.NOT_ACTIVE);
+                        recommendedPathFile.delete();
+                        track.clear();
+                    }
+                    else
+                    {
+                        ArrayList<Road> roads = buildOptimalPath();
+                        RoadFile.saveRecommendedPathToFile(getApplicationContext(), recommendedPathFile, roads);
+                        Log.d(LOG_TAG, "Route created");
+                    }
                     sendPathBroadcast();
                 }
-                int completedTask = intent.getIntExtra(ExtrasNames.COMPLETE_TASK,0);
                 if(completedTask != 0)
                 {
                     Log.d(LOG_TAG, "Complete task" + completedTask);
                     String reason = intent.getStringExtra(ExtrasNames.REASON);
                     completeTask(completedTask, reason);
 
-                    points = DataBase.getTargetPoints();
+                    points = DataBase.getTargetPoints(userEmail);
                     isOnPoint(lastFix);
                 }
             }
@@ -157,7 +173,7 @@ public class GPSTracker extends Service implements LocationListener
         lastFix.setLatitude(0);
         lastFix.setLongitude(0);
 
-        points = DataBase.getTargetPoints();
+        points = DataBase.getTargetPoints(userEmail);
 
         Log.d(LOG_TAG, "Service onCreate");
     }
@@ -261,23 +277,23 @@ public class GPSTracker extends Service implements LocationListener
         if(isLocationValid(location))
         {
             sendLocationBroadcast(location);
-            if(isOnPoint(location))
-            {
-
-            }
             if(isOnTheWayExist())
             {
+                DataBase.setCourierState(userEmail, CourierState.ON_MOVE);
                 track.add(new GeoPoint(location.getLatitude(),location.getLongitude()));
                 Log.d(LOG_TAG, "Added point(" + location.getLatitude() + ", " + location.getLongitude() + ") to track");
                 Log.d(LOG_TAG, "umber of points: " + track.size());
             }
             else
             {
+                DataBase.setCourierState(userEmail, CourierState.NOT_ACTIVE);
                 recommendedPathFile.delete();
-                sendPathBroadcast();
                 track.clear();
-                Log.d(LOG_TAG, "Track and path was cleared");
-                Log.d(LOG_TAG, "Track size:"+ track.size());
+                sendPathBroadcast();
+            }
+            if(isOnPoint(location))
+            {
+
             }
         }
     }
@@ -354,10 +370,12 @@ public class GPSTracker extends Service implements LocationListener
                 }
                 if(point.getClass() == Warehouse.class)
                 {
+                    DataBase.setCourierState(userEmail, CourierState.IN_WAREHOUSE);
                     notifications.showWarehouseNotify(point);
                 }
                 else if(((Task)point).getState() != TaskState.IN_WAREHOUSE)
                 {
+                    DataBase.setCourierState(userEmail, CourierState.AT_THE_POINT);
                     notifications.showTargetNotify(point);
                 }
                 return true;

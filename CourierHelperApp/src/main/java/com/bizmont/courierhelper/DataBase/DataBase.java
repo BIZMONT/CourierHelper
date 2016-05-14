@@ -7,6 +7,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
+import com.bizmont.courierhelper.Models.Courier.Courier;
+import com.bizmont.courierhelper.Models.Courier.CourierState;
 import com.bizmont.courierhelper.Models.Point;
 import com.bizmont.courierhelper.Models.Receiver.Receiver;
 import com.bizmont.courierhelper.Models.Report.Report;
@@ -14,7 +16,7 @@ import com.bizmont.courierhelper.Models.Report.ReportDetails;
 import com.bizmont.courierhelper.Models.Sender.Sender;
 import com.bizmont.courierhelper.Models.Task.Task;
 import com.bizmont.courierhelper.Models.Task.TaskFullDetails;
-import com.bizmont.courierhelper.Models.TaskState;
+import com.bizmont.courierhelper.Models.Task.TaskState;
 import com.bizmont.courierhelper.Models.Warehouse.Warehouse;
 
 import org.w3c.dom.Document;
@@ -44,7 +46,7 @@ public final class DataBase
         DatabaseManager.releaseDatabase();
     }
 
-    public static void addData(File file)
+    public static void addData(File file, String userEmail)
     {
         //TODO: catch parsing exceptions
         try
@@ -58,7 +60,7 @@ public final class DataBase
 
             SQLiteDatabase database = DatabaseManager.getInstance().openDatabase();
 
-            addTasksToDB(table, database);
+            addTasksToDB(table, database, userEmail);
             Log.d(LOG_TAG,"Tasks added!");
 
             table = document.getElementsByTagName("Warehouse");
@@ -97,7 +99,63 @@ public final class DataBase
 
         DatabaseManager.getInstance().closeDatabase();
     }
+    public static void addCourier(Courier courier)
+    {
+        ContentValues contentValues = new ContentValues();
 
+        SQLiteDatabase database = DatabaseManager.getInstance().openDatabase();
+
+        Cursor cursor = database.query(Tables.COURIERS, new String[]{"Email"}, "Email=?",
+                new String[]{courier.getEmail()}, null, null, null);
+        if(cursor.getCount() == 0)
+        {
+
+            contentValues.put("Email", courier.getEmail());
+            contentValues.put("Name", courier.getName());
+            contentValues.put("CompletedTasks",0);
+            contentValues.put("SuccessfulTasks", 0);
+            contentValues.put("State", courier.getState().toString());
+
+            database.insert(Tables.COURIERS, null, contentValues);
+        }
+
+        DatabaseManager.getInstance().closeDatabase();
+    }
+    public static Courier getCourier(String email)
+    {
+        Courier courier = null;
+        Cursor cursor;
+
+        SQLiteDatabase database = DatabaseManager.getInstance().openDatabase();
+
+        cursor = database.query(Tables.COURIERS, null, "Email = ?", new String[]{email}, null, null, null);
+
+        if (cursor.moveToFirst())
+        {
+            int emailColIndex = cursor.getColumnIndex("Email");
+            int nameColIndex = cursor.getColumnIndex("Name");
+            int stateColIndex = cursor.getColumnIndex("State");
+
+            do
+            {
+                courier = new Courier(cursor.getString(emailColIndex),cursor.getString(nameColIndex),
+                        CourierState.parse(cursor.getString(stateColIndex)));
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+
+        DatabaseManager.getInstance().closeDatabase();
+        return courier;
+    }
+    public static void setCourierState(String email, CourierState state)
+    {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put("State",state.toString());
+
+        SQLiteDatabase dataBase = DatabaseManager.getInstance().openDatabase();
+        dataBase.update(Tables.COURIERS, contentValues, "Email = ?", new String[]{email});
+        DatabaseManager.getInstance().closeDatabase();
+    }
     public static void setTaskState(TaskState state, int taskId)
     {
         ContentValues contentValues = new ContentValues();
@@ -108,7 +166,7 @@ public final class DataBase
         DatabaseManager.getInstance().closeDatabase();
     }
 
-    public static ArrayList<Point> getTargetPoints()
+    public static ArrayList<Point> getTargetPoints(String courierEmail)
     {
         ArrayList<Point> points = new ArrayList<>();
         HashSet<Integer> warehouses = new HashSet<>();
@@ -132,7 +190,8 @@ public final class DataBase
                 Tables.WAREHOUSES + ".Radius " +
                 "FROM " + Tables.TASKS +
                 " LEFT OUTER JOIN " + Tables.WAREHOUSES + " ON " + Tables.TASKS + ".WarehouseID = " + Tables.WAREHOUSES + ".ID" +
-                " WHERE " + Tables.TASKS + ".State = \"" + TaskState.ON_THE_WAY + "\" OR " + Tables.TASKS + ".State = \"" + TaskState.IN_WAREHOUSE +"\";";
+                " WHERE CourierEmail = \"" + courierEmail + "\"  AND " +
+                "(" + Tables.TASKS + ".State = \"" + TaskState.ON_THE_WAY + "\" OR " + Tables.TASKS + ".State = \"" + TaskState.IN_WAREHOUSE +"\");";
 
         cursor = database.rawQuery(sqlCommand,null);
 
@@ -176,7 +235,7 @@ public final class DataBase
         DatabaseManager.getInstance().closeDatabase();
         return points;
     }
-    public static ArrayList<Task> getActiveTasks(int warehouseId)
+    public static ArrayList<Task> getActiveTasks(int warehouseId, String courierEmail)
     {
         ArrayList<Task> tasks = new ArrayList<>();
         Cursor cursor;
@@ -185,14 +244,14 @@ public final class DataBase
 
         if(warehouseId == 0)
         {
-            cursor = database.query(Tables.TASKS, null, "State != ? OR State != ?",
-                    new String[]{TaskState.DELIVERED.toString(),TaskState.NOT_DELIVERED.toString()},
+            cursor = database.query(Tables.TASKS, null, "(State = ? OR State = ?) AND CourierEmail = ?",
+                    new String[]{TaskState.ON_THE_WAY.toString(), TaskState.IN_WAREHOUSE.toString(), courierEmail},
                     null, null, null);
         }
         else
         {
-            cursor = database.query(Tables.TASKS, null, "(State = ? OR State = ?) AND WarehouseID = ?",
-                    new String[]{TaskState.IN_WAREHOUSE.toString(), TaskState.ON_THE_WAY.toString(), Integer.toString(warehouseId)},
+            cursor = database.query(Tables.TASKS, null, "(State = ? OR State = ?) AND WarehouseID = ? AND CourierEmail = ?",
+                    new String[]{TaskState.IN_WAREHOUSE.toString(), TaskState.ON_THE_WAY.toString(), Integer.toString(warehouseId), courierEmail},
                     null, null, null);
         }
 
@@ -516,7 +575,7 @@ public final class DataBase
             }
         }
     }
-    private static void addTasksToDB(NodeList tasks, SQLiteDatabase database)
+    private static void addTasksToDB(NodeList tasks, SQLiteDatabase database, String userEmail)
     {
         ContentValues contentValues = new ContentValues();
 
@@ -537,6 +596,7 @@ public final class DataBase
                     contentValues.put("Content", element.getAttribute("Content"));
                     contentValues.put("ReceiverID", Integer.parseInt(element.getAttribute("ReceiverID")));
                     contentValues.put("SenderID", Integer.parseInt(element.getAttribute("SenderID")));
+                    contentValues.put("CourierEmail", userEmail);
                     contentValues.put("Address", element.getAttribute("Address"));
                     contentValues.put("Latitude", Float.parseFloat(element.getAttribute("Latitude")));
                     contentValues.put("Longitude", Float.parseFloat(element.getAttribute("Longitude")));
@@ -637,6 +697,7 @@ class DataBaseHelper extends SQLiteOpenHelper
                 "State text, " +
                 "ReceiverID integer, " +
                 "SenderID integer, " +
+                "CourierEmail text, " +
                 "Address text, " +
                 "Latitude real, " +
                 "Longitude real, " +
@@ -646,8 +707,9 @@ class DataBaseHelper extends SQLiteOpenHelper
                 "Comment text, " +
                 "Code text, " +
                 "FOREIGN KEY (ReceiverID) REFERENCES " + Tables.RECEIVERS + "(ID), " +
-                "FOREIGN KEY (WarehouseID) REFERENCES " + Tables.WAREHOUSES + "(ID)," +
-                "FOREIGN KEY (SenderID) REFERENCES " + Tables.SENDERS + "(ID)" +
+                "FOREIGN KEY (WarehouseID) REFERENCES " + Tables.WAREHOUSES + "(ID), " +
+                "FOREIGN KEY (SenderID) REFERENCES " + Tables.SENDERS + "(ID), " +
+                "FOREIGN KEY (CourierEmail) REFERENCES " + Tables.COURIERS + "(Email)" +
                 ");");
         db.execSQL("CREATE TABLE " + Tables.WAREHOUSES +
                 "(" +
@@ -681,12 +743,13 @@ class DataBaseHelper extends SQLiteOpenHelper
                 "Phone text, " +
                 "Address text" +
                 ");");
-        db.execSQL("CREATE TABLE " + Tables.COURIERS +"" +
+        db.execSQL("CREATE TABLE " + Tables.COURIERS +
                 "(" +
                 "Email text PRIMARY KEY," +
-                "Username text," +
+                "Name text," +
                 "CompletedTasks integer," +
-                "SuccessfulTasks integer" +
+                "SuccessfulTasks integer, " +
+                "State text" +
                 ");");
     }
 

@@ -5,7 +5,6 @@ import android.support.v4.content.ContextCompat;
 
 import com.bizmont.courierhelper.DataBase.DataBase;
 import com.bizmont.courierhelper.Models.Point;
-import com.bizmont.courierhelper.Models.TaskState;
 import com.bizmont.courierhelper.Models.Warehouse.Warehouse;
 import com.bizmont.courierhelper.R;
 
@@ -34,6 +33,10 @@ public class Task extends Point
         return state;
     }
 
+    public Warehouse getWarehouse() {
+        return warehouse;
+    }
+
     @Override
     public Marker createMarker(Context context, final MapView map)
     {
@@ -41,10 +44,10 @@ public class Task extends Point
         switch (state)
         {
             case DELIVERED:
-                //marker.setIcon(ContextCompat.getDrawable(context, R.drawable.ic_map_task));
+                marker.setIcon(ContextCompat.getDrawable(context, R.drawable.ic_task_green));
                 break;
             case NOT_DELIVERED:
-                //marker.setIcon(ContextCompat.getDrawable(context, R.drawable.ic_map_task));
+                marker.setIcon(ContextCompat.getDrawable(context, R.drawable.ic_task_red));
                 break;
             case IN_WAREHOUSE:
                 marker.setIcon(ContextCompat.getDrawable(context, R.drawable.ic_task_yellow));

@@ -10,7 +10,9 @@ import android.widget.LinearLayout;
 import android.widget.Switch;
 import android.widget.Toast;
 
+import com.bizmont.courierhelper.CourierHelperApp;
 import com.bizmont.courierhelper.DataBase.DataBase;
+import com.bizmont.courierhelper.Models.Courier.CourierState;
 import com.bizmont.courierhelper.OtherStuff.ExtrasNames;
 import com.bizmont.courierhelper.OtherStuff.TaskCodeDecoder;
 import com.bizmont.courierhelper.R;
@@ -89,6 +91,12 @@ public class CompleteTaskActivity extends AppCompatActivity
         Intent intent = new Intent(GPSTracker.BROADCAST_RECEIVE_ACTION);
         if(codeLayout.getVisibility() == View.VISIBLE)
         {
+            String userEmail = ((CourierHelperApp)getApplication()).getCurrentUserEmail();
+            if(DataBase.getCourier(userEmail).getState() != CourierState.AT_THE_POINT)
+            {
+                Toast.makeText(this, R.string.not_at_point_alert, Toast.LENGTH_SHORT).show();
+                return;
+            }
             if(!TaskCodeDecoder.isMatches(String.valueOf(taskId), code, codeEdit.getText().toString()))
             {
                 Toast.makeText(this, R.string.wrong_code, Toast.LENGTH_SHORT).show();

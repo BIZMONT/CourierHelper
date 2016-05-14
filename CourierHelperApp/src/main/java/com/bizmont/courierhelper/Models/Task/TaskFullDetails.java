@@ -3,7 +3,6 @@ package com.bizmont.courierhelper.Models.Task;
 import com.bizmont.courierhelper.DataBase.DataBase;
 import com.bizmont.courierhelper.Models.Receiver.Receiver;
 import com.bizmont.courierhelper.Models.Sender.Sender;
-import com.bizmont.courierhelper.Models.TaskState;
 
 public class TaskFullDetails extends TaskDetails
 {

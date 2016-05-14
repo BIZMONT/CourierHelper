@@ -98,4 +98,9 @@
     <string name="empty_task">Empty task</string>
     <string name="reason_empty_alert_message">Please, enter reason</string>
     <string name="about">About</string>
+    <string name="not_at_point_alert">You are not at the point to complete this task!</string>
+    <string name="statistics">Statistics</string>
+    <string name="title_activity_statistics">Statistics</string>
+
+    <string name="action_settings">Settings</string>
 </resources>

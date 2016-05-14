@@ -11,8 +11,10 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import com.bizmont.courierhelper.Activities.CompleteTaskActivity;
 import com.bizmont.courierhelper.Activities.MapActivity;
 import com.bizmont.courierhelper.Models.Task.Task;
+import com.bizmont.courierhelper.Models.Task.TaskState;
 import com.bizmont.courierhelper.OtherStuff.ExtrasNames;
 import com.bizmont.courierhelper.R;
 
@@ -59,8 +61,8 @@ public class TasksListViewAdapter extends ArrayAdapter {
         holder.taskName.setText(task.getAddress());
         holder.taskName.setEllipsize(TextUtils.TruncateAt.MARQUEE);
 
-        ImageButton imageButton = (ImageButton)row.findViewById(R.id.task_row_show);
-        imageButton.setOnClickListener(new ImageButtonOnClickListener(task.getId()) {
+        ImageButton showOnMap = (ImageButton)row.findViewById(R.id.task_row_show);
+        showOnMap.setOnClickListener(new ImageButtonOnClickListener(task.getId()) {
             @Override
             public void onClick(View v)
             {
@@ -71,6 +73,21 @@ public class TasksListViewAdapter extends ArrayAdapter {
             }
         });
 
+        ImageButton complete = (ImageButton)row.findViewById(R.id.task_row_complete);
+        complete.setOnClickListener(new ImageButtonOnClickListener(task.getId()) {
+            @Override
+            public void onClick(View v)
+            {
+                Intent intent = new Intent(context, CompleteTaskActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                intent.putExtra(ExtrasNames.TASK_ID, taskID);
+                context.startActivity(intent);
+            }
+        });
+        if(task.getState() == TaskState.ON_THE_WAY)
+        {
+            complete.setVisibility(View.VISIBLE);
+        }
         return row;
     }
 

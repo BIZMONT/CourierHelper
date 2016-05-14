@@ -12,6 +12,7 @@ import org.osmdroid.bonuspack.overlays.FolderOverlay;
 import org.osmdroid.bonuspack.overlays.Polyline;
 import org.osmdroid.bonuspack.routing.Road;
 import org.osmdroid.bonuspack.routing.RoadManager;
+import org.osmdroid.util.BoundingBoxE6;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
 
@@ -80,5 +81,15 @@ public final class RoadFile
         }
         in.close();
         out.close();
+    }
+    public static BoundingBoxE6 getBoundingBox(Context context, File file, MapView mapView)
+    {
+        KmlDocument kmlDocument = new KmlDocument();
+        if(file.exists())
+        {
+            kmlDocument.parseKMLFile(file);
+            return kmlDocument.mKmlRoot.getBoundingBox();
+        }
+        return null;
     }
 }

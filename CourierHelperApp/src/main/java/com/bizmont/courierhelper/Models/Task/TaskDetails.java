@@ -1,7 +1,5 @@
 package com.bizmont.courierhelper.Models.Task;
 
-import com.bizmont.courierhelper.Models.TaskState;
-
 public class TaskDetails extends Task
 {
     protected int receiverId;

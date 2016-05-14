@@ -90,6 +90,13 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
         setupActionBar();
     }
 
+    @Override
+    public void onBackPressed() {
+        Intent intent = new Intent(this, MapActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(intent);
+    }
+
     private void setupActionBar() {
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {

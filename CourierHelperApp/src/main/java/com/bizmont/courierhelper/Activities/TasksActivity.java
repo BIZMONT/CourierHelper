@@ -16,6 +16,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.bizmont.courierhelper.Adapters.TasksListViewAdapter;
+import com.bizmont.courierhelper.CourierHelperApp;
 import com.bizmont.courierhelper.DataBase.DataBase;
 import com.bizmont.courierhelper.Models.Courier.Courier;
 import com.bizmont.courierhelper.Models.Task.Task;
@@ -30,9 +31,10 @@ import java.util.ArrayList;
 public class TasksActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
+
+    TextView emptyMessage;
     ListView tasksList;
     TasksListViewAdapter tasksListViewAdapter;
-
     NavigationView navigationView;
 
     ArrayList<Task> tasks;
@@ -51,9 +53,9 @@ public class TasksActivity extends AppCompatActivity
         fileChooser.setFileListener(new FileChooser.FileSelectedListener() {
             @Override
             public void fileSelected(File file) {
-                DataBase.addData(file);
+                DataBase.addData(file,((CourierHelperApp)getApplication()).getCurrentUserEmail());
 
-                updateList();
+                createTasksList();
 
                 Intent locationIntent = new Intent(GPSTracker.BROADCAST_RECEIVE_ACTION);
                 locationIntent.putExtra(ExtrasNames.IS_UPDATE_POINTS, true);
@@ -73,9 +75,9 @@ public class TasksActivity extends AppCompatActivity
         assert navigationView != null;
         navigationView.setNavigationItemSelectedListener(this);
         navigationView.getMenu().findItem(R.id.nav_tasks).setChecked(true);
-        View headerView = navigationView.getHeaderView(0);
-        ((TextView)headerView.findViewById(R.id.courier_name)).setText(Courier.getInstance().getName());
-        ((TextView)headerView.findViewById(R.id.courier_status)).setText(Courier.getInstance().getState().toString());
+
+
+        emptyMessage = (TextView)findViewById(R.id.empty_list);
 
         tasksList = (ListView) findViewById(R.id.tasks_listview);
         tasksList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -92,11 +94,17 @@ public class TasksActivity extends AppCompatActivity
     protected void onResume()
     {
         super.onResume();
-        updateList();
+        createTasksList();
         if (!navigationView.getMenu().findItem(R.id.nav_tasks).isChecked())
         {
             navigationView.getMenu().findItem(R.id.nav_tasks).setChecked(true);
         }
+        View headerView = navigationView.getHeaderView(0);
+        Courier courier = DataBase.getCourier(((CourierHelperApp)getApplication()).getCurrentUserEmail());
+        TextView name = (TextView) headerView.findViewById(R.id.courier_name);
+        TextView email = (TextView) headerView.findViewById(R.id.courier_email);
+        name.setText(courier.getName());
+        email.setText(courier.getEmail());
     }
 
     @Override
@@ -141,6 +149,11 @@ public class TasksActivity extends AppCompatActivity
             Intent intent = new Intent(this, ReportsActivity.class);
             startActivity(intent);
         }
+        else if(id == R.id.nav_stats)
+        {
+            Intent intent = new Intent(this, StatisticsActivity.class);
+            startActivity(intent);
+        }
         else if(id == R.id.nav_settings)
         {
             Intent intent = new Intent(this, SettingsActivity.class);
@@ -158,9 +171,17 @@ public class TasksActivity extends AppCompatActivity
         return true;
     }
 
-    private void updateList()
+    private void createTasksList()
     {
-        tasks = DataBase.getActiveTasks(0);
+        tasks = DataBase.getActiveTasks(0, ((CourierHelperApp)getApplication()).getCurrentUserEmail());
+        if(tasks.size() != 0)
+        {
+            emptyMessage.setVisibility(View.GONE);
+        }
+        else
+        {
+            emptyMessage.setVisibility(View.VISIBLE);
+        }
         tasksListViewAdapter = new TasksListViewAdapter(TasksActivity.this, R.layout.tasks_listview_row, tasks);
         tasksList.setAdapter(tasksListViewAdapter);
     }

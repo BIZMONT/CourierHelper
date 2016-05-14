@@ -18,6 +18,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.bizmont.courierhelper.Adapters.ReportsListViewAdapter;
+import com.bizmont.courierhelper.CourierHelperApp;
 import com.bizmont.courierhelper.DataBase.DataBase;
 import com.bizmont.courierhelper.DatePickerFragment;
 import com.bizmont.courierhelper.Models.Courier.Courier;
@@ -32,7 +33,7 @@ import java.util.Calendar;
 public class ReportsActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
     Button datePickerButton;
     ListView reportsList;
-    TextView message;
+    TextView emptyMessage;
 
     NavigationView navigationView;
     ReportsListViewAdapter reportsListViewAdapter;
@@ -60,11 +61,8 @@ public class ReportsActivity extends AppCompatActivity implements NavigationView
         assert navigationView != null;
         navigationView.setNavigationItemSelectedListener(this);
         navigationView.getMenu().findItem(R.id.nav_reports).setChecked(true);
-        View headerView = navigationView.getHeaderView(0);
-        ((TextView) headerView.findViewById(R.id.courier_name)).setText(Courier.getInstance().getName());
-        ((TextView) headerView.findViewById(R.id.courier_status)).setText(Courier.getInstance().getState().toString());
 
-        message = (TextView) findViewById(R.id.empty_list);
+        emptyMessage = (TextView) findViewById(R.id.empty_list);
 
         Calendar c = Calendar.getInstance();
         pickedDate = simpleDateFormat.format(c.getTime());
@@ -107,6 +105,12 @@ public class ReportsActivity extends AppCompatActivity implements NavigationView
         if (!navigationView.getMenu().findItem(R.id.nav_reports).isChecked()) {
             navigationView.getMenu().findItem(R.id.nav_reports).setChecked(true);
         }
+        View headerView = navigationView.getHeaderView(0);
+        Courier courier = DataBase.getCourier(((CourierHelperApp)getApplication()).getCurrentUserEmail());
+        TextView name = (TextView) headerView.findViewById(R.id.courier_name);
+        TextView email = (TextView) headerView.findViewById(R.id.courier_email);
+        name.setText(courier.getName());
+        email.setText(courier.getEmail());
     }
 
     @Override
@@ -140,6 +144,11 @@ public class ReportsActivity extends AppCompatActivity implements NavigationView
             Intent intent = new Intent(this, TasksActivity.class);
             startActivity(intent);
         }
+        else if(id == R.id.nav_stats)
+        {
+            Intent intent = new Intent(this, StatisticsActivity.class);
+            startActivity(intent);
+        }
         else if(id == R.id.nav_settings)
         {
             Intent intent = new Intent(this, SettingsActivity.class);
@@ -162,11 +171,11 @@ public class ReportsActivity extends AppCompatActivity implements NavigationView
         reports = DataBase.getReportsWithDate(pickedDate);
         if(reports.size() != 0)
         {
-            message.setVisibility(View.VISIBLE);
+            emptyMessage.setVisibility(View.GONE);
         }
         else
         {
-            message.setVisibility(View.GONE);
+            emptyMessage.setVisibility(View.VISIBLE);
         }
         reportsListViewAdapter = new ReportsListViewAdapter(ReportsActivity.this, R.layout.reports_listview_row, reports);
         reportsList.setAdapter(reportsListViewAdapter);
