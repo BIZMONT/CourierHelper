@@ -43,8 +43,8 @@ public class StatisticsActivity extends AppCompatActivity
     @Override
     protected void onResume() {
         super.onResume();
-        if (!navigationView.getMenu().findItem(R.id.nav_map).isChecked()) {
-            navigationView.getMenu().findItem(R.id.nav_map).setChecked(true);
+        if (!navigationView.getMenu().findItem(R.id.nav_stats).isChecked()) {
+            navigationView.getMenu().findItem(R.id.nav_stats).setChecked(true);
         }
         View headerView = navigationView.getHeaderView(0);
         String userEmail = ((CourierHelperApp)getApplication()).getCurrentUserEmail();
@@ -64,27 +64,6 @@ public class StatisticsActivity extends AppCompatActivity
     @Override
     public boolean onPrepareOptionsMenu (Menu menu) {
         return false;
-    }
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.statistics, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
     }
 
     @Override

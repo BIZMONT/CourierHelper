@@ -45,7 +45,8 @@
         <activity
             android:name=".Activities.TaskDetailsActivity"
             android:label="@string/title_activity_task_info" />
-        <activity android:name=".Activities.ReportDetailsActivity" />
+        <activity android:name=".Activities.ReportDetailsActivity"
+            android:label="@string/report_details"/>
         <activity
             android:name=".Activities.SettingsActivity"
             android:label="@string/title_activity_settings" />
@@ -57,7 +58,7 @@
         <activity
             android:name=".Activities.StatisticsActivity"
             android:label="@string/title_activity_statistics"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:theme="@style/AppTheme.NoActionBar"/>
     </application>
 
 </manifest>

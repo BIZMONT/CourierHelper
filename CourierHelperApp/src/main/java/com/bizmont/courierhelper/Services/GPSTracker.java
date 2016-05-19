@@ -45,7 +45,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.concurrent.ExecutionException;
@@ -72,19 +71,18 @@ public class GPSTracker extends Service implements LocationListener
 
     private boolean isLocationDisabled;
 
-    ArrayList<Point> points;
-    ArrayList<GeoPoint> track;
+    private ArrayList<Point> points;
+    private ArrayList<GeoPoint> track;
 
-    BroadcastReceiver broadcastReceiver;
-    Notifications notifications;
+    private BroadcastReceiver broadcastReceiver;
+    private Notifications notifications;
 
-    NetworkLocationIgnorer networkLocationIgnorer;
+    private NetworkLocationIgnorer networkLocationIgnorer;
 
-    File recommendedPathFile;
-    String startTime;
-    static SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    private File recommendedPathFile;
+    private long startTime;
 
-    String userEmail;
+    private String userEmail;
 
     @Override
     public void onCreate() {
@@ -110,11 +108,12 @@ public class GPSTracker extends Service implements LocationListener
                     Log.d(LOG_TAG, "Point updated");
                     if(isOnTheWayExist() && isCreateRoute)
                     {
-                        startTime = simpleDateFormat.format(new Date());
+                        startTime = (new Date()).getTime();
                     }
                 }
                 if (isCreateRoute)
                 {
+                    sendMessageBroadcast("Creating route...");
                     if(!isOnTheWayExist())
                     {
                         DataBase.setCourierState(((CourierHelperApp)getApplication()).getCurrentUserEmail(), CourierState.NOT_ACTIVE);
@@ -338,10 +337,10 @@ public class GPSTracker extends Service implements LocationListener
         if (location.getAccuracy() < LOCATION_MIN_ACCURACY &&
                 lastFix.distanceTo(location) > 7)
         {
-            if(location.getProvider().equals("gps") &&  satellitesInUse < LOCATION_MIN_SATELLITES)
+            /*if(location.getProvider().equals("gps") &&  satellitesInUse < LOCATION_MIN_SATELLITES)
             {
                 return false;
-            }
+            }*/
             if(lastFix.getLatitude() != 0 && location.getSpeed() > 0.1)
             {
                 return  false;
@@ -439,7 +438,7 @@ public class GPSTracker extends Service implements LocationListener
     {
         File recommended = new File(getFilesDir() + "/kml/recommended_paths", taskId + "_rec.kml");
         Date date = new Date();
-        String endTime = simpleDateFormat.format(date);
+        long endTime = date.getTime();
         String trackFilePath;
 
         try

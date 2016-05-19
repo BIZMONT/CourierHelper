@@ -10,13 +10,13 @@
     android:descendantFocusability="blocksDescendants"
     android:clipToPadding="false"
     android:clipChildren="false"
-    android:background="@color/list_view_background">
+    android:background="@color/background">
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:padding="16dp"
-        android:background="@color/list_view_row_background"
+        android:background="@color/content_background"
         android:elevation="3dp">
         <LinearLayout
             android:layout_width="wrap_content"
@@ -28,7 +28,7 @@
                 android:layout_height="wrap_content"
                 android:text="@string/task_number"
                 android:textSize="14sp"
-                android:textColor="@color/list_view_secondary_content"/>
+                android:textColor="@color/secondary_content"/>
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -39,14 +39,14 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textSize="14sp"
-                    android:textColor="@color/list_view_secondary_content"/>
+                    android:textColor="@color/secondary_content"/>
                 <TextView
                     android:id="@+id/task_state"
                     android:text="@string/unknown"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textSize="14sp"
-                    android:textColor="@color/list_view_secondary_content"
+                    android:textColor="@color/secondary_content"
                     android:layout_alignParentRight="true"/>
             </RelativeLayout>
         </LinearLayout>
@@ -61,7 +61,7 @@
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
                 android:textSize="24sp"
-                android:textColor="@color/list_view_primary_content"/>
+                android:textColor="@color/primary_content"/>
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

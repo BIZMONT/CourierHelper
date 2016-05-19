@@ -6,11 +6,11 @@ public class Report
     private int taskId;
     private String recommendedPath;
     private String trackPath;
-    private String starTime;
-    private String endTime;
+    private long starTime;
+    private long endTime;
     private String reason;
 
-    public Report(int id, int taskId, String recommendedPath, String trackPath, String starTime, String endTime, String reason)
+    public Report(int id, int taskId, String recommendedPath, String trackPath, long starTime, long endTime, String reason)
     {
         this.id = id;
         this.taskId = taskId;
@@ -33,11 +33,11 @@ public class Report
         return trackPath;
     }
 
-    public String getStarTime() {
+    public long getStarTime() {
         return starTime;
     }
 
-    public String getEndTime() {
+    public long getEndTime() {
         return endTime;
     }
 

@@ -96,7 +96,7 @@
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Task Details"
+            android:text="@string/task_details"
             android:onClick="onClickTaskDetails"/>
     </LinearLayout>
 </LinearLayout>

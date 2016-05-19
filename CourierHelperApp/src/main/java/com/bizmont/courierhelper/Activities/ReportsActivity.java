@@ -20,7 +20,7 @@ import android.widget.TextView;
 import com.bizmont.courierhelper.Adapters.ReportsListViewAdapter;
 import com.bizmont.courierhelper.CourierHelperApp;
 import com.bizmont.courierhelper.DataBase.DataBase;
-import com.bizmont.courierhelper.DatePickerFragment;
+import com.bizmont.courierhelper.Fragments.DatePickerFragment;
 import com.bizmont.courierhelper.Models.Courier.Courier;
 import com.bizmont.courierhelper.Models.Report.Report;
 import com.bizmont.courierhelper.OtherStuff.ExtrasNames;
@@ -29,19 +29,24 @@ import com.bizmont.courierhelper.R;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 
 public class ReportsActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
-    Button datePickerButton;
-    ListView reportsList;
-    TextView emptyMessage;
+    private Button fromDatePicker;
+    private Button toDatePicker;
+    private ListView reportsList;
+    private TextView emptyMessage;
 
-    NavigationView navigationView;
-    ReportsListViewAdapter reportsListViewAdapter;
+    private NavigationView navigationView;
+    private ReportsListViewAdapter reportsListViewAdapter;
 
-    ArrayList<Report> reports;
-    String pickedDate;
+    private ArrayList<Report> reports;
+    private Date toDatePicked;
+    private Date fromDatePicked;
 
-    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+    Calendar calendar;
+
+    private static SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,6 +54,8 @@ public class ReportsActivity extends AppCompatActivity implements NavigationView
         setContentView(R.layout.reports_activity);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        calendar = Calendar.getInstance();
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -64,13 +71,25 @@ public class ReportsActivity extends AppCompatActivity implements NavigationView
 
         emptyMessage = (TextView) findViewById(R.id.empty_list);
 
-        Calendar c = Calendar.getInstance();
-        pickedDate = simpleDateFormat.format(c.getTime());
+        calendar.setTime(new Date());
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        fromDatePicked = calendar.getTime();
+        calendar.setTime(fromDatePicked);
+        calendar.add(Calendar.DATE,1);
+        toDatePicked = calendar.getTime();
 
-        datePickerButton = (Button) findViewById(R.id.date_picker_button);
-        assert datePickerButton != null;
-        datePickerButton.setText(pickedDate);
-        datePickerButton.setOnClickListener(new View.OnClickListener() {
+        fromDatePicker = (Button) findViewById(R.id.from_date_picker);
+        String fromDateText = simpleDateFormat.format(fromDatePicked);
+        fromDatePicker.setText(fromDateText);
+
+        toDatePicker = (Button) findViewById(R.id.to_date_picker);
+        String toDateText = simpleDateFormat.format(toDatePicked);
+        toDatePicker.setText(toDateText);
+
+        fromDatePicker.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 DatePickerFragment newFragment = new DatePickerFragment();
@@ -78,11 +97,34 @@ public class ReportsActivity extends AppCompatActivity implements NavigationView
                 newFragment.setCallBack(new DatePickerDialog.OnDateSetListener() {
                     @Override
                     public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
-                        Calendar c = Calendar.getInstance();
-                        c.set(year, monthOfYear, dayOfMonth);
-                        pickedDate = simpleDateFormat.format(c.getTime());
-                        datePickerButton.setText(pickedDate);
-                        createReportsList();
+                        calendar.set(year, monthOfYear, dayOfMonth,0,0,0);
+                        long current = calendar.getTime().getTime();
+                        if(current < toDatePicked.getTime())
+                        {
+                            fromDatePicked = calendar.getTime();
+                            fromDatePicker.setText(simpleDateFormat.format(fromDatePicked));
+                            createReportsList();
+                        }
+                    }
+                });
+            }
+        });
+        toDatePicker.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                DatePickerFragment newFragment = new DatePickerFragment();
+                newFragment.show(getSupportFragmentManager(), "datePicker");
+                newFragment.setCallBack(new DatePickerDialog.OnDateSetListener() {
+                    @Override
+                    public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
+                        calendar.set(year, monthOfYear, dayOfMonth,0,0,0);
+                        long current = calendar.getTime().getTime();
+                        if(fromDatePicked.getTime() < current)
+                        {
+                            toDatePicked = calendar.getTime();
+                            toDatePicker.setText(simpleDateFormat.format(toDatePicked));
+                            createReportsList();
+                        }
                     }
                 });
             }
@@ -168,7 +210,7 @@ public class ReportsActivity extends AppCompatActivity implements NavigationView
 
     private void createReportsList()
     {
-        reports = DataBase.getReportsWithDate(pickedDate);
+        reports = DataBase.getReportsWithDate(fromDatePicked.getTime(), toDatePicked.getTime());
         if(reports.size() != 0)
         {
             emptyMessage.setVisibility(View.GONE);

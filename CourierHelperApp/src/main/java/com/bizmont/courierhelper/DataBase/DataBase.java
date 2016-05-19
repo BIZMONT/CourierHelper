@@ -118,6 +118,7 @@ public final class DataBase
 
             database.insert(Tables.COURIERS, null, contentValues);
         }
+        cursor.close();
 
         DatabaseManager.getInstance().closeDatabase();
     }
@@ -331,20 +332,20 @@ public final class DataBase
         {
             throw new RuntimeException();
         }
+        cursor.close();
         DatabaseManager.getInstance().closeDatabase();
 
         return result;
     }
 
-    public static ArrayList<Report> getReportsWithDate(String date)
+    public static ArrayList<Report> getReportsWithDate(long fromDate, long toDate)
     {
         ArrayList<Report> reports = new ArrayList<>();
-        date = date.substring(0,10);
-        Log.d(LOG_TAG, "Date " + date);
         Cursor cursor;
 
         SQLiteDatabase database = DatabaseManager.getInstance().openDatabase();
-        cursor = database.query(Tables.REPORTS, null, "EndTime LIKE ?", new String[]{date + "%"}, null, null, null);
+        cursor = database.query(Tables.REPORTS, null, "EndTime >= ? AND EndTime <= ?",
+                new String[]{String.valueOf(fromDate),String.valueOf(toDate)}, null, null, null);
 
         if (cursor.moveToFirst())
         {
@@ -363,8 +364,8 @@ public final class DataBase
                         cursor.getInt(taskIdColIndex),
                         cursor.getString(pathColIndex),
                         cursor.getString(trackColIndex),
-                        cursor.getString(beginColIndex),
-                        cursor.getString(endColIndex),
+                        cursor.getLong(beginColIndex),
+                        cursor.getLong(endColIndex),
                         cursor.getString(reasonColIndex));
                 reports.add(report);
             } while (cursor.moveToNext());
@@ -399,8 +400,8 @@ public final class DataBase
                         cursor.getInt(taskIdColIndex),
                         cursor.getString(pathColIndex),
                         cursor.getString(trackColIndex),
-                        cursor.getString(beginColIndex),
-                        cursor.getString(endColIndex),
+                        cursor.getLong(beginColIndex),
+                        cursor.getLong(endColIndex),
                         cursor.getString(reasonColIndex));
             } while (cursor.moveToNext());
         }
@@ -731,23 +732,23 @@ class DataBaseHelper extends SQLiteOpenHelper
                 "TaskID integer, " +
                 "Track text, " +
                 "RecommendedPath text," +
-                "BeginTime text," +
-                "EndTime text," +
+                "BeginTime integer," +
+                "EndTime integer," +
                 "Reason text," +
                 "FOREIGN KEY (TaskID) REFERENCES " + Tables.TASKS + "(ID)" +
                 ");");
         db.execSQL("CREATE TABLE " + Tables.SENDERS +
                 "(" +
-                "ID integer PRIMARY KEY," +
+                "ID integer PRIMARY KEY, " +
                 "Name text, " +
                 "Phone text, " +
                 "Address text" +
                 ");");
         db.execSQL("CREATE TABLE " + Tables.COURIERS +
                 "(" +
-                "Email text PRIMARY KEY," +
-                "Name text," +
-                "CompletedTasks integer," +
+                "Email text PRIMARY KEY, " +
+                "Name text, " +
+                "CompletedTasks integer, " +
                 "SuccessfulTasks integer, " +
                 "State text" +
                 ");");

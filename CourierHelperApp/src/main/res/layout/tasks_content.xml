@@ -7,7 +7,7 @@
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context="com.bizmont.courierhelper.Activities.TasksActivity"
     tools:showIn="@layout/tasks_app_bar"
-    android:background="@color/list_view_background">
+    android:background="@color/background">
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
@@ -23,6 +23,6 @@
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
             android:visibility="gone"
-            android:textColor="@color/light_text"/>
+            android:textColor="@color/light_content"/>
     </RelativeLayout>
 </RelativeLayout>

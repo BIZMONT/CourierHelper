@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.bizmont.courierhelper.Activities.WarehouseActivity"
-    android:background="@color/list_view_background">
+    android:background="@color/background">
     <ListView
         android:id="@+id/warehouse_listview"
         android:layout_width="match_parent"

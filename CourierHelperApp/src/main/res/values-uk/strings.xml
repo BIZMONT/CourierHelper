@@ -4,7 +4,7 @@
     <string name="action_settings_location">Налаштування розташування</string>
     <string name="menu_map">Карта</string>
     <string name="menu_reports">Звіти</string>
-    <string name="menu_tasks">Список активних завдань</string>
+    <string name="menu_tasks">Активні завдання</string>
     <string name="title_activity_map">Карта</string>
     <string name="title_activity_reports">Звіти</string>
     <string name="toast_exit_message">Натисніть "Назад" знову щоб вийти</string>
@@ -34,7 +34,7 @@
     <string name="unknown_user">Невідомий користувач</string>
     <string name="code_accepted">Код прийнято</string>
     <string name="empty_task">Невідоме завдання</string>
-    <string name="enter_code_here">Введіть код сюди:</string>
+    <string name="enter_code_here">Введіть код сюди</string>
     <string name="wrong_code">Невірний код! Будь ласка, повторіть ще раз</string>
     <string name="shipping_is_fulfilled">Не доставлено</string>
     <string name="reason_empty_alert_message">Будь ласка, введіть причину</string>
@@ -44,4 +44,20 @@
     <string name="about">Про програму</string>
     <string name="statistics">Статистика</string>
     <string name="title_activity_statistics">Статистика</string>
+    <string name="date">Дата</string>
+    <string name="distance_traveled">Пройдена дистанція</string>
+    <string name="end_time">Час завершення</string>
+    <string name="info">Інформація</string>
+    <string name="not_at_point_alert">Ви не знаходитесь в точці, щоб завершити це завдання</string>
+    <string name="nothing_to_show">Порожньо</string>
+    <string name="recommended_path_distance">Рекомендована дистанція</string>
+    <string name="state">Стан</string>
+    <string name="task_details">Деталі завдання</string>
+    <string name="warehouse">Склад</string>
+    <string name="user_ico">Зображення користувача</string>
+    <string name="begin_time">Час початку</string>
+    <string name="animate_to_location_marker"></string>
+    <string name="from">Від</string>
+    <string name="to">до</string>
+    <string name="report_details">Деталі звіту</string>
 </resources>

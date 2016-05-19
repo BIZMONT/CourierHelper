@@ -10,13 +10,13 @@
     android:descendantFocusability="blocksDescendants"
     android:clipToPadding="false"
     android:clipChildren="false"
-    android:background="@color/list_view_background">
+    android:background="@color/background">
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:padding="16dp"
-        android:background="@color/list_view_row_background">
+        android:background="@color/content_background">
         <CheckBox
             android:id="@+id/task_checkbox"
             android:layout_width="wrap_content"
@@ -30,7 +30,7 @@
                 android:layout_height="match_parent"
                 android:text="@string/task_number"
                 android:textSize="24sp"
-                android:textColor="@color/list_view_primary_content"
+                android:textColor="@color/primary_content"
                 android:gravity="center_vertical"/>
             <TextView
                 android:id="@+id/task_id"
@@ -38,7 +38,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="24sp"
-                android:textColor="@color/list_view_primary_content"
+                android:textColor="@color/primary_content"
                 android:gravity="center_vertical"/>
         </LinearLayout>
     </LinearLayout>

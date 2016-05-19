@@ -20,8 +20,8 @@
             android:padding="16dp"
             android:textSize="@dimen/task_info_group_name_text"
             android:layout_alignParentBottom="true"
-            android:background="#44000000"
-            android:textColor="@color/light_text"/>
+            android:background="@color/transparent_background"
+            android:textColor="@color/light_header_content"/>
     </RelativeLayout>
     <ScrollView
         android:layout_width="match_parent"
@@ -29,304 +29,310 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
-            <!--Receiver info-->
+            android:padding="16dp">
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:layout_marginTop="10dp"
-                android:layout_marginBottom="10dp"
-                android:layout_marginLeft="16dp"
-                android:layout_marginRight="16dp">
-                <TextView
-                    android:text="@string/receiver"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:textSize="@dimen/task_info_group_name_text"
-                    android:textStyle="bold"
-                    android:textColor="@color/primary_text"/>
+                android:background="@color/content_background">
+                <!--Receiver info-->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:paddingLeft="16dp"
-                    android:paddingTop="8dp"
-                    android:paddingRight="16dp">
-                    <!--Name-->
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="10dp"
+                    android:layout_marginLeft="16dp"
+                    android:layout_marginRight="16dp">
+                    <TextView
+                        android:text="@string/receiver"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textSize="@dimen/task_info_group_name_text"
+                        android:textStyle="bold"
+                        android:textColor="@color/primary_content"/>
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="5dp">
-                        <TextView
-                            android:text="@string/name"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:textSize="@dimen/task_info_group_inner_text"
-                            android:textColor="@color/secondary_text"
-                            android:textStyle="bold"/>
-                        <TextView
-                            android:id="@+id/receiver_name"
-                            android:text="@string/unknown"
+                        android:orientation="vertical"
+                        android:paddingLeft="16dp"
+                        android:paddingTop="8dp"
+                        android:paddingRight="16dp">
+                        <!--Name-->
+                        <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginLeft="15dp"
-                            android:textSize="@dimen/task_info_group_inner_text"
-                            android:textColor="@color/secondary_text"/>
-                    </LinearLayout>
-                    <!--Phone-->
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="5dp">
-                        <TextView
-                            android:text="@string/phone"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:textSize="@dimen/task_info_group_inner_text"
-                            android:textColor="@color/secondary_text"
-                            android:textStyle="bold"/>
-                        <TextView
-                            android:id="@+id/receiver_phone"
-                            android:text="@string/unknown"
+                            android:layout_marginBottom="5dp">
+                            <TextView
+                                android:text="@string/name"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textSize="@dimen/task_info_group_inner_text"
+                                android:textColor="@color/secondary_content"
+                                android:textStyle="bold"/>
+                            <TextView
+                                android:id="@+id/receiver_name"
+                                android:text="@string/unknown"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginLeft="15dp"
+                                android:textSize="@dimen/task_info_group_inner_text"
+                                android:textColor="@color/secondary_content"/>
+                        </LinearLayout>
+                        <!--Phone-->
+                        <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginLeft="15dp"
-                            android:textSize="@dimen/task_info_group_inner_text"
-                            android:textColor="@color/secondary_text"/>
+                            android:layout_marginBottom="5dp">
+                            <TextView
+                                android:text="@string/phone"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textSize="@dimen/task_info_group_inner_text"
+                                android:textColor="@color/secondary_content"
+                                android:textStyle="bold"/>
+                            <TextView
+                                android:id="@+id/receiver_phone"
+                                android:text="@string/unknown"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginLeft="15dp"
+                                android:textSize="@dimen/task_info_group_inner_text"
+                                android:textColor="@color/secondary_content"/>
+                        </LinearLayout>
                     </LinearLayout>
                 </LinearLayout>
-            </LinearLayout>
-            <View
-                android:background="@color/separator"
-                android:layout_width= "match_parent"
-                android:layout_height="1dip" />
-            <!--Sender info-->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_marginTop="10dp"
-                android:layout_marginBottom="10dp"
-                android:layout_marginLeft="16dp"
-                android:layout_marginRight="16dp">
-                <TextView
-                    android:text="@string/sender"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:textSize="@dimen/task_info_group_name_text"
-                    android:textStyle="bold"
-                    android:textColor="@color/primary_text"/>
+                <View
+                    android:background="@color/separator"
+                    android:layout_width= "match_parent"
+                    android:layout_height="1dip" />
+                <!--Sender info-->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:paddingLeft="16dp"
-                    android:paddingTop="8dp"
-                    android:paddingRight="16dp">
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="10dp"
+                    android:layout_marginLeft="16dp"
+                    android:layout_marginRight="16dp">
+                    <TextView
+                        android:text="@string/sender"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textSize="@dimen/task_info_group_name_text"
+                        android:textStyle="bold"
+                        android:textColor="@color/primary_content"/>
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="5dp">
-                        <TextView
-                            android:text="@string/name"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:textSize="@dimen/task_info_group_inner_text"
-                            android:textStyle="bold"/>
-                        <TextView
-                            android:id="@+id/sender_name"
-                            android:text="@string/unknown"
+                        android:orientation="vertical"
+                        android:paddingLeft="16dp"
+                        android:paddingTop="8dp"
+                        android:paddingRight="16dp">
+                        <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginLeft="16dp"
-                            android:textSize="@dimen/task_info_group_inner_text" />
-                    </LinearLayout>
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="5dp">
-                        <TextView
-                            android:text="@string/address"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:textSize="@dimen/task_info_group_inner_text"
-                            android:textStyle="bold"/>
-                        <TextView
-                            android:id="@+id/sender_address"
-                            android:text="@string/unknown"
+                            android:layout_marginBottom="5dp">
+                            <TextView
+                                android:text="@string/name"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textSize="@dimen/task_info_group_inner_text"
+                                android:textStyle="bold"/>
+                            <TextView
+                                android:id="@+id/sender_name"
+                                android:text="@string/unknown"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginLeft="16dp"
+                                android:textSize="@dimen/task_info_group_inner_text" />
+                        </LinearLayout>
+                        <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginLeft="16dp"
-                            android:textSize="@dimen/task_info_group_inner_text" />
-                    </LinearLayout>
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="5dp">
-                        <TextView
-                            android:text="@string/phone"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:textSize="@dimen/task_info_group_inner_text"
-                            android:textStyle="bold"/>
-                        <TextView
-                            android:id="@+id/sender_phone"
-                            android:text="@string/unknown"
+                            android:layout_marginBottom="5dp">
+                            <TextView
+                                android:text="@string/address"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textSize="@dimen/task_info_group_inner_text"
+                                android:textStyle="bold"/>
+                            <TextView
+                                android:id="@+id/sender_address"
+                                android:text="@string/unknown"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginLeft="16dp"
+                                android:textSize="@dimen/task_info_group_inner_text" />
+                        </LinearLayout>
+                        <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginLeft="15dp"
-                            android:textSize="@dimen/task_info_group_inner_text" />
+                            android:layout_marginBottom="5dp">
+                            <TextView
+                                android:text="@string/phone"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textSize="@dimen/task_info_group_inner_text"
+                                android:textStyle="bold"/>
+                            <TextView
+                                android:id="@+id/sender_phone"
+                                android:text="@string/unknown"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginLeft="15dp"
+                                android:textSize="@dimen/task_info_group_inner_text" />
+                        </LinearLayout>
                     </LinearLayout>
                 </LinearLayout>
-            </LinearLayout>
-            <View
-                android:background="@color/separator"
-                android:layout_width= "match_parent"
-                android:layout_height="1dip" />
-            <!--Content-->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_marginTop="10dp"
-                android:layout_marginBottom="10dp"
-                android:layout_marginLeft="16dp"
-                android:layout_marginRight="16dp">
-                <TextView
-                    android:text="@string/content"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:textSize="@dimen/task_info_group_name_text"
-                    android:textStyle="bold"
-                    android:textColor="@color/primary_text"/>
-                <TextView
-                    android:id="@+id/task_content"
-                    android:text="@string/unknown"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:paddingLeft="16dp"
-                    android:paddingTop="8dp"
-                    android:paddingRight="16dp"
-                    android:textSize="@dimen/task_info_group_inner_text" />
-            </LinearLayout>
-            <View
-                android:background="@color/separator"
-                android:layout_width= "match_parent"
-                android:layout_height="1dip" />
-            <!--Info-->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_marginTop="10dp"
-                android:layout_marginBottom="10dp"
-                android:layout_marginLeft="16dp"
-                android:layout_marginRight="16dp">
-                <TextView
-                    android:text="Info"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:textSize="@dimen/task_info_group_name_text"
-                    android:textStyle="bold"
-                    android:textColor="@color/primary_text"/>
+                <View
+                    android:background="@color/separator"
+                    android:layout_width= "match_parent"
+                    android:layout_height="1dip" />
+                <!--Content-->
                 <LinearLayout
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:paddingLeft="16dp"
-                    android:paddingTop="8dp"
-                    android:paddingRight="16dp">
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="10dp"
+                    android:layout_marginLeft="16dp"
+                    android:layout_marginRight="16dp">
+                    <TextView
+                        android:text="@string/content"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textSize="@dimen/task_info_group_name_text"
+                        android:textStyle="bold"
+                        android:textColor="@color/primary_content"/>
+                    <TextView
+                        android:id="@+id/task_content"
+                        android:text="@string/unknown"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingLeft="16dp"
+                        android:paddingTop="8dp"
+                        android:paddingRight="16dp"
+                        android:textSize="@dimen/task_info_group_inner_text" />
+                </LinearLayout>
+                <View
+                    android:background="@color/separator"
+                    android:layout_width= "match_parent"
+                    android:layout_height="1dip" />
+                <!--Info-->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="10dp"
+                    android:layout_marginLeft="16dp"
+                    android:layout_marginRight="16dp">
+                    <TextView
+                        android:text="@string/info"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textSize="@dimen/task_info_group_name_text"
+                        android:textStyle="bold"
+                        android:textColor="@color/primary_content"/>
                     <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="5dp">
-                        <TextView
-                            android:text="Date"
+                        android:orientation="vertical"
+                        android:paddingLeft="16dp"
+                        android:paddingTop="8dp"
+                        android:paddingRight="16dp">
+                        <LinearLayout
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textSize="@dimen/task_info_group_inner_text"
-                            android:textStyle="bold"/>
-                        <TextView
-                            android:id="@+id/task_date"
-                            android:text="@string/unknown"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginLeft="10dp"
-                            android:textSize="@dimen/task_info_group_inner_text"/>
-                    </LinearLayout>
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="5dp">
-                        <TextView
-                            android:text="Warehouse"
+                            android:layout_marginBottom="5dp">
+                            <TextView
+                                android:text="@string/date"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textSize="@dimen/task_info_group_inner_text"
+                                android:textStyle="bold"/>
+                            <TextView
+                                android:id="@+id/task_date"
+                                android:text="@string/unknown"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginLeft="10dp"
+                                android:textSize="@dimen/task_info_group_inner_text"/>
+                        </LinearLayout>
+                        <LinearLayout
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textSize="@dimen/task_info_group_inner_text"
-                            android:textStyle="bold"/>
-                        <TextView
-                            android:id="@+id/task_warehouse"
-                            android:text="@string/unknown"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginLeft="10dp"
-                            android:textSize="@dimen/task_info_group_inner_text"/>
-                    </LinearLayout>
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="5dp">
-                        <TextView
-                            android:text="State"
+                            android:layout_marginBottom="5dp">
+                            <TextView
+                                android:text="@string/warehouse"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textSize="@dimen/task_info_group_inner_text"
+                                android:textStyle="bold"/>
+                            <TextView
+                                android:id="@+id/task_warehouse"
+                                android:text="@string/unknown"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginLeft="10dp"
+                                android:textSize="@dimen/task_info_group_inner_text"/>
+                        </LinearLayout>
+                        <LinearLayout
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textSize="@dimen/task_info_group_inner_text"
-                            android:textStyle="bold"/>
-                        <TextView
-                            android:id="@+id/task_state"
-                            android:text="@string/unknown"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginLeft="10dp"
-                            android:textSize="@dimen/task_info_group_inner_text"/>
+                            android:layout_marginBottom="5dp">
+                            <TextView
+                                android:text="@string/state"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textSize="@dimen/task_info_group_inner_text"
+                                android:textStyle="bold"/>
+                            <TextView
+                                android:id="@+id/task_state"
+                                android:text="@string/unknown"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginLeft="10dp"
+                                android:textSize="@dimen/task_info_group_inner_text"/>
+                        </LinearLayout>
                     </LinearLayout>
                 </LinearLayout>
-            </LinearLayout>
-            <View
-                android:background="@color/separator"
-                android:layout_width= "match_parent"
-                android:layout_height="1dip" />
-            <!--Comments-->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_marginTop="10dp"
-                android:layout_marginBottom="10dp"
-                android:layout_marginLeft="16dp"
-                android:layout_marginRight="16dp">
-                <TextView
-                    android:text="@string/comments"
+                <View
+                    android:background="@color/separator"
+                    android:layout_width= "match_parent"
+                    android:layout_height="1dip" />
+                <!--Comments-->
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:textSize="@dimen/task_info_group_name_text"
-                    android:textStyle="bold"
-                    android:textColor="@color/primary_text"/>
-                <TextView
-                    android:id="@+id/task_comment"
-                    android:text="@string/unknown"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:paddingLeft="16dp"
-                    android:paddingTop="8dp"
-                    android:paddingRight="16dp"
-                    android:textSize="@dimen/task_info_group_inner_text"/>
+                    android:orientation="vertical"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="10dp"
+                    android:layout_marginLeft="16dp"
+                    android:layout_marginRight="16dp">
+                    <TextView
+                        android:text="@string/comments"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textSize="@dimen/task_info_group_name_text"
+                        android:textStyle="bold"
+                        android:textColor="@color/primary_content"/>
+                    <TextView
+                        android:id="@+id/task_comment"
+                        android:text="@string/unknown"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:paddingLeft="16dp"
+                        android:paddingTop="8dp"
+                        android:paddingRight="16dp"
+                        android:textSize="@dimen/task_info_group_inner_text"/>
+                </LinearLayout>
+                <View
+                    android:background="@color/separator"
+                    android:layout_width= "match_parent"
+                    android:layout_height="1dip" />
             </LinearLayout>
-            <View
-                android:background="@color/separator"
-                android:layout_width= "match_parent"
-                android:layout_height="1dip" />
         </LinearLayout>
     </ScrollView>
 </LinearLayout>

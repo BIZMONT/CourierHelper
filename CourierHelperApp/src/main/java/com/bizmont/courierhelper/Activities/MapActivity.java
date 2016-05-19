@@ -167,7 +167,10 @@ public class MapActivity extends AppCompatActivity implements NavigationView.OnN
     {
         broadcastReceiver = new BroadcastReceiver() {
             public void onReceive(Context context, Intent intent) {
-                if(intent.getBooleanExtra(ExtrasNames.IS_LOCATION,false))
+                boolean isLocation  = intent.getBooleanExtra(ExtrasNames.IS_LOCATION,false);
+                boolean isPathUpdate = intent.getBooleanExtra(ExtrasNames.IS_PATH_UPDATE,false);
+                String message = intent.getStringExtra(ExtrasNames.MESSAGE);
+                if(isLocation)
                 {
                     Location location = intent.getParcelableExtra(ExtrasNames.LOCATION);
 
@@ -182,9 +185,13 @@ public class MapActivity extends AppCompatActivity implements NavigationView.OnN
                         showLocationMarkerOnMap(location);
                     }
                 }
-                if(intent.getBooleanExtra(ExtrasNames.IS_PATH_UPDATE,false))
+                if(isPathUpdate)
                 {
                     getPathOverlay();
+                }
+                if(message != null)
+                {
+                    Toast.makeText(getApplicationContext(),message,Toast.LENGTH_SHORT).show();
                 }
             }
         };

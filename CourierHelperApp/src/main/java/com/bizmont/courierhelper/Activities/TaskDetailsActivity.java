@@ -2,7 +2,6 @@ package com.bizmont.courierhelper.Activities;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -15,7 +14,6 @@ import com.bizmont.courierhelper.OtherStuff.ExtrasNames;
 import com.bizmont.courierhelper.R;
 
 import org.osmdroid.api.IMapController;
-import org.osmdroid.bonuspack.overlays.Marker;
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
@@ -98,35 +96,12 @@ public class TaskDetailsActivity extends AppCompatActivity
                         return true;
                     }
                 });
-                map.getOverlays().add(markerInit());
+                map.getOverlays().add(details.createMarker(this,map));
 
                 mapController = map.getController();
                 mapController.setZoom(18);
                 mapController.setCenter(new GeoPoint(details.getLatitude(),details.getLongitude()));
             }
         }
-    }
-
-    private Marker markerInit()
-    {
-        Marker marker = new Marker(map);
-        marker.setOnMarkerClickListener(new Marker.OnMarkerClickListener() {
-            @Override
-            public boolean onMarkerClick(Marker marker, MapView mapView) {
-                return true;
-            }
-        });
-        switch (details.getState())
-        {
-            case IN_WAREHOUSE:
-                marker.setIcon(ContextCompat.getDrawable(this, R.drawable.ic_task_yellow));
-                break;
-            case ON_THE_WAY:
-                marker.setIcon(ContextCompat.getDrawable(this, R.drawable.ic_task_blue));
-                break;
-        }
-        marker.setAnchor(org.osmdroid.bonuspack.overlays.Marker.ANCHOR_CENTER, org.osmdroid.bonuspack.overlays.Marker.ANCHOR_BOTTOM);
-        marker.setPosition(new GeoPoint(details.getLatitude(),details.getLongitude()));
-        return marker;
     }
 }

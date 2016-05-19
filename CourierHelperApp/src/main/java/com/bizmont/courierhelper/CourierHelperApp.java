@@ -42,7 +42,7 @@ public class CourierHelperApp extends Application
     private String getUsername() {
         AccountManager manager = AccountManager.get(this);
         Account[] accounts = manager.getAccountsByType("com.google");
-        List<String> possibleEmails = new LinkedList<String>();
+        List<String> possibleEmails = new LinkedList<>();
 
         for (Account account : accounts) {
             possibleEmails.add(account.name);
@@ -55,7 +55,7 @@ public class CourierHelperApp extends Application
             if (parts.length > 1)
                 return parts[0];
         }
-        return getString(R.string.unknown_user);
+        return getString(R.string.unknown);
     }
     public String getCurrentUserEmail()
     {

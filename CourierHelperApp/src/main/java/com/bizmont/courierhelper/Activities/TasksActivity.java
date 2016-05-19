@@ -30,8 +30,6 @@ import java.util.ArrayList;
 
 public class TasksActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
-
-
     TextView emptyMessage;
     ListView tasksList;
     TasksListViewAdapter tasksListViewAdapter;

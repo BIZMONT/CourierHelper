@@ -1,4 +1,4 @@
-package com.bizmont.courierhelper;
+package com.bizmont.courierhelper.Fragments;
 
 import android.app.DatePickerDialog;
 import android.app.Dialog;
