@@ -4,8 +4,6 @@
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
-    <string name="action_settings_location">Location settings</string>
-
     <string name="title_activity_reports">Reports</string>
     <string name="menu_map">Map</string>
     <string name="menu_reports">Reports</string>
@@ -37,7 +35,6 @@
     <string name="code_accepted">Code accepted</string>
     <string name="enter_code_here">Enter code here</string>
     <string name="wrong_code">Wrong code! Please, try again</string>
-    <string name="user_ico">User ico</string>
     <string name="shipping_is_fulfilled">Shipping is fulfilled</string>
     <string name="reason_empty_alert_message">Please, enter reason</string>
     <string name="nothing_to_show">Nothing to show</string>
@@ -48,7 +45,6 @@
     <string name="about">About</string>
     <string name="statistics">Statistics</string>
     <string name="title_activity_statistics">Statistics</string>
-    <string name="action_settings"></string>
     <string name="date">Date</string>
     <string name="distance_traveled">Distance traveled</string>
     <string name="end_time">End time</string>
@@ -59,8 +55,8 @@
     <string name="task_details">Task details</string>
     <string name="warehouse">Warehouse</string>
     <string name="begin_time">Begin time</string>
-    <string name="animate_to_location_marker">Animate to location marker</string>
     <string name="from">From</string>
     <string name="to">to</string>
     <string name="report_details">Report Details</string>
+    <string name="check_from_server">Update</string>
 </resources>

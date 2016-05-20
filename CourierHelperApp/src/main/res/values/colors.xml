@@ -3,13 +3,11 @@
     <color name="primary">#e53935</color>
     <color name="primary_dark">#c62828</color>
     <color name="accent">#E74C3C</color>
-    <color name="deep_background">#eeeeee</color>
     <color name="separator">#bdbdbd</color>
 
     <!--Map Items-->
     <color name="on_the_way">#03A9F4</color>
     <color name="on_the_way_radius">#6603A9F4</color>
-    <color name="on_warehouse">#FFC107</color>
     <color name="on_warehouse_radius">#66FFC107</color>
 
     <color name="content_background">#eeeeee</color>

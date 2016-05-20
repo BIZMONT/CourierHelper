@@ -50,7 +50,8 @@
         <activity
             android:name=".Activities.SettingsActivity"
             android:label="@string/title_activity_settings" />
-        <activity android:name=".Activities.AboutActivity" />
+        <activity android:name=".Activities.AboutActivity"
+            android:label="@string/about"/>
         <activity
             android:name=".Activities.WarehouseActivity"
             android:label="Warehouse #" />

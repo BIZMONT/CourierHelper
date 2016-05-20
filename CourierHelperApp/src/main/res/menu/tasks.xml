@@ -7,7 +7,6 @@
         android:title="@string/get_tasks_from_file"
         app:showAsAction="never" />
     <item
-        android:id="@+id/action_menu_check_new_tasks"
-        android:title="Check from server"
+        android:title="@string/check_from_server"
         app:showAsAction="never"/>
 </menu>

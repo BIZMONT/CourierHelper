@@ -18,7 +18,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:text="© OpenStreetMap contributors"
-        android:background="@color/content_background"
+        android:background="#88eeeeee"
         android:padding="3dp"
         android:textColor="@color/primary_content"/>
     <TextView

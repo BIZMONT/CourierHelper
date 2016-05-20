@@ -7,5 +7,53 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="com.bizmont.courierhelper.Activities.AboutActivity">
+    tools:context="com.bizmont.courierhelper.Activities.AboutActivity"
+    android:background="@color/background">
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/content_background"
+        android:padding="24dp">
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:orientation="vertical">
+            <ImageView
+                android:src="@drawable/launcher"
+                android:layout_width="128dp"
+                android:layout_height="128dp"
+                android:layout_gravity="center_horizontal"/>
+            <TextView
+                android:padding="8dp"
+                android:text="Courier Helper"
+                android:textSize="30sp"
+                android:textColor="@color/primary_content"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"/>
+
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:orientation="vertical">
+            <TextView
+                android:text="Copiright © 2016"
+                android:textSize="20sp"
+                android:textColor="@color/secondary_content"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"/>
+            <TextView
+                android:text="Created by BIZMONT"
+                android:textSize="20sp"
+                android:textColor="@color/secondary_content"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"/>
+        </LinearLayout>
+    </RelativeLayout>
 </RelativeLayout>

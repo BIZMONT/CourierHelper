@@ -10,9 +10,11 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context=".Activities.StatisticsActivity"
-    tools:showIn="@layout/statistics_app_bar">
+    tools:showIn="@layout/statistics_app_bar"
+    android:background="@color/background">
     <TextView
         android:text="In progress)"
+        android:textColor="@color/light_content"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
