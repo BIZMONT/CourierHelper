@@ -9,8 +9,8 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.bizmont.courierhelper.DataBase.DataBase;
+import com.bizmont.courierhelper.ExtrasNames;
 import com.bizmont.courierhelper.Models.Task.TaskFullDetails;
-import com.bizmont.courierhelper.OtherStuff.ExtrasNames;
 import com.bizmont.courierhelper.R;
 
 import org.osmdroid.api.IMapController;

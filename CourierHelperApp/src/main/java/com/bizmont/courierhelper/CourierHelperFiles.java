@@ -1,11 +1,9 @@
-package com.bizmont.courierhelper.OtherStuff;
+package com.bizmont.courierhelper;
 
 
 import android.content.Context;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
-
-import com.bizmont.courierhelper.R;
 
 import org.osmdroid.bonuspack.kml.KmlDocument;
 import org.osmdroid.bonuspack.overlays.FolderOverlay;
@@ -24,7 +22,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 
-public final class RoadFile
+public final class CourierHelperFiles
 {
     public static FolderOverlay getOverlayFromFile(Context context, File file, MapView mapView)
     {
@@ -36,7 +34,7 @@ public final class RoadFile
         }
         return new FolderOverlay(context);
     }
-    public static String saveRecommendedPathToFile(Context context, File file, ArrayList<Road> path)
+    public static String saveRoadsToFile(Context context, File file, ArrayList<Road> path)
     {
         if(path == null)
         {
@@ -68,7 +66,6 @@ public final class RoadFile
         kmlDocument.saveAsKML(file);
         return file.getAbsolutePath();
     }
-
     public static void copyFile(File src, File dst) throws IOException
     {
         InputStream in = new FileInputStream(src);

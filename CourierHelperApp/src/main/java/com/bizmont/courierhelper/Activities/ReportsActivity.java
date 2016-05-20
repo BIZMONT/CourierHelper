@@ -20,10 +20,10 @@ import android.widget.TextView;
 import com.bizmont.courierhelper.Adapters.ReportsListViewAdapter;
 import com.bizmont.courierhelper.CourierHelperApp;
 import com.bizmont.courierhelper.DataBase.DataBase;
+import com.bizmont.courierhelper.ExtrasNames;
 import com.bizmont.courierhelper.Fragments.DatePickerFragment;
 import com.bizmont.courierhelper.Models.Courier.Courier;
 import com.bizmont.courierhelper.Models.Report.Report;
-import com.bizmont.courierhelper.OtherStuff.ExtrasNames;
 import com.bizmont.courierhelper.R;
 
 import java.text.SimpleDateFormat;

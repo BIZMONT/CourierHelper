@@ -1,4 +1,4 @@
-package com.bizmont.courierhelper.OtherStuff;
+package com.bizmont.courierhelper;
 
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -13,13 +13,13 @@ import android.util.Log;
 import com.bizmont.courierhelper.Activities.CompleteTaskActivity;
 import com.bizmont.courierhelper.Activities.WarehouseActivity;
 import com.bizmont.courierhelper.Models.Point;
-import com.bizmont.courierhelper.R;
 
 public final class Notifications
 {
     public static final int LOCATION_ALERT_NOTIFICATION_ID = 1;
     public static final int STATE_NOTIFICATION_ID = 2;
     public static final int POINT_NOTIFICATION_ID = 3;
+    public static final int PATH_DIVERGENCE_NOTIFICATION_ID = 4;
 
     Context context;
 
@@ -28,6 +28,7 @@ public final class Notifications
     NotificationCompat.Builder nearPointNotify;
     NotificationCompat.Builder locationDisabledNotify;
     NotificationCompat.Builder serviceStatusNotify;
+    NotificationCompat.Builder pathDivergenceNotify;
 
     boolean isPointNotifyShows;
 
@@ -55,6 +56,11 @@ public final class Notifications
                 .setContentTitle("Courier Helper")
                 .setContentText(context.getString(R.string.service_work))
                 .setOngoing(true);
+
+        pathDivergenceNotify = new NotificationCompat.Builder(context)
+                .setSmallIcon(R.drawable.ic_path_divergence)
+                .setContentTitle("Courier Helper")
+                .setContentText("You deviated from the route");
     }
 
     public void showServiceStatusNotify()
@@ -141,6 +147,20 @@ public final class Notifications
         locationDisabledNotify.setContentIntent(resultPendingIntent);
         notificationManager.notify(LOCATION_ALERT_NOTIFICATION_ID, locationDisabledNotify.build());
     }
+    public void showPathDivergenceNotify()
+    {
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        pathDivergenceNotify.setSound(Uri.parse(sharedPreferences.getString("notifications_ringtone","content://settings/system/notification_sound")));
+        if(sharedPreferences.getBoolean("notifications_vibrate",true))
+        {
+            pathDivergenceNotify.setVibrate(new long[]{1000, 1000});
+        }
+        else
+        {
+            pathDivergenceNotify.setVibrate(new long[]{});
+        }
+        notificationManager.notify(PATH_DIVERGENCE_NOTIFICATION_ID, pathDivergenceNotify.build());
+    }
 
     public void hideLocationAlertNotify()
     {
@@ -155,6 +175,10 @@ public final class Notifications
     {
         notificationManager.cancel(POINT_NOTIFICATION_ID);
         isPointNotifyShows = false;
+    }
+    public void hidePathDivergenceNotify()
+    {
+        notificationManager.cancel(PATH_DIVERGENCE_NOTIFICATION_ID);
     }
 
     public boolean isPointNotifyShows()

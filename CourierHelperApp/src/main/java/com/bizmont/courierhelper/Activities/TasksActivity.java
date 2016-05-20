@@ -18,10 +18,10 @@ import android.widget.TextView;
 import com.bizmont.courierhelper.Adapters.TasksListViewAdapter;
 import com.bizmont.courierhelper.CourierHelperApp;
 import com.bizmont.courierhelper.DataBase.DataBase;
+import com.bizmont.courierhelper.ExtrasNames;
+import com.bizmont.courierhelper.FileChooser;
 import com.bizmont.courierhelper.Models.Courier.Courier;
 import com.bizmont.courierhelper.Models.Task.Task;
-import com.bizmont.courierhelper.OtherStuff.ExtrasNames;
-import com.bizmont.courierhelper.OtherStuff.FileChooser;
 import com.bizmont.courierhelper.R;
 import com.bizmont.courierhelper.Services.GPSTracker;
 

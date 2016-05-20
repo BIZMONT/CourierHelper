@@ -12,11 +12,11 @@ import android.widget.Toast;
 
 import com.bizmont.courierhelper.CourierHelperApp;
 import com.bizmont.courierhelper.DataBase.DataBase;
+import com.bizmont.courierhelper.ExtrasNames;
 import com.bizmont.courierhelper.Models.Courier.CourierState;
-import com.bizmont.courierhelper.OtherStuff.ExtrasNames;
-import com.bizmont.courierhelper.OtherStuff.TaskCodeDecoder;
 import com.bizmont.courierhelper.R;
 import com.bizmont.courierhelper.Services.GPSTracker;
+import com.bizmont.courierhelper.TaskCodeDecoder;
 
 public class CompleteTaskActivity extends AppCompatActivity
 {

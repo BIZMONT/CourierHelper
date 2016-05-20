@@ -21,17 +21,18 @@ import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 
 import com.bizmont.courierhelper.CourierHelperApp;
+import com.bizmont.courierhelper.CourierHelperFiles;
 import com.bizmont.courierhelper.DataBase.DataBase;
+import com.bizmont.courierhelper.ExtrasNames;
 import com.bizmont.courierhelper.Models.Courier.CourierState;
 import com.bizmont.courierhelper.Models.Point;
 import com.bizmont.courierhelper.Models.Report.Report;
 import com.bizmont.courierhelper.Models.Task.Task;
 import com.bizmont.courierhelper.Models.Task.TaskState;
 import com.bizmont.courierhelper.Models.Warehouse.Warehouse;
-import com.bizmont.courierhelper.OtherStuff.ExtrasNames;
-import com.bizmont.courierhelper.OtherStuff.Notifications;
-import com.bizmont.courierhelper.OtherStuff.RoadFile;
+import com.bizmont.courierhelper.Notifications;
 
+import org.osmdroid.bonuspack.overlays.FolderOverlay;
 import org.osmdroid.bonuspack.overlays.Polyline;
 import org.osmdroid.bonuspack.routing.MapQuestRoadManager;
 import org.osmdroid.bonuspack.routing.Road;
@@ -39,6 +40,8 @@ import org.osmdroid.bonuspack.routing.RoadManager;
 import org.osmdroid.bonuspack.utils.HttpConnection;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.util.NetworkLocationIgnorer;
+import org.osmdroid.views.MapView;
+import org.osmdroid.views.overlay.Overlay;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -47,6 +50,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -62,24 +66,24 @@ public class GPSTracker extends Service implements LocationListener
     public static final float LOCATION_MIN_ACCURACY = 50;
     public static final int LOCATION_MIN_SATELLITES = 4;
 
+
+
     private static final String LOG_TAG = "GPS Tracker Service";
 
     //location fields
     private LocationManager locationManager;
-    private GpsStatus gpsStatus;
     private Location lastFix;
 
     private boolean isLocationDisabled;
 
     private ArrayList<Point> points;
     private ArrayList<GeoPoint> track;
+    private ArrayList<Polyline> route;
 
     private BroadcastReceiver broadcastReceiver;
     private Notifications notifications;
 
-    private NetworkLocationIgnorer networkLocationIgnorer;
-
-    private File recommendedPathFile;
+    private File recommendedRouteFile;
     private long startTime;
 
     private String userEmail;
@@ -88,9 +92,9 @@ public class GPSTracker extends Service implements LocationListener
     public void onCreate() {
         super.onCreate();
 
+        route = new ArrayList<>();
         track = new ArrayList<>();
-        networkLocationIgnorer = new NetworkLocationIgnorer();
-        recommendedPathFile = new File(getFilesDir() + "/kml","recommended_path.kml");
+        recommendedRouteFile = new File(getFilesDir() + "/kml","recommended_path.kml");
         userEmail = ((CourierHelperApp)getApplication()).getCurrentUserEmail();
 
         broadcastReceiver = new BroadcastReceiver() {
@@ -106,7 +110,7 @@ public class GPSTracker extends Service implements LocationListener
                     points = DataBase.getTargetPoints(userEmail);
                     isOnPoint(lastFix);
                     Log.d(LOG_TAG, "Point updated");
-                    if(isOnTheWayExist() && isCreateRoute)
+                    if(isOnTheWayExist(points) && isCreateRoute)
                     {
                         startTime = (new Date()).getTime();
                     }
@@ -114,16 +118,20 @@ public class GPSTracker extends Service implements LocationListener
                 if (isCreateRoute)
                 {
                     sendMessageBroadcast("Creating route...");
-                    if(!isOnTheWayExist())
+                    if(!isOnTheWayExist(points))
                     {
                         DataBase.setCourierState(((CourierHelperApp)getApplication()).getCurrentUserEmail(), CourierState.NOT_ACTIVE);
-                        recommendedPathFile.delete();
+                        recommendedRouteFile.delete();
                         track.clear();
                     }
                     else
                     {
                         ArrayList<Road> roads = buildOptimalPath();
-                        RoadFile.saveRecommendedPathToFile(getApplicationContext(), recommendedPathFile, roads);
+                        CourierHelperFiles.saveRoadsToFile(getApplicationContext(), recommendedRouteFile, roads);
+                        for (Road road:roads)
+                        {
+                            route.add(RoadManager.buildRoadOverlay(road,getApplicationContext()));
+                        }
                         Log.d(LOG_TAG, "Route created");
                     }
                     sendPathBroadcast();
@@ -173,6 +181,11 @@ public class GPSTracker extends Service implements LocationListener
         lastFix.setLongitude(0);
 
         points = DataBase.getTargetPoints(userEmail);
+        if(recommendedRouteFile.exists())
+        {
+            route = convertOverlayToPolylineList(CourierHelperFiles.getOverlayFromFile(this,recommendedRouteFile,
+                    new MapView(getApplicationContext())));
+        }
 
         Log.d(LOG_TAG, "Service onCreate");
     }
@@ -187,14 +200,13 @@ public class GPSTracker extends Service implements LocationListener
         notifications.hideLocationAlertNotify();
         notifications.hideServiceStateNotify();
         notifications.hideOnPointNotify();
+        notifications.hidePathDivergenceNotify();
 
         unregisterReceiver(broadcastReceiver);
 
         Log.d(LOG_TAG, "Service onDestroy");
         super.onDestroy();
     }
-
-    //Service overridden methods
     @Override
     public IBinder onBind(Intent arg0)
     {
@@ -211,7 +223,6 @@ public class GPSTracker extends Service implements LocationListener
         sendLocationBroadcast(lastFix);
         isOnPoint(lastFix);
     }
-
     @Override
     public boolean onUnbind(Intent intent) {
         Log.d(LOG_TAG,"Service onUnbind");
@@ -239,7 +250,7 @@ public class GPSTracker extends Service implements LocationListener
     @Override
     public void onProviderDisabled(String provider) {checkProvidersAvailability();}
 
-    //Own methods
+
     private void checkProvidersAvailability()
     {
         if(!isLocationDisabled) {
@@ -250,43 +261,42 @@ public class GPSTracker extends Service implements LocationListener
             }
         }
     }
-    private int getSatellitesInUse()
-    {
-        locationManager.getGpsStatus(null);
-        gpsStatus = locationManager.getGpsStatus(gpsStatus);
-        Iterable<GpsSatellite> satellites = gpsStatus.getSatellites();
-        int inUse = 0;
-        if (satellites != null) {
-            for (GpsSatellite gpsSatellite : satellites) {
-                if (gpsSatellite.usedInFix()) {
-                    inUse++;
-                }
-            }
-        }
-        return inUse;
-    }
     private void getLocation(Location location)
     {
         if(location == null) {
             return;
         }
 
-        Log.d(LOG_TAG,"Location received: " + location.getLatitude() + " " + location.getLongitude() + " " + getSatellitesInUse());
+        Log.d(LOG_TAG,"Location received: " + location.getLatitude() + " " + location.getLongitude() + " " + getSatellitesInUse(locationManager));
 
         if(isLocationValid(location))
         {
             sendLocationBroadcast(location);
-            if(isOnTheWayExist())
+            if(isOnTheWayExist(points))
             {
                 DataBase.setCourierState(userEmail, CourierState.ON_MOVE);
                 track.add(new GeoPoint(location.getLatitude(),location.getLongitude()));
                 Log.d(LOG_TAG, "Added point(" + location.getLatitude() + ", " + location.getLongitude() + ") to track");
-                Log.d(LOG_TAG, "umber of points: " + track.size());
+                Log.d(LOG_TAG, "Number of points: " + track.size());
+                if(route != null && route.size() !=0)
+                {
+                    if(!isOnRoute(location, route))
+                    {
+                        Log.d(LOG_TAG,"Not on the route");
+                        notifications.showPathDivergenceNotify();
+                    }
+                    else
+                    {
+                        notifications.hidePathDivergenceNotify();
+                        Log.d(LOG_TAG,"On the route");
+                    }
+                }
             }
             else
             {
                 DataBase.setCourierState(userEmail, CourierState.NOT_ACTIVE);
-                recommendedPathFile.delete();
+                recommendedRouteFile.delete();
+                route.clear();
                 track.clear();
                 sendPathBroadcast();
             }
@@ -303,7 +313,7 @@ public class GPSTracker extends Service implements LocationListener
         locationIntent.putExtra(ExtrasNames.IS_LOCATION, true);
         locationIntent.putExtra(ExtrasNames.LOCATION, location);
 
-        sendBroadcast(locationIntent);
+        this.sendBroadcast(locationIntent);
         Log.d(LOG_TAG, "Location sent (" + location.getLatitude() + " " + location.getLongitude() + ")");
     }
     private void sendPathBroadcast()
@@ -311,7 +321,7 @@ public class GPSTracker extends Service implements LocationListener
         Intent pathIntent = new Intent(BROADCAST_SEND_ACTION);
         pathIntent.putExtra(ExtrasNames.IS_PATH_UPDATE, true);
 
-        sendBroadcast(pathIntent);
+        this.sendBroadcast(pathIntent);
         Log.d(LOG_TAG, "Path sent");
     }
     private void sendMessageBroadcast(String message)
@@ -319,14 +329,14 @@ public class GPSTracker extends Service implements LocationListener
         Intent messageIntent = new Intent(BROADCAST_SEND_ACTION);
         messageIntent.putExtra(ExtrasNames.MESSAGE, message);
 
-        sendBroadcast(messageIntent);
+        this.sendBroadcast(messageIntent);
         Log.d(LOG_TAG, "Message was sent");
     }
-
     private boolean isLocationValid(Location location)
     {
         long currentTime = System.currentTimeMillis();
-        int satellitesInUse = getSatellitesInUse();
+        int satellitesInUse = getSatellitesInUse(locationManager);
+        NetworkLocationIgnorer networkLocationIgnorer = new NetworkLocationIgnorer();
 
         if(networkLocationIgnorer.shouldIgnore(location.getProvider(),currentTime))
         {
@@ -337,10 +347,10 @@ public class GPSTracker extends Service implements LocationListener
         if (location.getAccuracy() < LOCATION_MIN_ACCURACY &&
                 lastFix.distanceTo(location) > 7)
         {
-            /*if(location.getProvider().equals("gps") &&  satellitesInUse < LOCATION_MIN_SATELLITES)
+            if(location.getProvider().equals("gps") &&  satellitesInUse < LOCATION_MIN_SATELLITES)
             {
                 return false;
-            }*/
+            }
             if(lastFix.getLatitude() != 0 && location.getSpeed() > 0.1)
             {
                 return  false;
@@ -382,17 +392,6 @@ public class GPSTracker extends Service implements LocationListener
         }
 
         notifications.hideOnPointNotify();
-        return false;
-    }
-    private boolean isOnTheWayExist()
-    {
-        for (Point point: points)
-        {
-            if(point instanceof Task && ((Task)point).getState() == TaskState.ON_THE_WAY)
-            {
-                return true;
-            }
-        }
         return false;
     }
     private ArrayList<Road> buildOptimalPath()
@@ -449,9 +448,9 @@ public class GPSTracker extends Service implements LocationListener
             Polyline trackLine = new Polyline(this);
             trackLine.setPoints(track);
 
-            trackFilePath = RoadFile.saveTrackToFile(trackFile, trackLine);
+            trackFilePath = CourierHelperFiles.saveTrackToFile(trackFile, trackLine);
             Log.d(LOG_TAG, "Track saved for task #" + taskId + " to " + trackFilePath);
-            RoadFile.copyFile(recommendedPathFile,recommended);
+            CourierHelperFiles.copyFile(recommendedRouteFile,recommended);
             Log.d(LOG_TAG, "Recommended path for task " + taskId + " saved to " + recommended.getAbsolutePath());
 
             DataBase.addReport(new Report(0, taskId, recommended.getAbsolutePath(), trackFilePath, startTime, endTime, reason));
@@ -463,9 +462,103 @@ public class GPSTracker extends Service implements LocationListener
         }
         return true;
     }
+
+    //static methods
+    private static boolean isOnTheWayExist(ArrayList<Point> points)
+    {
+        for (Point point: points)
+        {
+            if(point instanceof Task && ((Task)point).getState() == TaskState.ON_THE_WAY)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+    private static boolean isOnRoute(Location location, ArrayList<Polyline> lines)
+    {
+        double fallibility = 20.0e-5;
+        double minDistance = Double.MAX_VALUE;
+
+        GeoPoint locationGeoPoint = new GeoPoint(location);
+        for (Polyline polyline:lines)
+        {
+            List<GeoPoint> points = polyline.getPoints();
+            for(int i = 0; i < (points.size() - 1); i++)
+            {
+                double currentDistance = pointToSegmentDistance(points.get(i), points.get(i+1), locationGeoPoint);
+                if(currentDistance < minDistance)
+                {
+                    minDistance = currentDistance;
+                }
+            }
+        }
+        return minDistance < fallibility;
+    }
+    private static ArrayList<Polyline> convertOverlayToPolylineList(FolderOverlay routeOverlay)
+    {
+        ArrayList<Polyline> lines = new ArrayList<>();
+
+        for (Overlay path:routeOverlay.getItems())
+        {
+            lines.add((Polyline) path);
+        }
+        return lines;
+    }
+    private static double pointToSegmentDistance(GeoPoint aSegmentPoint, GeoPoint bSegmentPoint, GeoPoint p)
+    {
+        double distance;
+
+        double px = p.getLatitude();
+        double py = p.getLongitude();
+        double ax = aSegmentPoint.getLatitude();
+        double ay = aSegmentPoint.getLongitude();
+        double bx = bSegmentPoint.getLatitude();
+        double by = bSegmentPoint.getLongitude();
+
+        double k = (by - ay)/(bx - ax);
+        double b = ay - k * ax;
+        double K = -1/k;
+        double B = py - K * px;
+
+        double dx = (B - b)/(k - K);
+        double dy = K * dx + B;
+
+        double dPA = Math.sqrt(Math.pow((px - ax), 2) + Math.pow((py - ay), 2));
+        double dPB = Math.sqrt(Math.pow((px - bx), 2) + Math.pow((py - by), 2));
+
+        double ab = Math.sqrt(Math.pow((ax - bx), 2) + Math.pow((ay - by), 2));
+        double ad = Math.sqrt(Math.pow((ax - dx), 2) + Math.pow((ay - dy), 2));
+        double db = Math.sqrt(Math.pow((dx - bx), 2) + Math.pow((dy - by), 2));
+
+        if(Math.abs(ab - (ad + db)) > 1.0e-10)
+        {
+            distance = Math.min(dPA, dPB);
+        }
+        else
+        {
+            distance = Math.sqrt(Math.pow((px - dx), 2) + Math.pow((py - dy), 2));
+        }
+        return distance;
+    }
+    private static int getSatellitesInUse(LocationManager locationManager)
+    {
+        GpsStatus gpsStatus = locationManager.getGpsStatus(null);
+        Iterable<GpsSatellite> satellites = gpsStatus.getSatellites();
+        int inUse = 0;
+        if (satellites != null) {
+            for (GpsSatellite gpsSatellite : satellites) {
+                if (gpsSatellite.usedInFix()) {
+                    inUse++;
+                }
+            }
+        }
+        return inUse;
+    }
+
 }
 
-class PathBuilderTask extends AsyncTask<ArrayList<GeoPoint>,Void, ArrayList<Road>>
+class PathBuilderTask extends AsyncTask<ArrayList<GeoPoint>, Void, ArrayList<Road>>
 {
     public static final String MAPQUEST_SERVICE = "http://open.mapquestapi.com/directions/v2/optimizedroute?";
     private static final String MAPQUEST_API_KEY = "w9zLBh8dLYSm5pM3iC579DspUgg29jur";
@@ -541,7 +634,7 @@ class PathBuilderTask extends AsyncTask<ArrayList<GeoPoint>,Void, ArrayList<Road
         }
         catch (IOException ex)
         {
-            Log.d("PathBuilderTask", "Exception was throwed: " + ex.getMessage());
+            Log.d("PathBuilderTask", "Exception was thrown: " + ex.getMessage());
         }
         finally
         {
@@ -571,20 +664,4 @@ class PathBuilderTask extends AsyncTask<ArrayList<GeoPoint>,Void, ArrayList<Road
         }
         return sequence;
     }
-}
-
-class ReportCreatorTask extends AsyncTask<Void,Void,Void>
-{
-    @Override
-    protected Void doInBackground(Void... params) {
-        return null;
-    }
-}
-final class ReportData
-{
-    int taskId;
-    String reason;
-    String startTime;
-    GeoPoint track;
-    File recommendedPathFile;
 }

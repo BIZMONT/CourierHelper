@@ -6,11 +6,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.TextView;
 
+import com.bizmont.courierhelper.CourierHelperFiles;
 import com.bizmont.courierhelper.DataBase.DataBase;
+import com.bizmont.courierhelper.ExtrasNames;
 import com.bizmont.courierhelper.Models.Report.ReportDetails;
 import com.bizmont.courierhelper.Models.Task.Task;
-import com.bizmont.courierhelper.OtherStuff.ExtrasNames;
-import com.bizmont.courierhelper.OtherStuff.RoadFile;
 import com.bizmont.courierhelper.R;
 
 import org.osmdroid.api.IMapController;
@@ -82,16 +82,16 @@ public class ReportDetailsActivity extends AppCompatActivity {
             endTime.setText(simpleDateFormat.format(new Date(details.getEndTime())));
 
             File file = new File(getFilesDir() + "/kml/recommended_paths", details.getTaskId() + "_rec.kml");
-            recommendedPath = RoadFile.getOverlayFromFile(this, file, map);
+            recommendedPath = CourierHelperFiles.getOverlayFromFile(this, file, map);
 
             recommendedDistance = (TextView)findViewById(R.id.report_recommended_distance);
             GeoPoint taskCor = new GeoPoint(task.getLatitude(),task.getLongitude());
             recommendedDistance.setText(String.valueOf(calculateDistance(recommendedPath,taskCor)));
 
-            boxE6 = RoadFile.getBoundingBox(this, file, map);
+            boxE6 = CourierHelperFiles.getBoundingBox(this, file, map);
 
             file = new File(getFilesDir() + "/kml/tracks", String.valueOf(details.getTaskId()) + ".kml");
-            track = RoadFile.getOverlayFromFile(this, file, map);
+            track = CourierHelperFiles.getOverlayFromFile(this, file, map);
 
             pathDistance = (TextView)findViewById(R.id.report_traveled_distance);
             pathDistance.setText(String.valueOf(calculateDistance(track, null)));

@@ -32,13 +32,13 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bizmont.courierhelper.CourierHelperApp;
+import com.bizmont.courierhelper.CourierHelperFiles;
 import com.bizmont.courierhelper.DataBase.DataBase;
+import com.bizmont.courierhelper.ExtrasNames;
 import com.bizmont.courierhelper.Models.Courier.Courier;
 import com.bizmont.courierhelper.Models.Point;
 import com.bizmont.courierhelper.Models.Task.Task;
 import com.bizmont.courierhelper.Models.Task.TaskState;
-import com.bizmont.courierhelper.OtherStuff.ExtrasNames;
-import com.bizmont.courierhelper.OtherStuff.RoadFile;
 import com.bizmont.courierhelper.R;
 import com.bizmont.courierhelper.Services.GPSTracker;
 
@@ -431,7 +431,7 @@ public class MapActivity extends AppCompatActivity implements NavigationView.OnN
             map.getOverlays().remove(pathOverlay);
         }
         File overlayFile = new File(getFilesDir() + "/kml", "recommended_path.kml");
-        pathOverlay = RoadFile.getOverlayFromFile(getApplicationContext(),overlayFile,map);
+        pathOverlay = CourierHelperFiles.getOverlayFromFile(getApplicationContext(),overlayFile,map);
         map.getOverlays().add(pathOverlay);
         map.invalidate();
     }

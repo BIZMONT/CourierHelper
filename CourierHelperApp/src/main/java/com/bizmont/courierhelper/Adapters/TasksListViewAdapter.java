@@ -13,9 +13,9 @@ import android.widget.TextView;
 
 import com.bizmont.courierhelper.Activities.CompleteTaskActivity;
 import com.bizmont.courierhelper.Activities.MapActivity;
+import com.bizmont.courierhelper.ExtrasNames;
 import com.bizmont.courierhelper.Models.Task.Task;
 import com.bizmont.courierhelper.Models.Task.TaskState;
-import com.bizmont.courierhelper.OtherStuff.ExtrasNames;
 import com.bizmont.courierhelper.R;
 
 import java.util.ArrayList;
