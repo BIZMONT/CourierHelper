@@ -39,7 +39,7 @@ public class CourierHelperApp extends Application
         }
     }
 
-    private String getUsername() {
+    public String getUsername() {
         AccountManager manager = AccountManager.get(this);
         Account[] accounts = manager.getAccountsByType("com.google");
         List<String> possibleEmails = new LinkedList<>();

@@ -27,7 +27,7 @@ public class TaskFullDetails extends TaskDetails
         return receiver.getPhone();
     }
     public String getWarehouseAddress() {
-        return warehouse.getAddress();
+        return getWarehouse().getAddress();
     }
     public String getSenderName() {
         return sender.getName();

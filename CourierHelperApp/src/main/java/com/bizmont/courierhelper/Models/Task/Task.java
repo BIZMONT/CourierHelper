@@ -15,7 +15,7 @@ import org.osmdroid.views.MapView;
 public class Task extends Point
 {
     protected TaskState state;
-    protected Warehouse warehouse;
+    protected int warehouseId;
 
     public Task(int id, String address, double latitude, double longitude, TaskState state,
                 int warehouseId)
@@ -25,7 +25,7 @@ public class Task extends Point
         this.latitude = latitude;
         this.longitude = longitude;
         this.state = state;
-        this.warehouse = DataBase.getWarehouse(warehouseId);
+        this.warehouseId = warehouseId;
     }
 
     public TaskState getState()
@@ -34,7 +34,7 @@ public class Task extends Point
     }
 
     public Warehouse getWarehouse() {
-        return warehouse;
+        return DataBase.getWarehouse(warehouseId);
     }
 
     @Override
@@ -54,6 +54,7 @@ public class Task extends Point
                 marker.setOnMarkerClickListener(new Marker.OnMarkerClickListener() {
                     @Override
                     public boolean onMarkerClick(Marker marker, MapView mapView) {
+                        Warehouse warehouse = getWarehouse();
                         map.getController().animateTo(new GeoPoint(warehouse.getLatitude(), warehouse.getLongitude()));
                         return true;
                     }

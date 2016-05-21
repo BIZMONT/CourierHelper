@@ -87,7 +87,6 @@ public class TasksActivity extends AppCompatActivity
             }
         });
     }
-
     @Override
     protected void onResume()
     {
@@ -104,7 +103,6 @@ public class TasksActivity extends AppCompatActivity
         name.setText(courier.getName());
         email.setText(courier.getEmail());
     }
-
     @Override
     public void onBackPressed()
     {
@@ -112,14 +110,12 @@ public class TasksActivity extends AppCompatActivity
         intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(intent);
     }
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu)
     {
         getMenuInflater().inflate(R.menu.tasks, menu);
         return true;
     }
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
@@ -131,7 +127,6 @@ public class TasksActivity extends AppCompatActivity
 
         return super.onOptionsItemSelected(item);
     }
-
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         int id = item.getItemId();

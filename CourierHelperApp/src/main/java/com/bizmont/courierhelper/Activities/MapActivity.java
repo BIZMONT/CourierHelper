@@ -77,7 +77,7 @@ public class MapActivity extends AppCompatActivity implements NavigationView.OnN
     private Polygon accuracyRadius;
     private FolderOverlay markersOverlays;
     private GeoPoint userLocationGeoPoint;
-    private FolderOverlay pathOverlay;
+    private FolderOverlay routeOverlay;
 
     private BroadcastReceiver broadcastReceiver;
 
@@ -391,12 +391,12 @@ public class MapActivity extends AppCompatActivity implements NavigationView.OnN
         return address;
     }
 
-    private FolderOverlay buildMapPointsOverlay(Context context, MapView mapView, ArrayList<Point> points)
+    private FolderOverlay buildMapPointsOverlay(ArrayList<Point> points)
     {
-        FolderOverlay pointsFolderOverlay = new FolderOverlay(context);
+        FolderOverlay pointsFolderOverlay = new FolderOverlay(this);
         for(Point point : points)
         {
-            Polygon radius = new Polygon(context);
+            Polygon radius = new Polygon(this);
             radius.setStrokeColor(Color.parseColor("#00000000"));
             if(point.getClass() == Task.class)
             {
@@ -419,20 +419,23 @@ public class MapActivity extends AppCompatActivity implements NavigationView.OnN
                     point.getRadius()));
 
             pointsFolderOverlay.add(radius);
-            pointsFolderOverlay.add(point.createMarker(context, mapView));
+            pointsFolderOverlay.add(point.createMarker(this, map));
         }
         return pointsFolderOverlay;
     }
 
     private void getPathOverlay()
     {
-        if(pathOverlay != null)
+        if(routeOverlay != null)
         {
-            map.getOverlays().remove(pathOverlay);
+            map.getOverlays().remove(routeOverlay);
         }
         File overlayFile = new File(getFilesDir() + "/kml", "recommended_path.kml");
-        pathOverlay = CourierHelperFiles.getOverlayFromFile(getApplicationContext(),overlayFile,map);
-        map.getOverlays().add(pathOverlay);
+        if(overlayFile.exists())
+        {
+            routeOverlay = CourierHelperFiles.getOverlayFromFile(getApplicationContext(),overlayFile,map);
+            map.getOverlays().add(routeOverlay);
+        }
         map.invalidate();
     }
     private void getMarkersOverlay()
@@ -442,7 +445,7 @@ public class MapActivity extends AppCompatActivity implements NavigationView.OnN
             map.getOverlays().remove(markersOverlays);
         }
         ArrayList<Point> points = DataBase.getTargetPoints(userEmail);
-        markersOverlays = buildMapPointsOverlay(getApplicationContext(), map, points);
+        markersOverlays = buildMapPointsOverlay(points);
         map.getOverlays().add(markersOverlays);
     }
 }

@@ -38,7 +38,6 @@ public class ReportsActivity extends AppCompatActivity implements NavigationView
     private TextView emptyMessage;
 
     private NavigationView navigationView;
-    private ReportsListViewAdapter reportsListViewAdapter;
 
     private ArrayList<Report> reports;
     private Date toDatePicked;
@@ -139,7 +138,6 @@ public class ReportsActivity extends AppCompatActivity implements NavigationView
                 }
             });
     }
-
     @Override
     protected void onResume() {
         super.onResume();
@@ -154,14 +152,12 @@ public class ReportsActivity extends AppCompatActivity implements NavigationView
         name.setText(courier.getName());
         email.setText(courier.getEmail());
     }
-
     @Override
     public void onBackPressed() {
         Intent intent = new Intent(this, MapActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(intent);
     }
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
@@ -169,7 +165,6 @@ public class ReportsActivity extends AppCompatActivity implements NavigationView
         return id == R.id.action_menu_get_tasks_from_file || super.onOptionsItemSelected(item);
 
     }
-
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
@@ -219,7 +214,7 @@ public class ReportsActivity extends AppCompatActivity implements NavigationView
         {
             emptyMessage.setVisibility(View.VISIBLE);
         }
-        reportsListViewAdapter = new ReportsListViewAdapter(ReportsActivity.this, R.layout.reports_listview_row, reports);
+        ReportsListViewAdapter reportsListViewAdapter = new ReportsListViewAdapter(ReportsActivity.this, R.layout.reports_listview_row, reports);
         reportsList.setAdapter(reportsListViewAdapter);
     }
 }

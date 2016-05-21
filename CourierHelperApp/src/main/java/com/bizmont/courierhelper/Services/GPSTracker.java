@@ -126,7 +126,7 @@ public class GPSTracker extends Service implements LocationListener
                     }
                     else
                     {
-                        ArrayList<Road> roads = buildOptimalPath();
+                        ArrayList<Road> roads = buildOptimalRoute();
                         CourierHelperFiles.saveRoadsToFile(getApplicationContext(), recommendedRouteFile, roads);
                         for (Road road:roads)
                         {
@@ -134,7 +134,7 @@ public class GPSTracker extends Service implements LocationListener
                         }
                         Log.d(LOG_TAG, "Route created");
                     }
-                    sendPathBroadcast();
+                    sendRouteBroadcast();
                 }
                 if(completedTask != 0)
                 {
@@ -298,7 +298,7 @@ public class GPSTracker extends Service implements LocationListener
                 recommendedRouteFile.delete();
                 route.clear();
                 track.clear();
-                sendPathBroadcast();
+                sendRouteBroadcast();
             }
             if(isOnPoint(location))
             {
@@ -316,7 +316,7 @@ public class GPSTracker extends Service implements LocationListener
         this.sendBroadcast(locationIntent);
         Log.d(LOG_TAG, "Location sent (" + location.getLatitude() + " " + location.getLongitude() + ")");
     }
-    private void sendPathBroadcast()
+    private void sendRouteBroadcast()
     {
         Intent pathIntent = new Intent(BROADCAST_SEND_ACTION);
         pathIntent.putExtra(ExtrasNames.IS_PATH_UPDATE, true);
@@ -394,7 +394,7 @@ public class GPSTracker extends Service implements LocationListener
         notifications.hideOnPointNotify();
         return false;
     }
-    private ArrayList<Road> buildOptimalPath()
+    private ArrayList<Road> buildOptimalRoute()
     {
         ArrayList<GeoPoint> routePoints = new ArrayList<>();
         routePoints.add(new GeoPoint(lastFix));
@@ -418,18 +418,18 @@ public class GPSTracker extends Service implements LocationListener
         }
         return roads;
     }
-    public void completeTask(int completedTask, String reason)
+    public void completeTask(int taskId, String reason)
     {
-        if(createReport(completedTask, reason))
+        if(createReport(taskId, reason))
         {
-            Log.d(LOG_TAG, "Report created for task " + completedTask);
+            Log.d(LOG_TAG, "Report created for task " + taskId);
             if(reason == null)
             {
-                DataBase.setTaskState(TaskState.DELIVERED, completedTask);
+                DataBase.setTaskState(TaskState.DELIVERED, taskId);
             }
             else
             {
-                DataBase.setTaskState(TaskState.NOT_DELIVERED, completedTask);
+                DataBase.setTaskState(TaskState.NOT_DELIVERED, taskId);
             }
         }
     }

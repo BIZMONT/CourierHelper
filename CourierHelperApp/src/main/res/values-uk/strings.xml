@@ -58,4 +58,5 @@
     <string name="to">до</string>
     <string name="report_details">Деталі звіту</string>
     <string name="check_from_server">Оновити</string>
+    <string name="pref_ringtone_silent">Тиша</string>
 </resources>

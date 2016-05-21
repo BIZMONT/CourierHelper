@@ -32,10 +32,6 @@ public class TaskDetailsActivity extends AppCompatActivity
     TextView state;
     TextView comment;
 
-    MapView map;
-    IMapController mapController;
-
-    TaskFullDetails details;
     private  static final String LOG_TAG = "Task details activity";
 
     @Override
@@ -45,7 +41,7 @@ public class TaskDetailsActivity extends AppCompatActivity
 
         Intent intent = getIntent();
 
-        details = null;
+        TaskFullDetails details;
         int id = intent.getIntExtra(ExtrasNames.TASK_ID,0);
         Log.d(LOG_TAG, "Details for task#" + id);
 
@@ -85,7 +81,7 @@ public class TaskDetailsActivity extends AppCompatActivity
                 comment = (TextView) findViewById(R.id.task_comment);
                 comment.setText(details.getComment());
 
-                map = (MapView) findViewById(R.id.map);
+                MapView map = (MapView) findViewById(R.id.map);
                 assert map != null;
                 map.setTileSource(TileSourceFactory.MAPQUESTOSM);
                 map.setMaxZoomLevel(18);
@@ -98,7 +94,7 @@ public class TaskDetailsActivity extends AppCompatActivity
                 });
                 map.getOverlays().add(details.createMarker(this,map));
 
-                mapController = map.getController();
+                IMapController mapController = map.getController();
                 mapController.setZoom(18);
                 mapController.setCenter(new GeoPoint(details.getLatitude(),details.getLongitude()));
             }

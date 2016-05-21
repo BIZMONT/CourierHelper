@@ -7,6 +7,7 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.Switch;
 import android.widget.Toast;
 
@@ -23,7 +24,7 @@ public class CompleteTaskActivity extends AppCompatActivity
     EditText codeEdit;
     EditText reasonEdit;
     LinearLayout reasonLayout;
-    LinearLayout codeLayout;
+    RelativeLayout codeLayout;
     ImageView correctCode;
 
     boolean isComplete;
@@ -46,7 +47,7 @@ public class CompleteTaskActivity extends AppCompatActivity
         codeEdit = (EditText)findViewById(R.id.complete_code);
         reasonEdit = (EditText)findViewById(R.id.complete_reason);
         reasonLayout = (LinearLayout)findViewById(R.id.complete_with_reason);
-        codeLayout = (LinearLayout)findViewById(R.id.complete_with_code);
+        codeLayout = (RelativeLayout)findViewById(R.id.complete_with_code);
         correctCode = (ImageView)findViewById(R.id.complete_correct);
 
         code = DataBase.getTaskCode(taskId);
