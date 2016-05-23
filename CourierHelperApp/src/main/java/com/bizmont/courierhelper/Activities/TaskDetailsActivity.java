@@ -8,9 +8,11 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.TextView;
 
-import com.bizmont.courierhelper.DataBase.DataBase;
 import com.bizmont.courierhelper.ExtrasNames;
-import com.bizmont.courierhelper.Models.Task.TaskFullDetails;
+import com.bizmont.courierhelper.Model.Receiver;
+import com.bizmont.courierhelper.Model.Sender;
+import com.bizmont.courierhelper.Model.Task.Task;
+import com.bizmont.courierhelper.Model.Warehouse;
 import com.bizmont.courierhelper.R;
 
 import org.osmdroid.api.IMapController;
@@ -41,32 +43,35 @@ public class TaskDetailsActivity extends AppCompatActivity
 
         Intent intent = getIntent();
 
-        TaskFullDetails details;
+        Task details;
         int id = intent.getIntExtra(ExtrasNames.TASK_ID,0);
         Log.d(LOG_TAG, "Details for task#" + id);
 
         if(id != 0)
         {
-            details = DataBase.getFullTaskDetails(id);
+            details = new Task(id);
 
             if(details != null)
             {
+                Sender sender = details.getSender();
+                Receiver receiver = details.getReceiver();
+                Warehouse warehouse = details.getWarehouse();
                 setTitle(getString(R.string.task_number) + details.getId());
                 senderName = (TextView) findViewById(R.id.sender_name);
-                senderName.setText(details.getSenderName());
+                senderName.setText(sender.getName());
 
                 senderAddress = (TextView) findViewById(R.id.sender_address);
-                senderAddress.setText(details.getSenderAddress());
+                senderAddress.setText(sender.getAddress());
 
                 senderPhone = (TextView) findViewById(R.id.sender_phone);
-                senderPhone.setText(details.getSenderPhone());
+                senderPhone.setText(sender.getPhone());
 
                 receiverName = (TextView) findViewById(R.id.receiver_name);
-                receiverName.setText(details.getReceiverName());
+                receiverName.setText(receiver.getName());
                 address = (TextView)findViewById(R.id.map_address_textview);
                 address.setText(details.getAddress());
                 receiverPhone = (TextView) findViewById(R.id.receiver_phone);
-                receiverPhone.setText(details.getReceiverPhone());
+                receiverPhone.setText(receiver.getPhone());
 
                 content = (TextView) findViewById(R.id.task_content);
                 content.setText(details.getContent());
@@ -74,7 +79,7 @@ public class TaskDetailsActivity extends AppCompatActivity
                 date = (TextView) findViewById(R.id.task_date);
                 date.setText(details.getDate());
                 warehouseAddress = (TextView) findViewById(R.id.task_warehouse);
-                warehouseAddress.setText(details.getWarehouseAddress());
+                warehouseAddress.setText(warehouse.getAddress());
                 state = (TextView) findViewById(R.id.task_state);
                 state.setText(details.getState().toString());
 

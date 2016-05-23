@@ -9,9 +9,8 @@ import android.widget.ListView;
 
 import com.bizmont.courierhelper.Adapters.WarehouseTasksListViewAdapter;
 import com.bizmont.courierhelper.CourierHelperApp;
-import com.bizmont.courierhelper.DataBase.DataBase;
 import com.bizmont.courierhelper.ExtrasNames;
-import com.bizmont.courierhelper.Models.Task.Task;
+import com.bizmont.courierhelper.Model.Task.Task;
 import com.bizmont.courierhelper.R;
 import com.bizmont.courierhelper.Services.GPSTracker;
 
@@ -33,7 +32,7 @@ public class WarehouseActivity extends AppCompatActivity
         int id = intent.getIntExtra(ExtrasNames.WAREHOUSE_ID, 0);
         setTitle("Warehouse #" + id);
 
-        tasks = DataBase.getActiveTasks(id,((CourierHelperApp)getApplication()).getCurrentUserEmail());
+        tasks = Task.getActiveTasks(id,((CourierHelperApp)getApplication()).getCurrentUserEmail());
 
         tasksList = (ListView) findViewById(R.id.warehouse_listview);
         WarehouseTasksListViewAdapter warehouseTasksListViewAdapter = new WarehouseTasksListViewAdapter(this, R.layout.warehouse_content_row, tasks);

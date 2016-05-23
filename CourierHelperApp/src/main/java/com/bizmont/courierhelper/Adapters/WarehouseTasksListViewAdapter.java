@@ -9,9 +9,8 @@ import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.TextView;
 
-import com.bizmont.courierhelper.DataBase.DataBase;
-import com.bizmont.courierhelper.Models.Task.Task;
-import com.bizmont.courierhelper.Models.Task.TaskState;
+import com.bizmont.courierhelper.Model.Task.Task;
+import com.bizmont.courierhelper.Model.Task.TaskState;
 import com.bizmont.courierhelper.R;
 
 import java.util.ArrayList;
@@ -61,13 +60,16 @@ public class WarehouseTasksListViewAdapter extends ArrayAdapter {
             public void onClick(View v)
             {
                 CheckBox checkBox = (CheckBox) v;
+                Task task = new Task(taskID);
                 if(checkBox.isChecked())
                 {
-                    DataBase.setTaskState(TaskState.ON_THE_WAY, taskID);
+                    task.setState(TaskState.ON_THE_WAY);
+                    //DataBase.setTaskState(TaskState.ON_THE_WAY, taskID);
                 }
                 else
                 {
-                    DataBase.setTaskState(TaskState.IN_WAREHOUSE, taskID);
+                    task.setState(TaskState.IN_WAREHOUSE);
+                    //DataBase.setTaskState(TaskState.IN_WAREHOUSE, taskID);
                 }
             }
         });

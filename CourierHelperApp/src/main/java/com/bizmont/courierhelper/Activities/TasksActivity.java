@@ -17,11 +17,11 @@ import android.widget.TextView;
 
 import com.bizmont.courierhelper.Adapters.TasksListViewAdapter;
 import com.bizmont.courierhelper.CourierHelperApp;
-import com.bizmont.courierhelper.DataBase.DataBase;
+import com.bizmont.courierhelper.DataBase.Database;
 import com.bizmont.courierhelper.ExtrasNames;
 import com.bizmont.courierhelper.FileChooser;
-import com.bizmont.courierhelper.Models.Courier.Courier;
-import com.bizmont.courierhelper.Models.Task.Task;
+import com.bizmont.courierhelper.Model.Courier.Courier;
+import com.bizmont.courierhelper.Model.Task.Task;
 import com.bizmont.courierhelper.R;
 import com.bizmont.courierhelper.Services.GPSTracker;
 
@@ -51,7 +51,7 @@ public class TasksActivity extends AppCompatActivity
         fileChooser.setFileListener(new FileChooser.FileSelectedListener() {
             @Override
             public void fileSelected(File file) {
-                DataBase.addData(file,((CourierHelperApp)getApplication()).getCurrentUserEmail());
+                Database.addData(file,((CourierHelperApp)getApplication()).getCurrentUserEmail());
 
                 createTasksList();
 
@@ -97,7 +97,7 @@ public class TasksActivity extends AppCompatActivity
             navigationView.getMenu().findItem(R.id.nav_tasks).setChecked(true);
         }
         View headerView = navigationView.getHeaderView(0);
-        Courier courier = DataBase.getCourier(((CourierHelperApp)getApplication()).getCurrentUserEmail());
+        Courier courier = new Courier(((CourierHelperApp)getApplication()).getCurrentUserEmail());
         TextView name = (TextView) headerView.findViewById(R.id.courier_name);
         TextView email = (TextView) headerView.findViewById(R.id.courier_email);
         name.setText(courier.getName());
@@ -166,7 +166,7 @@ public class TasksActivity extends AppCompatActivity
 
     private void createTasksList()
     {
-        tasks = DataBase.getActiveTasks(0, ((CourierHelperApp)getApplication()).getCurrentUserEmail());
+        tasks = Task.getActiveTasks(0, ((CourierHelperApp)getApplication()).getCurrentUserEmail());
         if(tasks.size() != 0)
         {
             emptyMessage.setVisibility(View.GONE);

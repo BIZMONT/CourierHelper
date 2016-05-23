@@ -12,7 +12,7 @@ import android.util.Log;
 
 import com.bizmont.courierhelper.Activities.CompleteTaskActivity;
 import com.bizmont.courierhelper.Activities.WarehouseActivity;
-import com.bizmont.courierhelper.Models.Point;
+import com.bizmont.courierhelper.Model.Point;
 
 public final class Notifications
 {

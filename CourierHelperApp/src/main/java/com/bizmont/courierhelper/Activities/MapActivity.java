@@ -33,12 +33,11 @@ import android.widget.Toast;
 
 import com.bizmont.courierhelper.CourierHelperApp;
 import com.bizmont.courierhelper.CourierHelperFiles;
-import com.bizmont.courierhelper.DataBase.DataBase;
 import com.bizmont.courierhelper.ExtrasNames;
-import com.bizmont.courierhelper.Models.Courier.Courier;
-import com.bizmont.courierhelper.Models.Point;
-import com.bizmont.courierhelper.Models.Task.Task;
-import com.bizmont.courierhelper.Models.Task.TaskState;
+import com.bizmont.courierhelper.Model.Courier.Courier;
+import com.bizmont.courierhelper.Model.Point;
+import com.bizmont.courierhelper.Model.Task.Task;
+import com.bizmont.courierhelper.Model.Task.TaskState;
 import com.bizmont.courierhelper.R;
 import com.bizmont.courierhelper.Services.GPSTracker;
 
@@ -240,7 +239,7 @@ public class MapActivity extends AppCompatActivity implements NavigationView.OnN
             navigationView.getMenu().findItem(R.id.nav_map).setChecked(true);
         }
         View headerView = navigationView.getHeaderView(0);
-        Courier courier = DataBase.getCourier(userEmail);
+        Courier courier = new Courier(userEmail);
         TextView name = (TextView) headerView.findViewById(R.id.courier_name);
         TextView email = (TextView) headerView.findViewById(R.id.courier_email);
         name.setText(courier.getName());
@@ -366,7 +365,7 @@ public class MapActivity extends AppCompatActivity implements NavigationView.OnN
 
         userLocationGeoPoint = new GeoPoint(location);
         userLocationMarker.setPosition(userLocationGeoPoint);
-        Courier courier = DataBase.getCourier(userEmail);
+        Courier courier = new Courier(userEmail);
         userLocationMarker.setTitle(courier.getName() + " " + courier.getState());
         userLocationMarker.setSubDescription(convertPointToAddress(userLocationGeoPoint));
         accuracyRadius.setPoints(Polygon.pointsAsCircle(userLocationGeoPoint, location.getAccuracy()));
@@ -398,7 +397,7 @@ public class MapActivity extends AppCompatActivity implements NavigationView.OnN
         {
             Polygon radius = new Polygon(this);
             radius.setStrokeColor(Color.parseColor("#00000000"));
-            if(point.getClass() == Task.class)
+            if(point instanceof Task)
             {
                 Task task = (Task)point;
                 if(task.getState() == TaskState.ON_THE_WAY)
@@ -444,7 +443,7 @@ public class MapActivity extends AppCompatActivity implements NavigationView.OnN
         {
             map.getOverlays().remove(markersOverlays);
         }
-        ArrayList<Point> points = DataBase.getTargetPoints(userEmail);
+        ArrayList<Point> points = Point.getTargetPoints(userEmail);
         markersOverlays = buildMapPointsOverlay(points);
         map.getOverlays().add(markersOverlays);
     }

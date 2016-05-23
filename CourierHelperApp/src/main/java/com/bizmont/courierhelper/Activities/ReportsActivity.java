@@ -19,11 +19,10 @@ import android.widget.TextView;
 
 import com.bizmont.courierhelper.Adapters.ReportsListViewAdapter;
 import com.bizmont.courierhelper.CourierHelperApp;
-import com.bizmont.courierhelper.DataBase.DataBase;
 import com.bizmont.courierhelper.ExtrasNames;
 import com.bizmont.courierhelper.Fragments.DatePickerFragment;
-import com.bizmont.courierhelper.Models.Courier.Courier;
-import com.bizmont.courierhelper.Models.Report.Report;
+import com.bizmont.courierhelper.Model.Courier.Courier;
+import com.bizmont.courierhelper.Model.Report;
 import com.bizmont.courierhelper.R;
 
 import java.text.SimpleDateFormat;
@@ -133,7 +132,7 @@ public class ReportsActivity extends AppCompatActivity implements NavigationView
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                     Intent intent = new Intent(getApplicationContext(), ReportDetailsActivity.class);
-                    intent.putExtra(ExtrasNames.REPORT_ID, reports.get(position).getID());
+                    intent.putExtra(ExtrasNames.REPORT_ID, reports.get(position).getId());
                     startActivity(intent);
                 }
             });
@@ -146,7 +145,7 @@ public class ReportsActivity extends AppCompatActivity implements NavigationView
             navigationView.getMenu().findItem(R.id.nav_reports).setChecked(true);
         }
         View headerView = navigationView.getHeaderView(0);
-        Courier courier = DataBase.getCourier(((CourierHelperApp)getApplication()).getCurrentUserEmail());
+        Courier courier = new Courier(((CourierHelperApp)getApplication()).getCurrentUserEmail());
         TextView name = (TextView) headerView.findViewById(R.id.courier_name);
         TextView email = (TextView) headerView.findViewById(R.id.courier_email);
         name.setText(courier.getName());
@@ -205,7 +204,7 @@ public class ReportsActivity extends AppCompatActivity implements NavigationView
 
     private void createReportsList()
     {
-        reports = DataBase.getReportsWithDate(fromDatePicked.getTime(), toDatePicked.getTime());
+        reports = Report.getReportsWithDate(fromDatePicked.getTime(), toDatePicked.getTime());
         if(reports.size() != 0)
         {
             emptyMessage.setVisibility(View.GONE);

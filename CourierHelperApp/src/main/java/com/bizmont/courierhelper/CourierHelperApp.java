@@ -4,9 +4,8 @@ import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.app.Application;
 
-import com.bizmont.courierhelper.DataBase.DataBase;
-import com.bizmont.courierhelper.Models.Courier.Courier;
-import com.bizmont.courierhelper.Models.Courier.CourierState;
+import com.bizmont.courierhelper.DataBase.DatabaseManager;
+import com.bizmont.courierhelper.Model.Courier.Courier;
 
 import java.io.File;
 import java.util.LinkedList;
@@ -22,9 +21,9 @@ public class CourierHelperApp extends Application
 
         currentUserEmail = getUsername() + "@gmail.com";
 
-        DataBase.initialize(getApplicationContext());
+        DatabaseManager.initializeDatabase(getApplicationContext());
 
-        DataBase.addCourier(new Courier(currentUserEmail,"Mr Smith", CourierState.NOT_ACTIVE));
+        Courier.add(currentUserEmail,"Mr Smith");
 
 
         File path = new File(getFilesDir(), "kml/tracks");
@@ -70,6 +69,6 @@ public class CourierHelperApp extends Application
     public void onTerminate()
     {
         super.onTerminate();
-        DataBase.close();
+        DatabaseManager.releaseDatabase();
     }
 }

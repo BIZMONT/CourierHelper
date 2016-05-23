@@ -12,9 +12,10 @@ import android.widget.Switch;
 import android.widget.Toast;
 
 import com.bizmont.courierhelper.CourierHelperApp;
-import com.bizmont.courierhelper.DataBase.DataBase;
 import com.bizmont.courierhelper.ExtrasNames;
-import com.bizmont.courierhelper.Models.Courier.CourierState;
+import com.bizmont.courierhelper.Model.Courier.Courier;
+import com.bizmont.courierhelper.Model.Courier.CourierState;
+import com.bizmont.courierhelper.Model.Task.Task;
 import com.bizmont.courierhelper.R;
 import com.bizmont.courierhelper.Services.GPSTracker;
 import com.bizmont.courierhelper.TaskCodeDecoder;
@@ -50,7 +51,8 @@ public class CompleteTaskActivity extends AppCompatActivity
         codeLayout = (RelativeLayout)findViewById(R.id.complete_with_code);
         correctCode = (ImageView)findViewById(R.id.complete_correct);
 
-        code = DataBase.getTaskCode(taskId);
+        Task task = new  Task(taskId);
+        code = task.getCode();
 
         codeEdit.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
@@ -93,7 +95,8 @@ public class CompleteTaskActivity extends AppCompatActivity
         if(codeLayout.getVisibility() == View.VISIBLE)
         {
             String userEmail = ((CourierHelperApp)getApplication()).getCurrentUserEmail();
-            if(DataBase.getCourier(userEmail).getState() != CourierState.AT_THE_POINT)
+            Courier courier = new Courier(userEmail);
+            if(courier.getState() != CourierState.AT_THE_POINT)
             {
                 Toast.makeText(this, R.string.not_at_point_alert, Toast.LENGTH_SHORT).show();
                 return;
